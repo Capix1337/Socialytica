@@ -1,11 +1,31 @@
 "use client"
 
-import { motion } from "framer-motion"
+import { motion, AnimatePresence } from "framer-motion"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
 import { ArrowRight, Brain, Heart, Sparkles } from "lucide-react"
+import { useState, useEffect } from "react"
+
+const quotes = [
+  "Insight leads to empowerment, and empowerment leads to change.",
+  "The more you understand, the more you can achieve.",
+  "Seeing the full picture of your journey brings new perspective.",
+  "Understanding your strengths and challenges leads to meaningful progress.",
+  "Every step forward begins with understanding where you are now.",
+  "Understanding the present unlocks the full potential of the future."
+]
 
 const Hero = () => {
+  const [currentQuote, setCurrentQuote] = useState(0)
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentQuote((prev) => (prev + 1) % quotes.length)
+    }, 5000) // Change quote every 5 seconds
+
+    return () => clearInterval(timer)
+  }, [])
+
   return (
     <section className="relative overflow-hidden">
       {/* Background Pattern */}
@@ -19,10 +39,20 @@ const Hero = () => {
             transition={{ duration: 0.5 }}
             className="max-w-3xl space-y-4"
           >
-            <h1 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl lg:text-6xl text-foreground">
-              Discover Your Relationship{" "}
-              <span className="text-primary">Dynamics</span>
-            </h1>
+            <div className="relative h-[120px] sm:h-[150px] flex items-center justify-center">
+              <AnimatePresence mode="wait">
+                <motion.h1
+                  key={currentQuote}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -20 }}
+                  transition={{ duration: 0.5 }}
+                  className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl lg:text-6xl text-foreground absolute"
+                >
+                  {quotes[currentQuote]}
+                </motion.h1>
+              </AnimatePresence>
+            </div>
             <p className="mx-auto max-w-[700px] text-muted-foreground md:text-xl">
               Take our scientifically designed tests to gain insights into your relationships 
               and understand yourself better.
