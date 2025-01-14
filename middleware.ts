@@ -12,6 +12,9 @@ const isPublicRoute = createRouteMatcher([
   '/contact',
   '/terms',
   '/privacy',
+  "/blog(.*)",
+  "/our-framework"
+
 ])
 
 const isAdminRoute = createRouteMatcher(['/admindash(.*)'])
