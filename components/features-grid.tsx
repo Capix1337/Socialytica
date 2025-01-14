@@ -43,7 +43,7 @@ const features = [
   },
   {
     title: "Progress Tracking",
-    description: "Monitor your improvement with detailed charts and analytics",
+    description: "Revisit the test periodically to track progress and see improvements over time",
     icon: LineChart,
     color: "text-amber-500",
     delay: 0.6
