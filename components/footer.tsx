@@ -52,7 +52,7 @@ export function Footer() {
         <div className="xl:grid xl:grid-cols-3 xl:gap-8">
           {/* Brand Section */}
           <div className="space-y-4">
-            <h3 className="text-lg font-semibold">Sociolytics</h3>
+            <h3 className="text-lg font-semibold">Socialytica</h3>
             <p className="text-sm text-muted-foreground max-w-xs">
               Helping people understand their relationships better through scientifically-designed psychological tests.
             </p>
@@ -100,7 +100,7 @@ export function Footer() {
                 <ul className="space-y-3">
                   <li>
                     <a 
-                      href="mailto:contact@sociolytics.com"
+                      href="mailto:contact@socialytica.net"
                       className="text-sm text-muted-foreground hover:text-primary transition-colors flex items-center gap-2"
                     >
                       <Mail className="h-4 w-4" />
@@ -154,10 +154,10 @@ export function Footer() {
         <div className="mt-12 pt-8 border-t">
           <div className="flex flex-col items-center justify-between gap-4 md:flex-row">
             <p className="text-sm text-muted-foreground">
-              &copy; {new Date().getFullYear()} Sociolytics. All rights reserved.
+              &copy; {new Date().getFullYear()} Socialytica. All rights reserved.
             </p>
             <p className="text-sm text-muted-foreground flex items-center gap-1">
-              Made with <Heart className="h-4 w-4 text-red-500" /> by Sociolytics Team
+              Made with <Heart className="h-4 w-4 text-red-500" /> by Socialytica Team
             </p>
           </div>
         </div>

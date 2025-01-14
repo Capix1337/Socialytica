@@ -13,7 +13,7 @@ import { Inter } from "next/font/google"
 const inter = Inter({ subsets: ["latin"] })
 
 export const metadata = {
-  title: "Sociolytics | Relationship Psychology Tests & Analysis",
+  title: "Socialytica | Relationship Psychology Tests & Analysis",
   description: "Discover insights about your relationships through scientifically-designed psychological tests. Get personalized analysis and improve your connections with others.",
 }
 

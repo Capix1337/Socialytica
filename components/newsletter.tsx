@@ -104,9 +104,9 @@ export function Newsletter() {
             </p>
             <div className="space-y-4 pt-4">
               <Button variant="outline" className="w-full justify-start gap-2" asChild>
-                <a href="mailto:contact@sociolytics.com">
+                <a href="mailto:contact@Socialytica.net">
                   <Mail className="h-4 w-4" />
-                  contact@sociolytics.com
+                  contact@Socialytica.com
                 </a>
               </Button>
               <div className="flex gap-4">

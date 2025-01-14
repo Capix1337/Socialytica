@@ -7,7 +7,7 @@ import { Newsletter } from "@/components/newsletter"
 import RecentBlogPosts from "./components/RecentBlogPosts";
 
 export const metadata: Metadata = {
-  title: "Sociolytics | Relationship Psychology Tests & Analysis",
+  title: "Socialytica | Relationship Psychology Tests & Analysis",
   description: "Discover insights about your relationships through scientifically-designed psychological tests. Get personalized analysis and improve your connections with others.",
 }
 
