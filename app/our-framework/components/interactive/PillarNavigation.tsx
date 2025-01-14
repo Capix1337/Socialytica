@@ -1,6 +1,8 @@
+// app/our-framework/components/interactive/PillarNavigation.tsx
+
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { motion } from 'framer-motion';
 
 interface NavItem {
@@ -9,63 +11,72 @@ interface NavItem {
   section: string;
 }
 
+interface PillarNavigationProps {
+  activeSection?: string;
+}
+
 const navItems: NavItem[] = [
-  { id: 'values', label: 'Values & Goals', section: 'values-section' },
-  { id: 'sexuality', label: 'Sexuality', section: 'sexuality-section' },
-  { id: 'communication', label: 'Communication', section: 'communication-section' },
-  { id: 'trust', label: 'Trust & Loyalty', section: 'trust-section' },
+  { id: 'hero', label: 'Overview', section: 'hero' },
+  { id: 'theory', label: 'Theory', section: 'theory' },
+  { id: 'pillars', label: 'Pillars', section: 'pillars' },
+  { id: 'thresholds', label: 'Analysis', section: 'thresholds' },
+  { id: 'synergy', label: 'Synergy', section: 'synergy' },
 ];
 
-const PillarNavigation = () => {
-  const [activeSection, setActiveSection] = useState<string>('');
-
-  // Handle scroll and intersection observation
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            setActiveSection(entry.target.id);
-          }
-        });
-      },
-      { threshold: 0.5 }
-    );
-
-    navItems.forEach((item) => {
-      const element = document.getElementById(item.section);
-      if (element) observer.observe(element);
-    });
-
-    return () => observer.disconnect();
-  }, []);
-
+const PillarNavigation: React.FC<PillarNavigationProps> = ({ activeSection = 'hero' }) => {
   const scrollToSection = (sectionId: string) => {
     const element = document.getElementById(sectionId);
     if (element) {
-      element.scrollIntoView({ behavior: 'smooth' });
+      element.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start',
+      });
     }
   };
 
   return (
-    <nav className="sticky top-4 z-50 mx-auto max-w-2xl rounded-full bg-background/80 p-2 backdrop-blur-sm border border-border shadow-lg">
-      <ul className="flex justify-between space-x-1">
-        {navItems.map((item) => (
-          <motion.li key={item.id} className="flex-1">
-            <button
-              onClick={() => scrollToSection(item.section)}
-              className={`w-full rounded-full px-3 py-2 text-sm font-medium transition-all
-                ${
-                  activeSection === item.section
-                    ? 'bg-primary text-primary-foreground'
-                    : 'text-muted-foreground hover:bg-primary/10 hover:text-foreground'
-                }`}
+    <nav className="sticky top-4 z-50 mx-auto max-w-2xl">
+      <motion.div
+        initial={{ y: -100, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ duration: 0.5 }}
+        className="rounded-full bg-background/80 p-2 backdrop-blur-sm border border-border shadow-lg"
+      >
+        <ul className="flex items-center justify-between px-2">
+          {navItems.map((item) => (
+            <motion.li
+              key={item.id}
+              className="relative"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
             >
-              {item.label}
-            </button>
-          </motion.li>
-        ))}
-      </ul>
+              <button
+                onClick={() => scrollToSection(item.section)}
+                className={`relative px-4 py-2 text-sm font-medium rounded-full transition-colors
+                  ${
+                    activeSection === item.section
+                      ? 'text-primary-foreground'
+                      : 'text-muted-foreground hover:text-foreground'
+                  }`}
+              >
+                {item.label}
+                {activeSection === item.section && (
+                  <motion.div
+                    layoutId="activeSection"
+                    className="absolute inset-0 bg-primary rounded-full -z-10"
+                    initial={false}
+                    transition={{
+                      type: "spring",
+                      stiffness: 380,
+                      damping: 30
+                    }}
+                  />
+                )}
+              </button>
+            </motion.li>
+          ))}
+        </ul>
+      </motion.div>
     </nav>
   );
 };

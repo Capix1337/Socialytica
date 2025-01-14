@@ -18,7 +18,7 @@ import ThresholdVisualizer from './components/interactive/ThresholdVisualizer';
 import SynergyGraph from './components/interactive/SynergyGraph';
 
 // Content Components
-import TheoryCard from './components/content/TheoryCard';
+// import TheoryCard from './components/content/TheoryCard';
 import InfoBlock from './components/content/InfoBlock';
 import QuoteBlock from './components/content/QuoteBlock';
 
@@ -74,8 +74,9 @@ export default function FrameworkPage() {
         // Simulate data loading
         await new Promise(resolve => setTimeout(resolve, 1000));
         setIsLoading(false);
-      } catch (err) {
-        setError('Failed to load framework data. Please try again later.');
+      } catch (error) {
+        // Properly handle the error
+        setError(error instanceof Error ? error.message : 'An unknown error occurred');
         setIsLoading(false);
       }
     };
