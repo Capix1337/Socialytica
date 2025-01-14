@@ -40,8 +40,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       description: excerptText,
       type: "article",
       url: postUrl,
-      // Add null check for both mainImage and asset
-      ...(post.mainImage?.asset?._ref && {
+      ...(post.mainImage && {
         images: [{
           url: post.mainImage.asset._ref,
           width: 1200,
@@ -54,8 +53,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       card: "summary_large_image",
       title: post.title,
       description: excerptText,
-      // Add null check for both mainImage and asset
-      ...(post.mainImage?.asset?._ref && {
+      ...(post.mainImage && {
         images: [post.mainImage.asset._ref],
       }),
     },

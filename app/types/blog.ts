@@ -1,8 +1,5 @@
-// app/types/blog.ts
-
+import React from 'react';
 import { PortableTextBlock as SanityPortableTextBlock } from '@portabletext/types'
-import { Image as SanityImage } from 'sanity'
-
 
 // Re-export PortableTextBlock
 export type PortableTextBlock = SanityPortableTextBlock
@@ -80,18 +77,18 @@ export interface Author extends SanityDocument {
 // Portable Text Types
 export interface CustomPortableTextComponents {
   types: {
-    image: ({ value }: { value: SanityImage }) => JSX.Element;
+    image: ({ value }: { value: SanityImage }) => React.ReactElement;
     // Add other custom types here
   };
   marks: {
-    link: ({ children, value }: { children: React.ReactNode; value: { href: string } }) => JSX.Element;
+    link: ({ children, value }: { children: React.ReactNode; value: { href: string } }) => React.ReactElement;
     // Add other mark types here
   };
   block: {
-    h1: ({ children }: { children: React.ReactNode }) => JSX.Element;
-    h2: ({ children }: { children: React.ReactNode }) => JSX.Element;
-    h3: ({ children }: { children: React.ReactNode }) => JSX.Element;
-    normal: ({ children }: { children: React.ReactNode }) => JSX.Element;
+    h1: ({ children }: { children: React.ReactNode }) => React.ReactElement;
+    h2: ({ children }: { children: React.ReactNode }) => React.ReactElement;
+    h3: ({ children }: { children: React.ReactNode }) => React.ReactElement;
+    normal: ({ children }: { children: React.ReactNode }) => React.ReactElement;
     // Add other block types here
   };
 }
