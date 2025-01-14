@@ -25,7 +25,63 @@ const pillars: Pillar[] = [
       }
     ]
   },
-  // Add other pillars similarly...
+  {
+    id: 'intimacy',
+    title: 'Emotional & Physical Intimacy',
+    description: 'Focuses on the depth of emotional connection and physical compatibility between partners.',
+    subAreas: [
+      {
+        title: 'Emotional Vulnerability',
+        description: 'Ability to share feelings, fears, and desires openly while feeling emotionally safe and understood.'
+      },
+      {
+        title: 'Physical Connection',
+        description: 'Compatibility in physical intimacy, affection expression, and mutual satisfaction in intimate moments.'
+      },
+      {
+        title: 'Quality Time & Bonding',
+        description: 'Dedication to maintaining emotional closeness through shared experiences and meaningful interactions.'
+      }
+    ]
+  },
+  {
+    id: 'communication',
+    title: 'Communication & Conflict Resolution',
+    description: 'Evaluates the effectiveness of dialogue patterns and ability to navigate disagreements constructively.',
+    subAreas: [
+      {
+        title: 'Active Listening',
+        description: 'Capacity to truly hear and understand partner\'s perspective without immediate judgment or defense.'
+      },
+      {
+        title: 'Conflict Management',
+        description: 'Skills in addressing disagreements respectfully, finding compromises, and maintaining connection during disputes.'
+      },
+      {
+        title: 'Daily Communication',
+        description: 'Effectiveness in routine information sharing, emotional expression, and maintaining open dialogue.'
+      }
+    ]
+  },
+  {
+    id: 'trust',
+    title: 'Trust & Mutual Support',
+    description: 'Measures the foundation of reliability, loyalty, and reciprocal care in the relationship.',
+    subAreas: [
+      {
+        title: 'Reliability & Consistency',
+        description: 'Dependability in following through on commitments and maintaining consistent behavior patterns.'
+      },
+      {
+        title: 'Emotional Safety',
+        description: 'Creating an environment where both partners feel secure sharing vulnerabilities and concerns.'
+      },
+      {
+        title: 'Mutual Support System',
+        description: 'Active participation in supporting each other through challenges, stress, and personal growth.'
+      }
+    ]
+  }
 ];
 
 const PillarContainer = () => {
