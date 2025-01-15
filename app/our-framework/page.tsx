@@ -13,6 +13,7 @@ import { SynergySection } from './components/synergy-section'
 import { TraitsSection } from './components/traits-section'
 import { PredictionsSection } from './components/predictions-section'
 import { SectionHeader } from './components/ui/section-header'
+import { cn } from './utils/cn'
 
 export default function FrameworkPage() {
   const [activeSection, setActiveSection] = useState("hero")
@@ -42,7 +43,10 @@ export default function FrameworkPage() {
       <NavTabs activeSection={activeSection} />
       
       {/* Main Content */}
-      <div className="relative ml-16">
+      <div className={cn(
+        "relative transition-all duration-300",
+        "ml-[16px] md:ml-[64px]" // Minimum width when collapsed
+      )}>
         {/* Hero Section */}
         <section id="hero">
           <FrameworkHero />
