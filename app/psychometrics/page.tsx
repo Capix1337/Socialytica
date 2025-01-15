@@ -7,13 +7,14 @@ import { StructureSection } from "./components/StructureSection"
 import { ApplicationsSection } from "./components/ApplicationsSection"
 import { ReferencesList } from "./components/ReferencesList"
 import { GradientBackground } from "./components/GradientBackground"
+import { Reference } from "./types/references"
 
 export const metadata: Metadata = {
   title: "Four-Pillar Relationship Test Psychometrics",
   description: "Technical details and psychometric properties of our relationship assessment methodology",
 }
 
-const academicReferences = [
+const academicReferences: Reference[] = [
   {
     id: "ref1",
     authors: "Bowen, M.",
@@ -254,7 +255,7 @@ const academicReferences = [
     volume: "41(4)",
     pages: "659-675"
   }
-];
+] as const;
 
 export default function PsychometricsPage() {
   return (
