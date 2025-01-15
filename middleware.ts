@@ -13,7 +13,8 @@ const isPublicRoute = createRouteMatcher([
   '/terms',
   '/privacy',
   "/blog(.*)",
-  "/our-framework"
+  "/our-framework",
+  "/Psychometrics",
 
 ])
 
