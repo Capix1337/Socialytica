@@ -12,7 +12,7 @@ interface PillarNode {
 interface SynergyLink {
   source: string;
   target: string;
-  strength: number;
+  strength: number
 }
 
 interface SynergyGraphProps {
