@@ -50,7 +50,7 @@ export function SubAreaRow({
                 <Info className="h-4 w-4 text-muted-foreground" />
               </TooltipTrigger>
               <TooltipContent>
-                <p>Internal consistency measure (Cronbach's α)</p>
+                <p>Internal consistency measure (Cronbach&apos;s α)</p>
               </TooltipContent>
             </Tooltip>
           </TooltipProvider>
