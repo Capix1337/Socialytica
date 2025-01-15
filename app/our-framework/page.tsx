@@ -13,7 +13,7 @@ import { SynergySection } from './components/synergy-section'
 import { TraitsSection } from './components/traits-section'
 import { PredictionsSection } from './components/predictions-section'
 import { SectionHeader } from './components/ui/section-header'
-import { cn } from './utils/cn'
+import { cn } from '@/lib/utils'
 
 export default function FrameworkPage() {
   const [activeSection, setActiveSection] = useState("hero")
