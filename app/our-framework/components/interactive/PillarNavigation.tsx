@@ -62,8 +62,8 @@ const PillarNavigation: React.FC<PillarNavigationProps> = ({ activeSection = 'he
                   className={`relative w-full px-4 py-2 text-sm font-medium rounded-lg text-left transition-colors
                     ${
                       activeSection === item.section
-                        ? 'text-primary-foreground'
-                        : 'text-muted-foreground hover:text-foreground'
+                        ? 'bg-primary text-primary-foreground'
+                        : 'text-muted-foreground hover:bg-muted/50 hover:text-foreground'
                     }`}
                 >
                   {item.label}
