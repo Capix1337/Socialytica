@@ -23,7 +23,7 @@ export function AnimatedCounter({
 
   const spring = useSpring(0, {
     duration: duration * 1000,
-    onComplete: () => setIsAnimating(false)
+    bounce: 0
   })
 
   const displayed = useTransform(spring, (current) => formatValue(current))
@@ -32,8 +32,15 @@ export function AnimatedCounter({
     if (inView && !isAnimating) {
       setIsAnimating(true)
       spring.set(value)
+      
+      // Use a timeout to set isAnimating to false after animation completes
+      const timer = setTimeout(() => {
+        setIsAnimating(false)
+      }, duration * 1000)
+
+      return () => clearTimeout(timer)
     }
-  }, [inView, value, spring, isAnimating])
+  }, [inView, value, spring, isAnimating, duration])
 
   return (
     <motion.span
