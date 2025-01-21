@@ -44,7 +44,7 @@ export interface GuestAttemptQuestion {
   category: {
     id: string
     name: string
-  }
+  } | null  // Add null as a possible type
   options: {
     id: string
     text: string
