@@ -4,12 +4,14 @@ import { guestResultsQuerySchema } from "@/lib/validations/guest-attempt"
 import type { GuestAttemptResult } from "@/types/tests/guest-attempt"
 
 export async function GET(
-  req: Request,
-  { params }: { params: { attemptId: string } }
+  req: Request
 ): Promise<NextResponse<GuestAttemptResult | { error: string }>> {
   try {
+    // Get attemptId from URL
+    const attemptId = req.url.split('/attempt/')[1].split('/results')[0]
+    
     const validation = guestResultsQuerySchema.safeParse({
-      attemptId: params.attemptId
+      attemptId
     })
 
     if (!validation.success) {
@@ -21,7 +23,7 @@ export async function GET(
 
     const attempt = await prisma.guestAttempt.findFirst({
       where: {
-        id: params.attemptId,
+        id: attemptId,
         status: "COMPLETED",
         expiresAt: {
           gt: new Date()

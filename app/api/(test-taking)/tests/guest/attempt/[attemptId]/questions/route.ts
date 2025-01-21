@@ -11,14 +11,16 @@ import type {
   SubmitGuestAnswerResponse 
 } from "@/types/tests/guest-attempt"
 
+// Update type definition for params
 export async function GET(
-  req: Request,
-  { params }: { params: { attemptId: string } }
-) {
+  req: Request
+): Promise<NextResponse<GuestAttemptQuestionsResponse | { error: string }>> {
   try {
-    // 1. Validate attempt ID
+    // Get attemptId from URL instead of params
+    const attemptId = req.url.split('/attempt/')[1].split('/questions')[0]
+    
     const validation = guestAttemptQuestionsQuerySchema.safeParse({
-      attemptId: params.attemptId
+      attemptId
     })
 
     if (!validation.success) {
@@ -31,7 +33,7 @@ export async function GET(
     // 2. Get attempt with questions
     const attempt = await prisma.guestAttempt.findFirst({
       where: {
-        id: params.attemptId,
+        id: attemptId,
         status: "IN_PROGRESS",
         expiresAt: {
           gt: new Date()
@@ -106,15 +108,18 @@ export async function GET(
   }
 }
 
+// Update PATCH handler similarly
 export async function PATCH(
-  req: Request,
-  { params }: { params: { attemptId: string } }
-) {
+  req: Request
+): Promise<NextResponse<SubmitGuestAnswerResponse>> {
   try {
+    // Get attemptId from URL
+    const attemptId = req.url.split('/attempt/')[1].split('/questions')[0]
     const json = await req.json()
+    
     const validation = submitGuestAnswerSchema.safeParse({
       ...json,
-      attemptId: params.attemptId
+      attemptId
     })
 
     if (!validation.success) {
@@ -130,7 +135,7 @@ export async function PATCH(
       // Verify attempt exists and is not expired
       const attempt = await tx.guestAttempt.findFirst({
         where: {
-          id: params.attemptId,
+          id: attemptId,
           status: "IN_PROGRESS",
           expiresAt: {
             gt: new Date()
@@ -167,12 +172,12 @@ export async function PATCH(
       await tx.guestResponse.upsert({
         where: {
           guestAttemptId_questionId: {
-            guestAttemptId: params.attemptId,
+            guestAttemptId: attemptId,
             questionId: validation.data.questionId
           }
         },
         create: {
-          guestAttemptId: params.attemptId,
+          guestAttemptId: attemptId,
           questionId: validation.data.questionId,
           selectedOptionId: validation.data.selectedOptionId,
           pointsEarned: pointsEarned,

@@ -1,17 +1,16 @@
+// app/api/(test-taking)/tests/guest/attempt/[attemptId]/complete/route.ts
 import { NextResponse } from "next/server"
 import prisma from "@/lib/prisma"
 import { guestCompletionSchema } from "@/lib/validations/guest-attempt"
 import type { GuestCompletionResponse } from "@/types/tests/guest-attempt"
 
-export async function POST(
-  req: Request,
-  { params }: { params: { attemptId: string } }
-): Promise<NextResponse<GuestCompletionResponse>> {
+export async function POST(req: Request): Promise<NextResponse<GuestCompletionResponse>> {
   try {
-    const validation = guestCompletionSchema.safeParse({
-      attemptId: params.attemptId
-    })
-
+    // 1. Get attempt ID from URL
+    const attemptId = req.url.split('/attempt/')[1].split('/complete')[0]
+    
+    // 2. Validate attempt ID
+    const validation = guestCompletionSchema.safeParse({ attemptId })
     if (!validation.success) {
       return NextResponse.json({
         success: false,
@@ -20,11 +19,12 @@ export async function POST(
       }, { status: 400 })
     }
 
+    // 3. Process completion in transaction
     const result = await prisma.$transaction(async (tx) => {
       // Get attempt with all related data
       const attempt = await tx.guestAttempt.findFirst({
         where: {
-          id: params.attemptId,
+          id: attemptId,
           status: "IN_PROGRESS",
           expiresAt: {
             gt: new Date()
@@ -71,7 +71,7 @@ export async function POST(
 
           return await tx.guestCategoryScore.create({
             data: {
-              guestAttemptId: params.attemptId,
+              guestAttemptId: attemptId,
               categoryId: category.id,
               rawScore,
               maxRawScore,
@@ -89,7 +89,7 @@ export async function POST(
 
       // Update attempt status
       const updatedAttempt = await tx.guestAttempt.update({
-        where: { id: params.attemptId },
+        where: { id: attemptId },
         data: {
           status: "COMPLETED",
           completedAt: new Date(),
@@ -112,17 +112,34 @@ export async function POST(
       }
     })
 
-    return NextResponse.json({
+    const response: GuestCompletionResponse = {
       success: true,
-      result: result
-    })
+      result: {
+        attemptId: result.attemptId,
+        totalScore: result.totalScore,
+        percentageScore: result.percentageScore,
+        categoryScores: result.categoryScores.map(cs => ({
+          categoryId: cs.categoryId,
+          rawScore: cs.rawScore,
+          maxRawScore: cs.maxRawScore,
+          scaledScore: cs.scaledScore,
+          maxScale: cs.maxScale
+        }))
+      }
+    }
+
+    return NextResponse.json(response)
 
   } catch (error) {
     console.error("[GUEST_COMPLETION]", error)
     
-    return NextResponse.json({
+    const errorResponse: GuestCompletionResponse = {
       success: false,
       error: error instanceof Error ? error.message : "Internal server error"
-    }, { status: error instanceof Error ? 400 : 500 })
+    }
+    
+    return NextResponse.json(errorResponse, { 
+      status: error instanceof Error ? 400 : 500 
+    })
   }
 }
