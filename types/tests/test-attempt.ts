@@ -3,7 +3,7 @@
 import { Test } from "./test"
 import { Question } from "./question"
 import { Option } from "./option"
-import { Category } from "./category"
+// import { Category } from "./category"
 
 export type TestStatus = 'IN_PROGRESS' | 'COMPLETED' | 'ABANDONED'
 
