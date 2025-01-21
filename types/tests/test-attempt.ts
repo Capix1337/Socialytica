@@ -59,6 +59,21 @@ export interface TestAttempt {
   updatedAt?: Date
 }
 
+// Common interface for category score display
+export interface DisplayCategoryScore {
+  category: {
+    id: string
+    name: string
+    description: string | null
+    scale: number
+    testId: string
+  }
+  scaledScore: number
+  maxScale: number
+  percentage: number
+}
+
+// Update TestAttemptResult interface
 export interface TestAttemptResult {
   test: {
     name: string   // Add this field
@@ -66,8 +81,21 @@ export interface TestAttemptResult {
   totalScore: number
   maxScore: number
   percentageScore: number
-  categoryScores: CategoryScore[]
+  categoryScores: DisplayCategoryScore[]
   responses: QuestionResponse[]
+}
+
+// Update GuestAttemptResult interface
+export interface GuestAttemptResult {
+  isBlurred: boolean
+  needsAuth: boolean
+  test: {
+    name: string
+  }
+  totalScore: number
+  maxScore: number
+  percentageScore: number
+  categoryScores: DisplayCategoryScore[]
 }
 
 export interface TestAttemptResponse {
