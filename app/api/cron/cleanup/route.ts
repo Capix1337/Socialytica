@@ -11,7 +11,7 @@ export async function GET(req: Request) {
   try {
     // Verify cron secret for security
     const headersList = headers()
-    const authHeader = headersList.get('authorization')
+    const authHeader = headersList.get('authorization')?.toString()
     
     if (!CLEANUP_SECRET || authHeader !== `Bearer ${CLEANUP_SECRET}`) {
       return NextResponse.json({ 
