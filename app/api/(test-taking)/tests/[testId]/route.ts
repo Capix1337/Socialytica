@@ -3,7 +3,7 @@
 import { auth } from '@clerk/nextjs/server'
 import { NextResponse } from 'next/server'
 import prisma from '@/lib/prisma'
-// import type { TestAttempt } from '@/types/tests/test-attempt'
+import type { TestAttempt } from '@/types/tests/test-attempt'
 
 export async function GET(req: Request) {
   try {
@@ -54,7 +54,8 @@ export async function GET(req: Request) {
     }
 
     // Get attempts only if user is authenticated
-    let attempts = []
+    let attempts: Pick<TestAttempt, 'id' | 'startedAt' | 'completedAt' | 'status' | 'totalScore' | 'percentageScore'>[] = []
+    
     if (userId) {
       attempts = await prisma.testAttempt.findMany({
         where: {
