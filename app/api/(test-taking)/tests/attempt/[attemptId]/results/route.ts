@@ -98,12 +98,16 @@ export async function GET(req: Request): Promise<NextResponse<TestAttemptResult 
       maxScore,
       percentageScore,
       categoryScores: attempt.categoryScores.map(cs => ({
-        ...cs,
-        scaledScore: cs.actualScore,
         category: {
-          ...cs.category,
-          description: cs.category.description || '' // Convert null/undefined to empty string
-        }
+          id: cs.category.id,
+          name: cs.category.name,
+          description: cs.category.description || '',
+          scale: cs.category.scale,
+          testId: cs.category.testId
+        },
+        scaledScore: cs.actualScore,
+        maxScale: cs.maxScale,
+        percentage: (cs.actualScore / cs.maxScale) * 100 // Add percentage calculation
       })),
       responses: attempt.responses.map(response => ({
         ...response,
