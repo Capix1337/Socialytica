@@ -9,6 +9,7 @@ import type { TestAttempt } from "@/types/tests/test-attempt"
 interface TestDetailsProps {
   test: Test
   attempts?: Pick<TestAttempt, 'id' | 'startedAt' | 'completedAt' | 'status' | 'totalScore' | 'percentageScore'>[]
+  isAuthenticated?: boolean // Add this line
 }
 
 export function TestDetails({ test, attempts = [] }: TestDetailsProps) {

@@ -1,7 +1,6 @@
-//app/(test-taking)/tests/[testId]/page.tsx
-
 import { Metadata } from "next"
 import { notFound } from "next/navigation"
+import { currentUser } from "@clerk/nextjs/server"
 import { TestDetails } from "./components/TestDetails"
 import { getPublicTest } from "@/lib/tests"
 
@@ -17,27 +16,34 @@ interface PageProps {
 }
 
 export default async function TestPage({ params }: PageProps) {
+  const user = await currentUser()
+  const isAuthenticated = !!user
+  
   // Await the params first
-  const resolvedParams = await params
+  const resolvedParams = await params;
 
   if (!resolvedParams?.testId) {
-    notFound()
+    notFound();
   }
 
   try {
-    const response = await getPublicTest(resolvedParams.testId)
+    const response = await getPublicTest(resolvedParams.testId);
     
     if (!response?.test) {
-      notFound()
+      notFound();
     }
 
     return (
       <div className="container py-8 space-y-8">
-        <TestDetails test={response.test} attempts={response.attempts} />
+        <TestDetails 
+          test={response.test} 
+          attempts={response.attempts}
+          isAuthenticated={isAuthenticated} // Pass authentication status
+        />
       </div>
-    )
+    );
   } catch (error) {
-    console.error('Error fetching test:', error)
-    notFound()
+    console.error('Error fetching test:', error);
+    notFound();
   }
 }
