@@ -25,18 +25,19 @@ export function StartTestButton({
     try {
       setIsLoading(true)
 
-      const guestData = !isAuthenticated ? guestStorage.initGuest() : null;
-      
-      const requestData: GuestTestAttemptData = {
-        testId,
-        isGuest: !isAuthenticated,
-        ...(guestData && { guestId: guestData.guestId })
-      };
+      let guestData = null;
+      if (!isAuthenticated) {
+        guestData = guestStorage.initGuest();
+      }
 
       const response = await fetch("/api/tests/attempt", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(requestData)
+        body: JSON.stringify({ 
+          testId,
+          isGuest: !isAuthenticated,
+          guestId: guestData?.guestId
+        })
       });
 
       if (!response.ok) {
@@ -47,18 +48,19 @@ export function StartTestButton({
       const data: TestAttemptApiResponse = await response.json();
 
       // Store attempt data in localStorage if guest mode
-      if (!isAuthenticated) {
-        guestStorage.saveAttempt({
+      if (!isAuthenticated && guestData) {
+        const guestAttemptData: GuestTestAttemptData = {
           attemptId: data.testAttempt.id,
           testId: data.testAttempt.testId,
+          guestId: guestData.guestId,
           startedAt: Date.now(),
           status: "IN_PROGRESS",
           responses: [],
-          guestId: guestData!.guestId, // Include the guestId
-        });
+          categoryScores: []
+        };
+        guestStorage.saveAttempt(guestAttemptData);
       }
 
-      // Navigate to attempt page
       router.push(`/tests/${testId}/attempt/${data.testAttempt.id}`);
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Failed to start test");

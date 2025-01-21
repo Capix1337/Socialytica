@@ -146,7 +146,22 @@ export interface GuestAttemptResponse {
 }
 
 export interface GuestTestAttemptData {
+  attemptId: string;
   testId: string;
-  isGuest: boolean;
-  guestId?: string;
+  guestId: string;  // Add this
+  responses: {
+    questionId: string;
+    selectedOptionId: string;
+    pointsEarned: number;
+    maxPoints: number;
+  }[];
+  startedAt: number;
+  status: 'IN_PROGRESS' | 'COMPLETED' | 'ABANDONED';
+  categoryScores?: {
+    categoryId: string;
+    actualScore: number;
+    maxScale: number;
+    rawScore: number;
+    maxRawScore: number;
+  }[];
 }
