@@ -4,7 +4,14 @@ import { analytics } from './utils/analytics'
 
 // Protected routes that require authentication
 const isProtectedRoute = createRouteMatcher([
-  '/dashboard(.*)'  // All dashboard routes require auth
+  '/dashboard(.*)',  // All dashboard routes require auth
+  '/profile(.*)'     // Profile routes require auth
+])
+
+// Guest-enabled routes (allow both authenticated and guest access)
+const isGuestEnabledRoute = createRouteMatcher([
+  '/tests/(.*)/attempt/(.*)',  // Test attempt routes
+  '/tests/(.*)/results/(.*)'   // Test results routes
 ])
 
 // Admin only routes
@@ -25,11 +32,17 @@ export default clerkMiddleware(async (auth, req) => {
     }
   }
 
+  // Handle guest-enabled routes
+  if (isGuestEnabledRoute(req)) {
+    // Allow access regardless of auth state
+    return NextResponse.next()
+  }
+
   // Check for protected routes
   if (isProtectedRoute(req)) {
     const { userId, redirectToSignIn } = await auth()
     if (!userId) {
-      return redirectToSignIn()
+      return redirectToSignIn({ returnBackUrl: req.url })
     }
   }
 

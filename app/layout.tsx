@@ -7,6 +7,7 @@ import { ProfileCompletionDialog } from '@/components/profile/ProfileCompletionD
 import { Toaster } from "@/components/ui/sonner"
 import Navbar from "@/components/navbar"
 import { Footer } from "@/components/footer"
+import { AuthGuestHandler } from '@/components/auth/AuthGuestHandler'
 import "./globals.css"
 import { Inter } from "next/font/google"
 
@@ -39,7 +40,8 @@ export default function RootLayout({
               </main>
               <Footer />
               <ProfileCompletionDialog />
-              <Toaster />
+              <AuthGuestHandler />
+              <Toaster position="top-center" />
             </ProfileCompletionProvider>
           </ThemeProvider>
         </body>
