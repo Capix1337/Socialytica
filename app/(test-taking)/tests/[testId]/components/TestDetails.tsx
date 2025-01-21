@@ -12,7 +12,11 @@ interface TestDetailsProps {
   isAuthenticated?: boolean // Add this line
 }
 
-export function TestDetails({ test, attempts = [] }: TestDetailsProps) {
+export function TestDetails({ 
+  test, 
+  attempts = [], 
+  isAuthenticated = false 
+}: TestDetailsProps) {
   const lastAttempt = attempts[0];
   const canStartNewAttempt = !lastAttempt || 
     lastAttempt.status !== 'IN_PROGRESS';
@@ -70,7 +74,8 @@ export function TestDetails({ test, attempts = [] }: TestDetailsProps) {
       {/* Start Test Button */}
       <StartTestButton 
         testId={test.id} 
-        disabled={!canStartNewAttempt} 
+        disabled={!canStartNewAttempt}
+        isAuthenticated={isAuthenticated} // Pass the auth state
       />
     </div>
   );
