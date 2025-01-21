@@ -93,7 +93,8 @@ export interface TestAttemptApiResponse {
   testAttempt: {
     id: string
     testId: string
-    userId: string
+    userId?: string
+    guestId?: string
     startedAt: Date
     status: TestStatus
   }
@@ -123,4 +124,22 @@ export interface TestCompletionResponse {
     categoryScores: CategoryCompletion[]
   }
   error?: string
+}
+
+// Add these new types to test-attempt.ts
+
+export interface GuestAttemptData {
+  attemptId: string;
+  guestId: string;
+  testId: string;
+  startedAt: Date;
+  status: TestStatus;
+  responses?: QuestionResponse[];
+  categoryScores?: CategoryScore[];
+}
+
+export interface GuestAttemptResponse {
+  success: boolean;
+  attempt?: GuestAttemptData;
+  error?: string;
 }
