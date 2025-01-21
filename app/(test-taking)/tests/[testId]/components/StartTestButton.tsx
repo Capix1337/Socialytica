@@ -5,18 +5,18 @@ import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { toast } from "sonner"
 import { guestStorage } from "@/lib/storage/guest-storage"
-import type { TestAttemptApiResponse } from "@/types/tests/test-attempt"
+import type { TestAttemptApiResponse, GuestTestAttemptData } from "@/types/tests/test-attempt"
 
 interface StartTestButtonProps {
-  testId: string
-  disabled?: boolean
-  isAuthenticated?: boolean // New prop for auth state
+  testId: string;
+  disabled?: boolean;
+  isAuthenticated?: boolean;
 }
 
 export function StartTestButton({ 
   testId, 
   disabled,
-  isAuthenticated = false // Default to guest mode if not specified
+  isAuthenticated = false
 }: StartTestButtonProps) {
   const [isLoading, setIsLoading] = useState(false)
   const router = useRouter()
@@ -25,26 +25,18 @@ export function StartTestButton({
     try {
       setIsLoading(true)
 
-      let guestId: string | undefined;
+      const guestData = !isAuthenticated ? guestStorage.initGuest() : null;
+      
+      const requestData: GuestTestAttemptData = {
+        testId,
+        isGuest: !isAuthenticated,
+        ...(guestData && { guestId: guestData.guestId })
+      };
 
-      // Initialize guest storage if not authenticated
-      if (!isAuthenticated) {
-        // Get or create guest data
-        const guestData = guestStorage.initGuest();
-        guestId = guestData.guestId;
-      }
-
-      // Call the test attempt endpoint with guest info if needed
       const response = await fetch("/api/tests/attempt", {
         method: "POST",
-        headers: { 
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({ 
-          testId,
-          isGuest: !isAuthenticated,
-          guestId // Include guestId if in guest mode
-        })
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(requestData)
       });
 
       if (!response.ok) {
@@ -62,7 +54,7 @@ export function StartTestButton({
           startedAt: Date.now(),
           status: "IN_PROGRESS",
           responses: [],
-          guestId: guestId!, // Include the guestId
+          guestId: guestData!.guestId, // Include the guestId
         });
       }
 

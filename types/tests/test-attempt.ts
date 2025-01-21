@@ -44,7 +44,8 @@ export interface CategoryScore {
 
 export interface TestAttempt {
   id: string
-  userId: string
+  userId?: string
+  guestId?: string // Add this for guest attempts
   testId: string
   startedAt: Date
   completedAt: Date | null
@@ -142,4 +143,10 @@ export interface GuestAttemptResponse {
   success: boolean;
   attempt?: GuestAttemptData;
   error?: string;
+}
+
+export interface GuestTestAttemptData {
+  testId: string;
+  isGuest: boolean;
+  guestId?: string;
 }
