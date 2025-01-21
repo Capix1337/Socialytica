@@ -8,13 +8,27 @@ import type { TestAttemptApiResponse } from "@/types/tests/test-attempt"
 
 export async function POST(request: Request) {
   try {
-    // 1. Get clerk user ID
     const { userId: clerkUserId } = await auth()
-    if (!clerkUserId) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+    
+    // Parse request
+    const validation = startTestAttemptSchema.safeParse(await request.json())
+    if (!validation.success) {
+      return NextResponse.json({ 
+        error: "Validation failed",
+        details: validation.error.flatten() 
+      }, { status: 400 })
     }
 
-    // 2. Get internal user ID
+    // For guest users, redirect to guest attempt endpoint
+    if (!clerkUserId) {
+      const guestAttemptResponse = await fetch('/api/tests/guest/attempt', {
+        method: 'POST',
+        body: JSON.stringify(validation.data)
+      })
+      return guestAttemptResponse
+    }
+
+    // Continue with authenticated user flow...
     const user = await prisma.user.findUnique({
       where: { clerkUserId },
       select: { id: true }
@@ -22,15 +36,6 @@ export async function POST(request: Request) {
 
     if (!user) {
       return NextResponse.json({ error: "User not found" }, { status: 404 })
-    }
-
-    // 3. Parse and validate request
-    const validation = startTestAttemptSchema.safeParse(await request.json())
-    if (!validation.success) {
-      return NextResponse.json({ 
-        error: "Validation failed",
-        details: validation.error.flatten() 
-      }, { status: 400 })
     }
 
     // 4. Begin transaction
@@ -95,13 +100,6 @@ export async function POST(request: Request) {
 
   } catch (error) {
     console.error("[TEST_ATTEMPT_CREATE]", error)
-    
-    if (error instanceof Error) {
-      if (error.message === "Test not found or not published") {
-        return NextResponse.json({ error: error.message }, { status: 404 })
-      }
-    }
-    
     return NextResponse.json({ 
       error: "Internal server error" 
     }, { status: 500 })
