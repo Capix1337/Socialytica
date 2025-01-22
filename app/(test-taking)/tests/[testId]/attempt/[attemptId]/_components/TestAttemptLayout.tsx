@@ -14,6 +14,7 @@ export function TestAttemptLayout() {
     isLoading,
     questions,
     currentCategoryId,
+    setCurrentCategoryId, // Add this
     showCompletionDialog,
     setShowCompletionDialog,
     testId,
@@ -85,6 +86,7 @@ export function TestAttemptLayout() {
           <CategoryTabs
             categories={categories}
             currentCategoryId={currentCategoryId}
+            onCategoryChange={setCurrentCategoryId} // Add this prop
           />
           <QuestionManager currentCategory={currentCategory} />
         </div>
