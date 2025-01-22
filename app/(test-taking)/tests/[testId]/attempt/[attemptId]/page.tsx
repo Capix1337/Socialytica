@@ -30,6 +30,30 @@ export default function TestAttemptPage({ params }: TestAttemptPageProps) {
   const [testId, setTestId] = useState<string>("")
   const [showCompletionDialog, setShowCompletionDialog] = useState(false)
 
+  useEffect(() => {
+    if (!isSignedIn && attemptId) {
+      // Load saved guest attempt data
+      const savedAttempt = guestStorage.getAttempt(attemptId)
+      if (savedAttempt) {
+        setQuestions(prevQuestions => 
+          prevQuestions.map(q => {
+            const savedResponse = savedAttempt.responses.find(
+              r => r.questionId === q.id
+            )
+            if (savedResponse) {
+              return {
+                ...q,
+                selectedOptionId: savedResponse.selectedOptionId,
+                isAnswered: true
+              }
+            }
+            return q
+          })
+        )
+      }
+    }
+  }, [isSignedIn, attemptId])
+
   const fetchQuestions = useCallback(async () => {
     if (!attemptId) return
 
@@ -62,7 +86,7 @@ export default function TestAttemptPage({ params }: TestAttemptPageProps) {
 
   const submitAnswer = async (questionId: string, selectedOptionId: string) => {
     try {
-      const endpoint = isSignedIn
+      const endpoint = isSignedIn 
         ? `/api/tests/attempt/${attemptId}/questions`
         : `/api/tests/guest/attempt/${attemptId}/questions`
 
@@ -82,6 +106,18 @@ export default function TestAttemptPage({ params }: TestAttemptPageProps) {
       }
 
       const data = await response.json()
+
+      // Save response to localStorage if in guest mode
+      if (!isSignedIn && data.success) {
+        guestStorage.saveGuestResponse(
+          attemptId,
+          questionId,
+          selectedOptionId,
+          data.pointsEarned,
+          data.maxPoints
+        )
+      }
+
       return data
     } catch (error) {
       console.error('Failed to submit answer:', error)
