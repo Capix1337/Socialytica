@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from "react"
 import { useAuth } from "@clerk/nextjs"
 import { cn } from "@/lib/utils"
+import { guestStorage } from "@/lib/storage/guest-storage"
 import { type TestAttemptQuestion } from "@/types/tests/test-attempt-question"
 import { type GuestAttemptQuestion } from "@/types/tests/guest-attempt"
 import { LoadingState } from "./_components/LoadingState"
