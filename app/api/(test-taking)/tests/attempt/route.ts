@@ -2,6 +2,7 @@
 
 import { auth } from "@clerk/nextjs/server"
 import { NextResponse } from "next/server"
+import { v4 as uuidv4 } from 'uuid'
 import prisma from "@/lib/prisma"
 import { startTestAttemptSchema } from "@/lib/validations/test-attempt"
 import type { TestAttemptApiResponse } from "@/types/tests/test-attempt"
@@ -19,21 +20,47 @@ export async function POST(request: Request) {
       }, { status: 400 })
     }
 
-    // For guest users, redirect to guest attempt endpoint
+    // Handle guest attempt creation directly
     if (!clerkUserId) {
-      // Get base URL from request
-      const url = new URL(request.url)
-      const baseUrl = `${url.protocol}//${url.host}`
-      
-      const guestAttemptResponse = await fetch(`${baseUrl}/api/tests/guest/attempt`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(validation.data)
+      const guestId = validation.data.guestId || uuidv4()
+
+      const result = await prisma.$transaction(async (tx) => {
+        const test = await tx.test.findFirst({
+          where: {
+            id: validation.data.testId,
+            isPublished: true
+          },
+          select: { id: true }
+        })
+
+        if (!test) {
+          throw new Error("Test not found or not published")
+        }
+
+        return await tx.guestAttempt.create({
+          data: {
+            guestId,
+            testId: test.id,
+            status: "IN_PROGRESS",
+            startedAt: new Date(),
+            expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) // 30 days
+          },
+          select: {
+            id: true,
+            testId: true,
+            guestId: true,
+            startedAt: true,
+            status: true
+          }
+        })
       })
-      
-      return guestAttemptResponse
+
+      return NextResponse.json({
+        testAttempt: {
+          ...result,
+          userId: undefined
+        }
+      }, { status: 201 })
     }
 
     // Continue with authenticated user flow...
