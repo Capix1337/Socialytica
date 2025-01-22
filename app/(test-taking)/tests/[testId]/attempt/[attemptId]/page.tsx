@@ -21,6 +21,13 @@ interface TestAttemptPageProps {
   }>
 }
 
+// Create a helper function to check the question type
+const isGuestQuestion = (
+  question: TestAttemptQuestion | GuestAttemptQuestion
+): question is GuestAttemptQuestion => {
+  return 'title' in question;
+}
+
 export default function TestAttemptPage({ params }: TestAttemptPageProps) {
   const { isSignedIn } = useAuth()
   const [questions, setQuestions] = useState<(TestAttemptQuestion | GuestAttemptQuestion)[]>([])
@@ -163,7 +170,12 @@ export default function TestAttemptPage({ params }: TestAttemptPageProps) {
       // Check if this was the last question in the current category
       if (currentIndexInCategory === currentCategoryQuestions.length - 1) {
         // Find the next category that has unanswered questions
-        const categoryIds = Array.from(new Set(questions.map(q => q.question.categoryId || "uncategorized")))
+        const categoryIds = Array.from(new Set(questions.map(q => {
+          const isGuestQuestion = 'title' in q
+          return isGuestQuestion 
+            ? q.category?.id || "uncategorized"
+            : q.question.categoryId || "uncategorized"
+        })))
         const currentCategoryIndex = categoryIds.indexOf(currentCategoryId)
         
         // Look for next category with unanswered questions
@@ -245,13 +257,13 @@ export default function TestAttemptPage({ params }: TestAttemptPageProps) {
   // Group questions by category
   const questionsByCategory = questions.reduce((acc, question) => {
     // Handle both guest and authenticated question structures
-    const isGuestQuestion = 'title' in question
-    const categoryId = isGuestQuestion 
+    const categoryId = isGuestQuestion(question) 
       ? question.category?.id || "uncategorized"
-      : question.question.categoryId || "uncategorized"
-    const categoryName = isGuestQuestion
+      : question.question.categoryId || "uncategorized";
+      
+    const categoryName = isGuestQuestion(question)
       ? question.category?.name || "Uncategorized"
-      : question.question.category?.name || "Uncategorized"
+      : question.question.category?.name || "Uncategorized";
 
     if (!acc[categoryId]) {
       acc[categoryId] = {
@@ -265,14 +277,16 @@ export default function TestAttemptPage({ params }: TestAttemptPageProps) {
 
     acc[categoryId].questions.push(question)
     acc[categoryId].totalQuestions++
-    if (isGuestQuestion ? question.selectedOptionId : question.isAnswered) {
+    
+    if (isGuestQuestion(question) ? !!question.selectedOptionId : question.isAnswered) {
       acc[categoryId].answeredQuestions++
     }
+
     return acc
   }, {} as Record<string, {
     id: string
     name: string
-    questions: TestAttemptQuestion[]
+    questions: (TestAttemptQuestion | GuestAttemptQuestion)[]
     totalQuestions: number
     answeredQuestions: number
   }>)
@@ -280,7 +294,9 @@ export default function TestAttemptPage({ params }: TestAttemptPageProps) {
   const categories = Object.values(questionsByCategory)
   const currentCategory = questionsByCategory[currentCategoryId]
   const totalQuestions = questions.length
-  const answeredQuestions = questions.filter(q => q.isAnswered).length
+  const answeredQuestions = questions.filter(q => 
+    isGuestQuestion(q) ? !!q.selectedOptionId : q.isAnswered
+  ).length
   const currentCategoryProgress = currentCategory 
     ? (currentCategory.answeredQuestions / currentCategory.totalQuestions) * 100
     : 0
