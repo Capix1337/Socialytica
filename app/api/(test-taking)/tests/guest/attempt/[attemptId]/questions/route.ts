@@ -113,12 +113,11 @@ export async function PATCH(
   req: Request
 ): Promise<NextResponse<SubmitGuestAnswerResponse>> {
   try {
-    // Get attemptId from URL
-    const attemptId = req.url.split('/attempt/')[1].split('/questions')[0]
-    const json = await req.json()
+    const attemptId = req.url.split("/attempt/")[1].split("/questions")[0]
+    const body = await req.json()
     
     const validation = submitGuestAnswerSchema.safeParse({
-      ...json,
+      ...body,
       attemptId
     })
 
@@ -130,43 +129,19 @@ export async function PATCH(
       }, { status: 400 })
     }
 
-    // Process answer submission in transaction
     const result = await prisma.$transaction(async (tx) => {
-      // Verify attempt exists and is not expired
+      // Verify attempt exists and is valid
       const attempt = await tx.guestAttempt.findFirst({
         where: {
           id: attemptId,
           status: "IN_PROGRESS",
-          expiresAt: {
-            gt: new Date()
-          }
+          expiresAt: { gt: new Date() }
         }
       })
 
       if (!attempt) {
         throw new Error("Guest attempt not found, expired, or not in progress")
       }
-
-      // Calculate points
-      const question = await tx.question.findFirst({
-        where: { id: validation.data.questionId },
-        include: { options: true }
-      })
-
-      if (!question) {
-        throw new Error("Question not found")
-      }
-
-      const selectedOption = question.options.find(
-        opt => opt.id === validation.data.selectedOptionId
-      )
-
-      if (!selectedOption) {
-        throw new Error("Selected option not found")
-      }
-
-      const maxPoints = Math.max(...question.options.map(opt => opt.point))
-      const pointsEarned = selectedOption.point
 
       // Save response
       await tx.guestResponse.upsert({
@@ -179,14 +154,10 @@ export async function PATCH(
         create: {
           guestAttemptId: attemptId,
           questionId: validation.data.questionId,
-          selectedOptionId: validation.data.selectedOptionId,
-          pointsEarned: pointsEarned,
-          maxPoints: maxPoints
+          selectedOptionId: validation.data.selectedOptionId
         },
         update: {
-          selectedOptionId: validation.data.selectedOptionId,
-          pointsEarned: pointsEarned,
-          maxPoints: maxPoints
+          selectedOptionId: validation.data.selectedOptionId
         }
       })
 
@@ -194,17 +165,11 @@ export async function PATCH(
     })
 
     return NextResponse.json(result)
-
   } catch (error) {
     console.error("[GUEST_ANSWER_SUBMIT]", error)
-    
-    const errorResponse: SubmitGuestAnswerResponse = {
+    return NextResponse.json({ 
       success: false,
-      error: error instanceof Error ? error.message : "Internal server error"
-    }
-    
-    return NextResponse.json(errorResponse, { 
-      status: error instanceof Error ? 400 : 500 
-    })
+      error: error instanceof Error ? error.message : "Failed to submit answer"
+    }, { status: 500 })
   }
 }

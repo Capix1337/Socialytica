@@ -191,9 +191,14 @@ export default function TestAttemptPage({ params }: TestAttemptPageProps) {
 
   // Group questions by category
   const questionsByCategory = questions.reduce((acc, question) => {
-    // Safely access nested properties
-    const categoryId = question?.question?.categoryId || "uncategorized"
-    const categoryName = question?.question?.category?.name || "Uncategorized"
+    // Handle both guest and authenticated question structures
+    const isGuestQuestion = 'title' in question
+    const categoryId = isGuestQuestion 
+      ? question.category?.id || "uncategorized"
+      : question.question.categoryId || "uncategorized"
+    const categoryName = isGuestQuestion
+      ? question.category?.name || "Uncategorized"
+      : question.question.category?.name || "Uncategorized"
 
     if (!acc[categoryId]) {
       acc[categoryId] = {
@@ -207,7 +212,7 @@ export default function TestAttemptPage({ params }: TestAttemptPageProps) {
 
     acc[categoryId].questions.push(question)
     acc[categoryId].totalQuestions++
-    if (question.isAnswered) {
+    if (isGuestQuestion ? question.selectedOptionId : question.isAnswered) {
       acc[categoryId].answeredQuestions++
     }
     return acc
