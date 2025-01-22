@@ -1,7 +1,7 @@
-// app/(test-taking)/tests/[testId]/attempt/[attemptId]/page.tsx
 "use client"
 
 import { useState, useEffect, useCallback } from "react"
+import { useAuth } from "@clerk/nextjs"
 import { cn } from "@/lib/utils"
 import { type TestAttemptQuestion } from "@/types/tests/test-attempt-question"
 import { LoadingState } from "./_components/LoadingState"
@@ -20,6 +20,7 @@ interface TestAttemptPageProps {
 }
 
 export default function TestAttemptPage({ params }: TestAttemptPageProps) {
+  const { isSignedIn } = useAuth()
   const [questions, setQuestions] = useState<TestAttemptQuestion[]>([])
   const [currentQuestionId, setCurrentQuestionId] = useState<string>("")
   const [currentCategoryId, setCurrentCategoryId] = useState<string>("")
@@ -32,11 +33,16 @@ export default function TestAttemptPage({ params }: TestAttemptPageProps) {
     if (!attemptId) return
 
     try {
-      const response = await fetch(`/api/tests/attempt/${attemptId}/questions`)
+      const endpoint = isSignedIn 
+        ? `/api/tests/attempt/${attemptId}/questions`
+        : `/api/tests/guest/attempt/${attemptId}/questions`
+
+      const response = await fetch(endpoint)
+      if (!response.ok) {
+        throw new Error(await response.text())
+      }
+
       const data = await response.json()
-
-      if (!response.ok) throw new Error(data.error || "Failed to fetch questions")
-
       setQuestions(data.questions)
       if (data.questions.length > 0) {
         setCurrentQuestionId(data.questions[0].id)
@@ -47,7 +53,7 @@ export default function TestAttemptPage({ params }: TestAttemptPageProps) {
     } finally {
       setIsLoading(false)
     }
-  }, [attemptId])
+  }, [attemptId, isSignedIn])
 
   const handleAnswerSelect = useCallback(async (questionId: string, optionId: string) => {
     try {
