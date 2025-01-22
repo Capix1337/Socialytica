@@ -3,7 +3,7 @@
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
-import { useAuth } from "@clerk/nextjs/server"
+import { useAuth } from "@clerk/nextjs"
 import {
   AlertDialog,
   AlertDialogAction,
