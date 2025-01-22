@@ -3,6 +3,7 @@
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
+import { useAuth } from "@clerk/nextjs"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -17,13 +18,14 @@ import { Progress } from "@/components/ui/progress"
 import { AlertTriangle, CheckCircle2 } from "lucide-react"
 import { toast } from "sonner"
 import type { TestAttemptQuestion } from "@/types/tests/test-attempt-question"
+import type { GuestAttemptQuestion } from "@/types/tests/guest-attempt"
 
 interface CompletionDialogProps {
   isOpen: boolean
   onOpenChange: (open: boolean) => void
   testId: string
   attemptId: string
-  questions: TestAttemptQuestion[]
+  questions: (TestAttemptQuestion | GuestAttemptQuestion)[]
 }
 
 export function CompletionDialog({
@@ -35,28 +37,42 @@ export function CompletionDialog({
 }: CompletionDialogProps) {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const router = useRouter()
+  const { isSignedIn } = useAuth()
 
   // Group questions by category
   const questionsByCategory = questions.reduce((acc, question) => {
-    const categoryName = question.question.category?.name || "Uncategorized"
+    // Handle both guest and authenticated question structures
+    const isGuestQuestion = 'title' in question;
+    const categoryName = isGuestQuestion 
+      ? question.category?.name || "Uncategorized"
+      : question.question.category?.name || "Uncategorized";
+
     if (!acc[categoryName]) {
       acc[categoryName] = { total: 0, answered: 0 }
     }
     acc[categoryName].total++
-    if (question.isAnswered) {
+    
+    // Handle answered state for both types
+    if (isGuestQuestion ? !!question.selectedOptionId : question.isAnswered) {
       acc[categoryName].answered++
     }
     return acc
   }, {} as Record<string, { total: number; answered: number }>)
 
   const totalQuestions = questions.length
-  const answeredQuestions = questions.filter(q => q.isAnswered).length
+  const answeredQuestions = questions.filter(q => 
+    'title' in q ? !!q.selectedOptionId : q.isAnswered
+  ).length
   const hasUnanswered = answeredQuestions < totalQuestions
 
   const handleComplete = async () => {
     try {
       setIsSubmitting(true)
-      const response = await fetch(`/api/tests/attempt/${attemptId}/complete`, {
+      const endpoint = isSignedIn
+        ? `/api/tests/attempt/${attemptId}/complete`
+        : `/api/tests/guest/attempt/${attemptId}/complete`
+
+      const response = await fetch(endpoint, {
         method: "POST",
       })
 
