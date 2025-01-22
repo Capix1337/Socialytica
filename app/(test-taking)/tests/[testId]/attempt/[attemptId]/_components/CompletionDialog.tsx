@@ -74,13 +74,25 @@ export function CompletionDialog({
 
       const response = await fetch(endpoint, {
         method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        }
       })
 
-      if (!response.ok) throw new Error("Failed to complete test")
+      if (!response.ok) {
+        throw new Error("Failed to complete test")
+      }
 
-      toast.success("Test completed successfully!")
-      router.push(`/tests/${testId}/attempt/${attemptId}/results`)
-    } catch {
+      const data = await response.json()
+      
+      if (data.success) {
+        toast.success("Test completed successfully!")
+        router.push(`/tests/${testId}/attempt/${attemptId}/results`)
+      } else {
+        throw new Error(data.error || "Failed to complete test")
+      }
+    } catch (error) {
+      console.error("Complete test error:", error)
       toast.error("Failed to complete test. Please try again.")
     } finally {
       setIsSubmitting(false)
