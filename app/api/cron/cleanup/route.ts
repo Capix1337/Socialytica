@@ -5,13 +5,13 @@ import { cleanupService } from "@/lib/cleanup/cleanup-service"
 import { storageMonitor } from "@/lib/cleanup/storage-monitor"
 import { headers } from "next/headers"
 
-const CLEANUP_SECRET = process.env.CLEANUP_CRON_SECRET
+const CLEANUP_SECRET = process.env.CLEANUP_SECRET
 
 export async function GET(req: Request) {
   try {
-    // Verify cron secret for security
-    const headersList = headers() // Remove await - headers() is not async
-    const authHeader = headersList.get('authorization')
+    // Get the headers using await since headers() returns a Promise
+    const headerPayload = await headers()
+    const authHeader = headerPayload.get('authorization')
     
     if (!CLEANUP_SECRET || authHeader !== `Bearer ${CLEANUP_SECRET}`) {
       return NextResponse.json({ 
