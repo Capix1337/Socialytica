@@ -99,62 +99,60 @@ export default function TestAttemptPage({ params }: TestAttemptPageProps) {
     }
   }, [attemptId, isSignedIn])
 
-  const submitAnswer = async (questionId: string, selectedOptionId: string) => {
-    try {
-      const endpoint = isSignedIn 
-        ? `/api/tests/attempt/${attemptId}/questions`
-        : `/api/tests/guest/attempt/${attemptId}/questions`
-
-      const response = await fetch(endpoint, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          questionId,
-          selectedOptionId
-        })
-      })
-
-      if (!response.ok) {
-        throw new Error('Failed to submit answer')
-      }
-
-      const data = await response.json()
-
-      // Save response to localStorage if in guest mode
-      if (!isSignedIn && data.success) {
-        guestStorage.saveGuestResponse(
-          attemptId,
-          questionId,
-          selectedOptionId,
-          data.pointsEarned,
-          data.maxPoints
-        )
-      }
-
-      return data
-    } catch (error) {
-      console.error('Failed to submit answer:', error)
-      throw error
-    }
-  }
-
   const handleAnswerSelect = useCallback(async (questionId: string, optionId: string) => {
     try {
+      // Move submitAnswer inside useCallback
+      const submitAnswer = async (qId: string, selectedOptionId: string) => {
+        try {
+          const endpoint = isSignedIn 
+            ? `/api/tests/attempt/${attemptId}/questions`
+            : `/api/tests/guest/attempt/${attemptId}/questions`
+
+          const response = await fetch(endpoint, {
+            method: 'PATCH',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              questionId: qId,
+              selectedOptionId
+            })
+          })
+
+          if (!response.ok) {
+            throw new Error('Failed to submit answer')
+          }
+
+          const data = await response.json()
+
+          if (!isSignedIn && data.success) {
+            guestStorage.saveGuestResponse(
+              attemptId,
+              qId,
+              selectedOptionId,
+              data.pointsEarned,
+              data.maxPoints
+            )
+          }
+
+          return data
+        } catch (error) {
+          console.error('Failed to submit answer:', error)
+          throw error
+        }
+      }
+
       await submitAnswer(questionId, optionId)
 
       setQuestions(prev => prev.map(q => {
-        // Check if it's a guest question
-        const isGuestQuestion = 'title' in q;
-        if ((isGuestQuestion ? q.id : q.questionId) === questionId) {
+        if ((isGuestQuestion(q) ? q.id : q.questionId) === questionId) {
           return {
             ...q,
             selectedOptionId: optionId,
-            isAnswered: true
+            isAnswered: !isGuestQuestion(q)  // Only set isAnswered for TestAttemptQuestion
           }
         }
-        return q;
+        return q
       }))
 
       // Find the current category's questions
@@ -246,7 +244,7 @@ export default function TestAttemptPage({ params }: TestAttemptPageProps) {
     } catch (error) {
       console.error("Error saving answer:", error)
     }
-  }, [questions, currentCategoryId, submitAnswer]) // Remove attemptId
+  }, [questions, currentCategoryId, attemptId, isSignedIn]) // Add required dependencies
 
   // Resolve params since they're a Promise
   useEffect(() => {
