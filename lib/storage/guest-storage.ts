@@ -20,6 +20,55 @@ export class GuestStorage {
     return Date.now() > timestamp;
   }
 
+  // Add method to get current attempt
+  public getCurrentAttempt(testId: string): GuestTestAttemptData | null {
+    if (!this.isClient) return null;
+
+    try {
+      const guestData = this.getGuestData();
+      if (!guestData?.currentAttemptId) return null;
+
+      const attempt = this.getAttempt(guestData.currentAttemptId);
+      if (!attempt || attempt.testId !== testId) return null;
+
+      // Check if attempt is expired
+      if (this.isAttemptExpired(attempt)) {
+        this.clearAttempt(attempt.attemptId);
+        return null;
+      }
+
+      return attempt;
+    } catch (error) {
+      console.error('Storage operation failed:', error);
+      return null;
+    }
+  }
+
+  // Add method to check attempt expiration
+  private isAttemptExpired(attempt: GuestTestAttemptData): boolean {
+    const expirationTime = attempt.startedAt + (30 * 24 * 60 * 60 * 1000); // 30 days
+    return Date.now() > expirationTime;
+  }
+
+  // Add method to clear specific attempt
+  public clearAttempt(attemptId: string): void {
+    if (!this.isClient) return;
+
+    try {
+      const key = `${STORAGE_KEYS.GUEST_ATTEMPT}_${attemptId}`;
+      localStorage.removeItem(key);
+
+      // Update current attempt reference if needed
+      const guestData = this.getGuestData();
+      if (guestData?.currentAttemptId === attemptId) {
+        guestData.currentAttemptId = null;
+        localStorage.setItem(STORAGE_KEYS.GUEST_ID, JSON.stringify(guestData));
+      }
+    } catch (error) {
+      console.error('Storage operation failed:', error);
+    }
+  }
+
   /**
    * Initialize or retrieve guest ID
    */
