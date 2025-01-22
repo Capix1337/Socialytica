@@ -21,10 +21,18 @@ export async function POST(request: Request) {
 
     // For guest users, redirect to guest attempt endpoint
     if (!clerkUserId) {
-      const guestAttemptResponse = await fetch('/api/tests/guest/attempt', {
+      // Get base URL from request
+      const url = new URL(request.url)
+      const baseUrl = `${url.protocol}//${url.host}`
+      
+      const guestAttemptResponse = await fetch(`${baseUrl}/api/tests/guest/attempt`, {
         method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
         body: JSON.stringify(validation.data)
       })
+      
       return guestAttemptResponse
     }
 
