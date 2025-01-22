@@ -68,7 +68,9 @@ export function CompletionDialog({
   const handleComplete = async () => {
     try {
       setIsSubmitting(true)
-      const endpoint = isSignedIn
+      
+      // Use different endpoints for guest and authenticated users
+      const endpoint = isSignedIn 
         ? `/api/tests/attempt/${attemptId}/complete`
         : `/api/tests/guest/attempt/${attemptId}/complete`
 
