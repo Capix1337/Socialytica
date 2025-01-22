@@ -39,6 +39,9 @@ export function CompletionDialog({
   const router = useRouter()
   const { isSignedIn } = useAuth()
 
+  // Add console.log to debug auth state
+  console.log("Auth State:", { isSignedIn, attemptId })
+
   // Group questions by category
   const questionsByCategory = questions.reduce((acc, question) => {
     // Handle both guest and authenticated question structures
@@ -69,10 +72,12 @@ export function CompletionDialog({
     try {
       setIsSubmitting(true)
       
-      // Use different endpoints for guest and authenticated users
+      // Add console.log to debug endpoint selection
       const endpoint = isSignedIn 
         ? `/api/tests/attempt/${attemptId}/complete`
         : `/api/tests/guest/attempt/${attemptId}/complete`
+      
+      console.log("Selected endpoint:", endpoint)
 
       const response = await fetch(endpoint, {
         method: "POST",
