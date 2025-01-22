@@ -194,7 +194,9 @@ export default function TestAttemptPage({ params }: TestAttemptPageProps) {
           
           if (hasUnansweredQuestions) {
             // Switch to next category and set first unanswered question as current
-            const nextQuestion = nextCategoryQuestions.find(q => !q.isAnswered)
+            const nextQuestion = nextCategoryQuestions.find(q => 
+              isGuestQuestion(q) ? !q.selectedOptionId : !q.isAnswered
+            )
             if (nextQuestion) {
               setCurrentCategoryId(categoryIds[i])
               setCurrentQuestionId(nextQuestion.id)
