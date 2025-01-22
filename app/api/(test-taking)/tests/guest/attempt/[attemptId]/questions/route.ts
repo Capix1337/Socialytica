@@ -113,8 +113,17 @@ export async function PATCH(
   req: Request
 ): Promise<NextResponse<SubmitGuestAnswerResponse>> {
   try {
+    // Get attemptId from URL
     const attemptId = req.url.split("/attempt/")[1].split("/questions")[0]
-    const body = await req.json()
+
+    // Ensure request has a body
+    const body = await req.json().catch(() => null)
+    if (!body) {
+      return NextResponse.json({
+        success: false,
+        error: "Missing request body"
+      }, { status: 400 })
+    }
     
     const validation = submitGuestAnswerSchema.safeParse({
       ...body,
@@ -136,12 +145,37 @@ export async function PATCH(
           id: attemptId,
           status: "IN_PROGRESS",
           expiresAt: { gt: new Date() }
+        },
+        include: {
+          test: {
+            include: {
+              questions: {
+                include: {
+                  options: true
+                }
+              }
+            }
+          }
         }
       })
 
       if (!attempt) {
         throw new Error("Guest attempt not found, expired, or not in progress")
       }
+
+      // Get question and option details for point calculation
+      const question = attempt.test.questions.find(q => q.id === validation.data.questionId)
+      if (!question) {
+        throw new Error("Question not found")
+      }
+
+      const selectedOption = question.options.find(o => o.id === validation.data.selectedOptionId)
+      if (!selectedOption) {
+        throw new Error("Selected option not found")
+      }
+
+      const maxPoints = Math.max(...question.options.map(o => o.point))
+      const pointsEarned = selectedOption.point
 
       // Save response
       await tx.guestResponse.upsert({
@@ -154,14 +188,22 @@ export async function PATCH(
         create: {
           guestAttemptId: attemptId,
           questionId: validation.data.questionId,
-          selectedOptionId: validation.data.selectedOptionId
+          selectedOptionId: validation.data.selectedOptionId,
+          pointsEarned,
+          maxPoints
         },
         update: {
-          selectedOptionId: validation.data.selectedOptionId
+          selectedOptionId: validation.data.selectedOptionId,
+          pointsEarned,
+          maxPoints
         }
       })
 
-      return { success: true }
+      return { 
+        success: true,
+        pointsEarned,
+        maxPoints
+      }
     })
 
     return NextResponse.json(result)
