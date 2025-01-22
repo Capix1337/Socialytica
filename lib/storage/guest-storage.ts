@@ -75,15 +75,65 @@ export class GuestStorage {
   }
 
   /**
+   * Save guest response
+   */
+  public saveGuestResponse(
+    attemptId: string,
+    questionId: string,
+    selectedOptionId: string,
+    pointsEarned: number,
+    maxPoints: number
+  ): void {
+    if (!this.isClient) return
+
+    try {
+      // Get current attempt data
+      const key = `guest_attempt_${attemptId}`
+      const attemptData = this.getAttempt(attemptId)
+
+      if (attemptData) {
+        // Update or add the response
+        const existingResponseIndex = attemptData.responses.findIndex(
+          r => r.questionId === questionId
+        )
+
+        if (existingResponseIndex > -1) {
+          attemptData.responses[existingResponseIndex] = {
+            questionId,
+            selectedOptionId,
+            pointsEarned,
+            maxPoints
+          }
+        } else {
+          attemptData.responses.push({
+            questionId,
+            selectedOptionId,
+            pointsEarned,
+            maxPoints
+          })
+        }
+
+        // Save updated attempt data
+        localStorage.setItem(key, JSON.stringify(attemptData))
+      }
+    } catch (error) {
+      console.error('Storage operation failed:', error)
+    }
+  }
+
+  /**
    * Get guest attempt by ID
    */
   public getAttempt(attemptId: string): GuestTestAttemptData | null {
+    if (!this.isClient) return null
+
     try {
-      const key = `${STORAGE_KEYS.GUEST_ATTEMPT}_${attemptId}`;
-      const data = localStorage.getItem(key);
-      return data ? JSON.parse(data) : null;
+      const key = `guest_attempt_${attemptId}`
+      const data = localStorage.getItem(key)
+      return data ? JSON.parse(data) : null
     } catch (error) {
-      throw this.handleError(error);
+      console.error('Storage operation failed:', error)
+      return null
     }
   }
 
