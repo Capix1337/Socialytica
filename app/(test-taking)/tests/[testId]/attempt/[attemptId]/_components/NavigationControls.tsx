@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/dialog"
 import { useRouter } from "next/navigation"
 import { AlertTriangle } from "lucide-react"
-import { useAuth } from "@/hooks/useAuth"
+import { useAuth } from "@clerk/nextjs"
 
 interface NavigationControlsProps {
   testId: string
