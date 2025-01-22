@@ -81,9 +81,11 @@ export default function TestAttemptPage({ params }: TestAttemptPageProps) {
         throw new Error('Failed to submit answer')
       }
 
-      // ... handle success
+      const data = await response.json()
+      return data
     } catch (error) {
       console.error('Failed to submit answer:', error)
+      throw error
     }
   }
 
