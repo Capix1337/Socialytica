@@ -55,15 +55,36 @@ export default function TestAttemptPage({ params }: TestAttemptPageProps) {
     }
   }, [attemptId, isSignedIn])
 
-  const handleAnswerSelect = useCallback(async (questionId: string, optionId: string) => {
+  const submitAnswer = async (questionId: string, selectedOptionId: string) => {
     try {
-      const response = await fetch(`/api/tests/attempt/${attemptId}/questions`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ questionId, selectedOptionId: optionId })
+      const endpoint = isSignedIn
+        ? `/api/tests/attempt/${attemptId}/questions`
+        : `/api/tests/guest/attempt/${attemptId}/questions`
+
+      const response = await fetch(endpoint, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          questionId,
+          selectedOptionId
+        })
       })
 
-      if (!response.ok) throw new Error("Failed to save answer")
+      if (!response.ok) {
+        throw new Error('Failed to submit answer')
+      }
+
+      // ... handle success
+    } catch (error) {
+      console.error('Failed to submit answer:', error)
+    }
+  }
+
+  const handleAnswerSelect = useCallback(async (questionId: string, optionId: string) => {
+    try {
+      await submitAnswer(questionId, optionId)
 
       setQuestions(prev => prev.map(q => 
         q.questionId === questionId
