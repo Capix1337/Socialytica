@@ -21,11 +21,18 @@ interface TestAttemptPageProps {
   }>
 }
 
-// Create a helper function to check the question type
+// Replace the existing isGuestQuestion function
 const isGuestQuestion = (
   question: TestAttemptQuestion | GuestAttemptQuestion
 ): question is GuestAttemptQuestion => {
   return 'title' in question;
+}
+
+// Add a helper function to access category ID
+const getCategoryId = (question: TestAttemptQuestion | GuestAttemptQuestion): string => {
+  return isGuestQuestion(question) 
+    ? question.category?.id || "uncategorized"
+    : question.question.categoryId || "uncategorized";
 }
 
 export default function TestAttemptPage({ params }: TestAttemptPageProps) {
@@ -180,10 +187,12 @@ export default function TestAttemptPage({ params }: TestAttemptPageProps) {
         
         // Look for next category with unanswered questions
         for (let i = currentCategoryIndex + 1; i < categoryIds.length; i++) {
-          const nextCategoryQuestions = questions.filter(
-            q => (q.question.categoryId || "uncategorized") === categoryIds[i]
+          const nextCategoryQuestions = questions.filter(q => 
+            getCategoryId(q) === categoryIds[i]
           )
-          const hasUnansweredQuestions = nextCategoryQuestions.some(q => !q.isAnswered)
+          const hasUnansweredQuestions = nextCategoryQuestions.some(q => 
+            isGuestQuestion(q) ? !q.selectedOptionId : !q.isAnswered
+          )
           
           if (hasUnansweredQuestions) {
             // Switch to next category and set first unanswered question as current
@@ -237,7 +246,7 @@ export default function TestAttemptPage({ params }: TestAttemptPageProps) {
     } catch (error) {
       console.error("Error saving answer:", error)
     }
-  }, [attemptId, questions, currentCategoryId, submitAnswer])
+  }, [questions, currentCategoryId, submitAnswer]) // Remove attemptId
 
   // Resolve params since they're a Promise
   useEffect(() => {
@@ -377,14 +386,14 @@ export default function TestAttemptPage({ params }: TestAttemptPageProps) {
               const currentIndex = questions.findIndex(q => q.id === currentQuestionId)
               if (currentIndex < questions.length - 1) {
                 setCurrentQuestionId(questions[currentIndex + 1].id)
-                setCurrentCategoryId(questions[currentIndex + 1].question.categoryId || "uncategorized")
+                setCurrentCategoryId(getCategoryId(questions[currentIndex + 1]))
               }
             }}
             onPrevious={() => {
               const currentIndex = questions.findIndex(q => q.id === currentQuestionId)
               if (currentIndex > 0) {
                 setCurrentQuestionId(questions[currentIndex - 1].id)
-                setCurrentCategoryId(questions[currentIndex - 1].question.categoryId || "uncategorized")
+                setCurrentCategoryId(getCategoryId(questions[currentIndex - 1]))
               }
             }}
           />
