@@ -10,8 +10,8 @@ const CLEANUP_SECRET = process.env.CLEANUP_CRON_SECRET
 export async function GET(req: Request) {
   try {
     // Verify cron secret for security
-    const headersList = await headers() // Add await here
-    const authHeader = headersList.get('authorization')?.toString()
+    const headersList = headers() // Remove await - headers() is not async
+    const authHeader = headersList.get('authorization')
     
     if (!CLEANUP_SECRET || authHeader !== `Bearer ${CLEANUP_SECRET}`) {
       return NextResponse.json({ 
