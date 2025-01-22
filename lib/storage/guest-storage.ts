@@ -20,6 +20,29 @@ export class GuestStorage {
     return Date.now() > timestamp;
   }
 
+  // Get or create guest ID
+  public getGuestId(): string {
+    if (!this.isClient) return '';
+    
+    const existingData = localStorage.getItem(STORAGE_KEYS.GUEST_ID);
+    if (existingData) {
+      const data = JSON.parse(existingData);
+      if (data.expiresAt > Date.now()) {
+        return data.guestId;
+      }
+    }
+    
+    const newData: GuestStorageData = {
+      guestId: uuidv4(),
+      currentAttemptId: null,
+      createdAt: Date.now(),
+      expiresAt: Date.now() + (30 * 24 * 60 * 60 * 1000) // 30 days
+    };
+    
+    localStorage.setItem(STORAGE_KEYS.GUEST_ID, JSON.stringify(newData));
+    return newData.guestId;
+  }
+
   // Add method to get current attempt
   public getCurrentAttempt(testId: string): GuestTestAttemptData | null {
     if (!this.isClient) return null;
