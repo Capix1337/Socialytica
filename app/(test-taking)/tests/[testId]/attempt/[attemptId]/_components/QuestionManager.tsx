@@ -5,7 +5,11 @@ import { useTestAttempt } from "./TestAttemptContext"
 import { QuestionCard } from "./QuestionCard"
 import { NavigationControls } from "./NavigationControls"
 import { cn } from "@/lib/utils"
-import { isGuestQuestion } from "@/lib/utils/question-helpers"
+import { 
+    // isGuestQuestion, 
+    getQuestionData } from "@/lib/utils/question-helpers"
+import type { TestAttemptQuestion } from "@/types/tests/test-attempt-question"
+import type { GuestAttemptQuestion } from "@/types/tests/guest-attempt"
 
 interface QuestionManagerProps {
   currentCategory: {
@@ -20,40 +24,34 @@ export function QuestionManager({ currentCategory }: QuestionManagerProps) {
     attemptId,
     questions,
     currentQuestionId,
-    handleAnswerSelect
+    handleAnswerSelect,
+    setCurrentQuestionId
   } = useTestAttempt()
 
   const totalQuestions = questions.length
-  const answeredQuestions = questions.filter(q => 
-    isGuestQuestion(q) ? !!q.selectedOptionId : q.isAnswered
-  ).length
+  const answeredQuestions = questions.filter(q => getQuestionData(q).isAnswered).length
 
   return (
     <>
       <main className="space-y-6 mb-20">
         {currentCategory?.questions.map((question, index) => {
-          const isGuest = isGuestQuestion(question)
+          const questionData = getQuestionData(question)
           
           return (
             <QuestionCard
               key={question.id}
               question={{
-                id: isGuest ? question.id : question.questionId,
-                title: isGuest ? question.title : question.question.title,
-                options: isGuest 
-                  ? question.options 
-                  : question.question.options.map(opt => ({
-                      id: opt.id,
-                      text: opt.text
-                    }))
+                id: questionData.id,
+                title: questionData.title,
+                options: questionData.options.map(opt => ({
+                  id: opt.id,
+                  text: opt.text
+                }))
               }}
               questionNumber={index + 1}
               selectedOption={question.selectedOptionId || undefined}
-              isAnswered={isGuest ? !!question.selectedOptionId : question.isAnswered}
-              onAnswerSelect={(optionId) => handleAnswerSelect(
-                isGuest ? question.id : question.questionId, 
-                optionId
-              )}
+              isAnswered={questionData.isAnswered}
+              onAnswerSelect={(optionId) => handleAnswerSelect(questionData.id, optionId)}
               className={cn(
                 "transition-all duration-200",
                 question.id === currentQuestionId 
@@ -69,17 +67,11 @@ export function QuestionManager({ currentCategory }: QuestionManagerProps) {
         <NavigationControls
           testId={testId}
           attemptId={attemptId}
-          currentQuestionNumber={
-            questions.findIndex(q => q.id === currentQuestionId) + 1
-          }
+          currentQuestionNumber={questions.findIndex(q => q.id === currentQuestionId) + 1}
           totalQuestions={totalQuestions}
           answeredQuestions={answeredQuestions}
-          canGoNext={
-            questions.findIndex(q => q.id === currentQuestionId) < questions.length - 1
-          }
-          canGoPrevious={
-            questions.findIndex(q => q.id === currentQuestionId) > 0
-          }
+          canGoNext={questions.findIndex(q => q.id === currentQuestionId) < questions.length - 1}
+          canGoPrevious={questions.findIndex(q => q.id === currentQuestionId) > 0}
           onNext={() => {
             const currentIndex = questions.findIndex(q => q.id === currentQuestionId)
             if (currentIndex < questions.length - 1) {

@@ -5,7 +5,6 @@ import { useTestAttempt } from "./TestAttemptContext"
 import { TestHeader } from "./TestHeader"
 import { CategoryTabs } from "./CategoryTabs"
 import { QuestionManager } from "./QuestionManager"
-// import { NavigationControls } from "./NavigationControls"
 import { CompletionDialog } from "./CompletionDialog"
 import { LoadingState } from "./LoadingState"
 import { isGuestQuestion } from "@/lib/utils/question-helpers"
@@ -14,26 +13,24 @@ export function TestAttemptLayout() {
   const {
     isLoading,
     questions,
-    // currentQuestionId,
     currentCategoryId,
     showCompletionDialog,
     setShowCompletionDialog,
-    setCurrentCategoryId,
     testId,
     attemptId
   } = useTestAttempt()
 
   if (isLoading) return <LoadingState />
 
-  // Group questions by category
-  const questionsByCategory = questions.reduce((acc, question) => {
-    const categoryId = isGuestQuestion(question) 
-      ? question.category?.id || "uncategorized"
-      : question.question.categoryId || "uncategorized"
+  // Group questions by category for display
+  const questionsByCategory = questions.reduce((acc, q) => {
+    const categoryId = isGuestQuestion(q) 
+      ? q.category?.id || "uncategorized"
+      : q.question.categoryId || "uncategorized"
       
-    const categoryName = isGuestQuestion(question)
-      ? question.category?.name || "Uncategorized"
-      : question.question.category?.name || "Uncategorized"
+    const categoryName = isGuestQuestion(q)
+      ? q.category?.name || "Uncategorized"
+      : q.question.category?.name || "Uncategorized"
 
     if (!acc[categoryId]) {
       acc[categoryId] = {
@@ -45,12 +42,11 @@ export function TestAttemptLayout() {
       }
     }
 
-    acc[categoryId].questions.push(question)
+    acc[categoryId].questions.push(q)
     acc[categoryId].totalQuestions++
-    
-    if (isGuestQuestion(question) ? !!question.selectedOptionId : question.isAnswered) {
-      acc[categoryId].answeredQuestions++
-    }
+    acc[categoryId].answeredQuestions += isGuestQuestion(q) 
+      ? Number(!!q.selectedOptionId)
+      : Number(q.isAnswered)
 
     return acc
   }, {} as Record<string, {
@@ -67,9 +63,6 @@ export function TestAttemptLayout() {
   const answeredQuestions = questions.filter(q => 
     isGuestQuestion(q) ? !!q.selectedOptionId : q.isAnswered
   ).length
-  const currentCategoryProgress = currentCategory 
-    ? (currentCategory.answeredQuestions / currentCategory.totalQuestions) * 100
-    : 0
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -80,19 +73,19 @@ export function TestAttemptLayout() {
             currentCategory={currentCategory?.name || ""}
             totalQuestions={totalQuestions}
             answeredQuestions={answeredQuestions}
-            currentCategoryProgress={currentCategoryProgress}
+            currentCategoryProgress={
+              currentCategory
+                ? (currentCategory.answeredQuestions / currentCategory.totalQuestions) * 100
+                : 0
+            }
           />
         </div>
 
         <div className="container max-w-7xl mx-auto px-4 mt-6">
-          <div className="mb-6">
-            <CategoryTabs
-              categories={categories}
-              currentCategoryId={currentCategoryId}
-              onCategoryChange={setCurrentCategoryId}
-            />
-          </div>
-
+          <CategoryTabs
+            categories={categories}
+            currentCategoryId={currentCategoryId}
+          />
           <QuestionManager currentCategory={currentCategory} />
         </div>
 
