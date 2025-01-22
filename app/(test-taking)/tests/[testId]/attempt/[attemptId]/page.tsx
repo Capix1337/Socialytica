@@ -93,21 +93,35 @@ export default function TestAttemptPage({ params }: TestAttemptPageProps) {
     try {
       await submitAnswer(questionId, optionId)
 
-      setQuestions(prev => prev.map(q => 
-        q.questionId === questionId
-          ? { ...q, selectedOptionId: optionId, isAnswered: true }
-          : q
-      ))
+      setQuestions(prev => prev.map(q => {
+        // Check if it's a guest question
+        const isGuestQuestion = 'title' in q;
+        if ((isGuestQuestion ? q.id : q.questionId) === questionId) {
+          return {
+            ...q,
+            selectedOptionId: optionId,
+            isAnswered: true
+          }
+        }
+        return q;
+      }))
 
       // Find the current category's questions
-      const currentCategoryQuestions = questions.filter(
-        q => (q.question.categoryId || "uncategorized") === currentCategoryId
-      )
-      
+      const currentCategoryQuestions = questions.filter(q => {
+        // Check if it's a guest question
+        const isGuestQuestion = 'title' in q;
+        const qCategoryId = isGuestQuestion 
+          ? q.category?.id 
+          : q.question.categoryId;
+        
+        return (qCategoryId || "uncategorized") === currentCategoryId;
+      });
+
       // Find the index within the current category
-      const currentIndexInCategory = currentCategoryQuestions.findIndex(
-        q => q.questionId === questionId
-      )
+      const currentIndexInCategory = currentCategoryQuestions.findIndex(q => {
+        const isGuestQuestion = 'title' in q;
+        return (isGuestQuestion ? q.id : q.questionId) === questionId;
+      });
 
       // Check if this was the last question in the current category
       if (currentIndexInCategory === currentCategoryQuestions.length - 1) {
@@ -174,7 +188,7 @@ export default function TestAttemptPage({ params }: TestAttemptPageProps) {
     } catch (error) {
       console.error("Error saving answer:", error)
     }
-  }, [attemptId, questions, currentCategoryId])
+  }, [attemptId, questions, currentCategoryId, submitAnswer])
 
   // Resolve params since they're a Promise
   useEffect(() => {
