@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from "react"
 import { useAuth } from "@clerk/nextjs"
 import { cn } from "@/lib/utils"
 import { type TestAttemptQuestion } from "@/types/tests/test-attempt-question"
+import { type GuestAttemptQuestion } from "@/types/tests/guest-attempt"
 import { LoadingState } from "./_components/LoadingState"
 import { TestHeader } from "./_components/TestHeader"
 import { CategoryTabs } from "./_components/CategoryTabs"
@@ -21,7 +22,7 @@ interface TestAttemptPageProps {
 
 export default function TestAttemptPage({ params }: TestAttemptPageProps) {
   const { isSignedIn } = useAuth()
-  const [questions, setQuestions] = useState<TestAttemptQuestion[]>([])
+  const [questions, setQuestions] = useState<(TestAttemptQuestion | GuestAttemptQuestion)[]>([])
   const [currentQuestionId, setCurrentQuestionId] = useState<string>("")
   const [currentCategoryId, setCurrentCategoryId] = useState<string>("")
   const [isLoading, setIsLoading] = useState(true)
@@ -252,29 +253,39 @@ export default function TestAttemptPage({ params }: TestAttemptPageProps) {
           </div>
 
           <main className="space-y-6 mb-20"> {/* Add margin-bottom for navigation */}
-            {currentCategory?.questions.map((question, index) => (
-              <QuestionCard
-                key={question.id}
-                question={{
-                  id: question.questionId,
-                  title: question.question.title,
-                  options: question.question.options.map(opt => ({
-                    id: opt.id,
-                    text: opt.text
-                  }))
-                }}
-                questionNumber={index + 1}
-                selectedOption={question.selectedOptionId || undefined}
-                isAnswered={question.isAnswered}
-                onAnswerSelect={(optionId) => handleAnswerSelect(question.questionId, optionId)} // Keep using question.questionId
-                className={cn(
-                  "transition-all duration-200",
-                  question.id === currentQuestionId 
-                    ? "opacity-100 ring-2 ring-primary" 
-                    : "opacity-70 hover:opacity-90"
-                )}
-              />
-            ))}
+            {currentCategory?.questions.map((question, index) => {
+              // Check if it's a guest question or authenticated question
+              const isGuestQuestion = 'title' in question;
+              
+              return (
+                <QuestionCard
+                  key={question.id}
+                  question={{
+                    id: isGuestQuestion ? question.id : question.questionId,
+                    title: isGuestQuestion ? question.title : question.question.title,
+                    options: isGuestQuestion 
+                      ? question.options 
+                      : question.question.options.map(opt => ({
+                          id: opt.id,
+                          text: opt.text
+                        }))
+                  }}
+                  questionNumber={index + 1}
+                  selectedOption={question.selectedOptionId || undefined}
+                  isAnswered={isGuestQuestion ? !!question.selectedOptionId : question.isAnswered}
+                  onAnswerSelect={(optionId) => handleAnswerSelect(
+                    isGuestQuestion ? question.id : question.questionId, 
+                    optionId
+                  )}
+                  className={cn(
+                    "transition-all duration-200",
+                    question.id === currentQuestionId 
+                      ? "opacity-100 ring-2 ring-primary" 
+                      : "opacity-70 hover:opacity-90"
+                  )}
+                />
+              )
+            })}
           </main>
         </div>
 
