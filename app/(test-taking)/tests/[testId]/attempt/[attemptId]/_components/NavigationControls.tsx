@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/dialog"
 import { useRouter } from "next/navigation"
 import { AlertTriangle } from "lucide-react"
+import { useAuth } from "@/hooks/useAuth"
 
 interface NavigationControlsProps {
   testId: string
@@ -39,18 +40,35 @@ export function NavigationControls({
 }: NavigationControlsProps) {
   const [showConfirmDialog, setShowConfirmDialog] = useState(false)
   const router = useRouter()
+  const { isSignedIn } = useAuth()
 
   const handleCompleteTest = async () => {
     try {
-      const res = await fetch(`/api/tests/attempt/${attemptId}/complete`, {
+      // Use different endpoints for guest and authenticated users
+      const endpoint = isSignedIn
+        ? `/api/tests/attempt/${attemptId}/complete`
+        : `/api/tests/guest/attempt/${attemptId}/complete`
+
+      const res = await fetch(endpoint, {
         method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        }
       })
 
       if (!res.ok) throw new Error('Failed to complete test')
 
-      router.push(`/tests/${testId}/attempt/${attemptId}/results`)
+      const data = await res.json()
+      
+      if (data.success) {
+        router.push(`/tests/${testId}/attempt/${attemptId}/results`)
+      } else {
+        throw new Error(data.error || 'Failed to complete test')
+      }
     } catch (error) {
       console.error('Error completing test:', error)
+    } finally {
+      setShowConfirmDialog(false)
     }
   }
 
