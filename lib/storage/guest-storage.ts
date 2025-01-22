@@ -10,6 +10,8 @@ const STORAGE_KEYS = {
 const EXPIRATION_DAYS = 30;
 
 export class GuestStorage {
+  private isClient = typeof window !== 'undefined';
+
   private getExpirationDate(): number {
     return Date.now() + (EXPIRATION_DAYS * 24 * 60 * 60 * 1000);
   }
@@ -21,7 +23,9 @@ export class GuestStorage {
   /**
    * Initialize or retrieve guest ID
    */
-  public initGuest(): GuestStorageData {
+  public initGuest(): GuestStorageData | null {
+    if (!this.isClient) return null;
+
     try {
       const existingData = localStorage.getItem(STORAGE_KEYS.GUEST_ID);
       
@@ -44,7 +48,8 @@ export class GuestStorage {
       return newData;
 
     } catch (error) {
-      throw this.handleError(error);
+      console.error('Storage operation failed:', error);
+      return null;
     }
   }
 
@@ -52,6 +57,8 @@ export class GuestStorage {
    * Save guest test attempt
    */
   public saveAttempt(attemptData: GuestTestAttemptData): void {
+    if (!this.isClient) return;
+
     try {
       const key = `${STORAGE_KEYS.GUEST_ATTEMPT}_${attemptData.attemptId}`;
       localStorage.setItem(key, JSON.stringify(attemptData));
@@ -63,7 +70,7 @@ export class GuestStorage {
         localStorage.setItem(STORAGE_KEYS.GUEST_ID, JSON.stringify(guestData));
       }
     } catch (error) {
-      throw this.handleError(error);
+      console.error('Storage operation failed:', error);
     }
   }
 
@@ -84,6 +91,8 @@ export class GuestStorage {
    * Get current guest data
    */
   public getGuestData(): GuestStorageData | null {
+    if (!this.isClient) return null;
+
     try {
       const data = localStorage.getItem(STORAGE_KEYS.GUEST_ID);
       if (!data) return null;
@@ -96,7 +105,8 @@ export class GuestStorage {
 
       return parsedData;
     } catch (error) {
-      throw this.handleError(error);
+      console.error('Storage operation failed:', error);
+      return null;
     }
   }
 
@@ -104,6 +114,8 @@ export class GuestStorage {
    * Clear all guest data
    */
   public clearGuestData(): void {
+    if (!this.isClient) return;
+
     try {
       const guestData = this.getGuestData();
       if (guestData?.currentAttemptId) {
@@ -113,7 +125,7 @@ export class GuestStorage {
       }
       localStorage.removeItem(STORAGE_KEYS.GUEST_ID);
     } catch (error) {
-      throw this.handleError(error);
+      console.error('Storage operation failed:', error);
     }
   }
 

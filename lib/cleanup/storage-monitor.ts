@@ -8,6 +8,7 @@ const DEFAULT_THRESHOLDS: MonitoringThresholds = {
 };
 
 export class StorageMonitor {
+  private isClient = typeof window !== 'undefined';
   private thresholds: MonitoringThresholds;
 
   constructor(thresholds?: Partial<MonitoringThresholds>) {
@@ -15,6 +16,15 @@ export class StorageMonitor {
   }
 
   public async getStorageMetrics(): Promise<StorageMetrics> {
+    if (!this.isClient) {
+      return {
+        guestAttempts: 0,
+        expiredAttempts: 0,
+        storageUsage: 0,
+        lastCleanup: 0
+      };
+    }
+
     try {
       // Estimate localStorage usage
       const storageUsage = this.calculateLocalStorageUsage();
@@ -33,7 +43,12 @@ export class StorageMonitor {
       };
     } catch (error) {
       console.error('Error getting storage metrics:', error);
-      throw error;
+      return {
+        guestAttempts: 0,
+        expiredAttempts: 0,
+        storageUsage: 0,
+        lastCleanup: 0
+      };
     }
   }
 
