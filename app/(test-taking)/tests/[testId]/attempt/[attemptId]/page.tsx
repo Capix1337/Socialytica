@@ -44,9 +44,13 @@ export default function TestAttemptPage({ params }: TestAttemptPageProps) {
 
       const data = await response.json()
       setQuestions(data.questions)
+      
       if (data.questions.length > 0) {
         setCurrentQuestionId(data.questions[0].id)
-        setCurrentCategoryId(data.questions[0].question.categoryId || "uncategorized")
+        // Safely access nested properties
+        setCurrentCategoryId(
+          data.questions[0]?.question?.categoryId || "uncategorized"
+        )
       }
     } catch (error) {
       console.error("Failed to load questions:", error)
@@ -186,16 +190,20 @@ export default function TestAttemptPage({ params }: TestAttemptPageProps) {
 
   // Group questions by category
   const questionsByCategory = questions.reduce((acc, question) => {
-    const categoryId = question.question.categoryId || "uncategorized"
+    // Safely access nested properties
+    const categoryId = question?.question?.categoryId || "uncategorized"
+    const categoryName = question?.question?.category?.name || "Uncategorized"
+
     if (!acc[categoryId]) {
       acc[categoryId] = {
         id: categoryId,
-        name: question.question.category?.name || "Uncategorized",
+        name: categoryName,
         questions: [],
         totalQuestions: 0,
         answeredQuestions: 0
       }
     }
+
     acc[categoryId].questions.push(question)
     acc[categoryId].totalQuestions++
     if (question.isAnswered) {
