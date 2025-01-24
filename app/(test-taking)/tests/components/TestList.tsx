@@ -1,6 +1,8 @@
 "use client"
 
 import { useCallback, useEffect, useState } from "react"
+import { useAuth } from "@clerk/nextjs"
+import { guestStorage } from "@/lib/storage/guest-storage"
 import { TestsPageHeader } from "./TestsPageHeader"
 import { TestCard } from "./TestCard"
 import { TestCardSkeleton } from "./TestCardSkeleton"
@@ -10,8 +12,10 @@ import { RecentlyTakenTests } from "./RecentlyTakenTests"
 import { getPublicTests } from "@/lib/tests"
 import type { Test } from "@/types/tests/test"
 import type { TestAttempt } from "@/types/tests/test-attempt"
+import type { GuestAttemptSummary } from "@/types/tests/guest-attempt"
 
 export function TestList() {
+  const { isSignedIn } = useAuth()
   const [tests, setTests] = useState<Test[]>([])
   const [currentPage, setCurrentPage] = useState(1)
   const [totalPages, setTotalPages] = useState(1)
@@ -20,8 +24,8 @@ export function TestList() {
   const [error, setError] = useState<string | null>(null)
   const [searchQuery, setSearchQuery] = useState("")
   const [view, setView] = useState<"grid" | "list">("grid")
-  const [inProgressAttempts, setInProgressAttempts] = useState<TestAttempt[]>([])
-  const [recentAttempts, setRecentAttempts] = useState<TestAttempt[]>([])
+  const [inProgressAttempts, setInProgressAttempts] = useState<(TestAttempt | GuestAttemptSummary)[]>([])
+  const [recentAttempts, setRecentAttempts] = useState<(TestAttempt | GuestAttemptSummary)[]>([])
 
   const fetchTests = useCallback(async () => {
     try {
@@ -43,16 +47,32 @@ export function TestList() {
 
   const fetchUserAttempts = useCallback(async () => {
     try {
-      const response = await fetch('/api/tests/attempts')
-      if (!response.ok) throw new Error('Failed to fetch attempts')
-      const data = await response.json()
-      
-      setInProgressAttempts(data.inProgress)
-      setRecentAttempts(data.completed)
+      if (isSignedIn) {
+        // Fetch authenticated user attempts
+        const response = await fetch('/api/tests/attempts')
+        if (!response.ok) throw new Error('Failed to fetch attempts')
+        const data = await response.json()
+        
+        setInProgressAttempts(data.inProgress)
+        setRecentAttempts(data.completed)
+      } else {
+        // Get guest attempts from localStorage
+        const guestId = guestStorage.getGuestId()
+        if (!guestId) return
+
+        // Fetch guest attempts from API
+        const response = await fetch(`/api/tests/guest/attempts?guestId=${guestId}`)
+        if (!response.ok) throw new Error('Failed to fetch guest attempts')
+        const data = await response.json()
+
+        setInProgressAttempts(data.inProgress)
+        setRecentAttempts(data.completed)
+      }
     } catch (error) {
-      console.error('Failed to fetch user attempts:', error)
+      console.error('Failed to fetch attempts:', error)
+      setError(error instanceof Error ? error.message : 'Failed to fetch attempts')
     }
-  }, [])
+  }, [isSignedIn])
 
   useEffect(() => {
     void fetchTests()

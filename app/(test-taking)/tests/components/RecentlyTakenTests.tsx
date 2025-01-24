@@ -6,9 +6,11 @@ import { Badge } from "@/components/ui/badge"
 import { cn } from "@/lib/utils";
 import Link from "next/link"
 import type { TestAttempt } from "@/types/tests/test-attempt"
+import type { GuestAttemptSummary } from "@/types/tests/guest-attempt"
+import { isTestAttempt } from "../utils/type-guards"
 
 interface RecentlyTakenTestsProps {
-  attempts: TestAttempt[]
+  attempts: (TestAttempt | GuestAttemptSummary)[]
 }
 
 export function RecentlyTakenTests({ attempts }: RecentlyTakenTestsProps) {
@@ -20,40 +22,49 @@ export function RecentlyTakenTests({ attempts }: RecentlyTakenTestsProps) {
         <CardTitle className="text-xl">Recent Results</CardTitle>
       </CardHeader>
       <CardContent className="grid gap-4">
-        {attempts.map((attempt) => (
-          <div key={attempt.id} className="flex items-center justify-between">
-            <div>
-              <h4 className="font-medium">
-                {attempt.test?.title ?? "Untitled Test"}
-              </h4>
-              <p className="text-sm text-muted-foreground">
-                {attempt.completedAt && 
-                  `Completed ${new Date(attempt.completedAt).toLocaleDateString()}`
-                }
-              </p>
-            </div>
-            <div className="flex items-center gap-4">
-              {attempt.percentageScore !== null && (
-                <Badge 
-                  variant="secondary"
-                  className={cn(
-                    attempt.percentageScore >= 70 
-                      ? "bg-green-100 text-green-800" 
-                      : "bg-secondary text-secondary-foreground"
-                  )}
+        {attempts.map((attempt) => {
+          const completedDate = isTestAttempt(attempt) 
+            ? attempt.completedAt
+            : new Date(attempt.startedAt);
+          const score = isTestAttempt(attempt)
+            ? attempt.percentageScore
+            : attempt.score?.percentageScore;
+
+          return (
+            <div key={attempt.id} className="flex items-center justify-between">
+              <div>
+                <h4 className="font-medium">
+                  {attempt.test?.title ?? "Untitled Test"}
+                </h4>
+                <p className="text-sm text-muted-foreground">
+                  {completedDate && 
+                    `Completed ${new Date(completedDate).toLocaleDateString()}`
+                  }
+                </p>
+              </div>
+              <div className="flex items-center gap-4">
+                {score !== null && (
+                  <Badge 
+                    variant="secondary"
+                    className={cn(
+                      score >= 70 
+                        ? "bg-green-100 text-green-800" 
+                        : "bg-secondary text-secondary-foreground"
+                    )}
+                  >
+                    {Math.round(score)}%
+                  </Badge>
+                )}
+                <Link 
+                  href={`/tests/${attempt.test?.id ?? attempt.testId}/attempt/${attempt.id}/results`}
+                  className="text-sm underline"
                 >
-                  {Math.round(attempt.percentageScore)}%
-                </Badge>
-              )}
-              <Link 
-                href={`/tests/${attempt.test?.id ?? attempt.testId}/attempt/${attempt.id}/results`}
-                className="text-sm underline"
-              >
-                View Results
-              </Link>
+                  View Results
+                </Link>
+              </div>
             </div>
-          </div>
-        ))}
+          )
+        })}
       </CardContent>
     </Card>
   )

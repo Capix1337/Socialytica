@@ -9,12 +9,13 @@ import { ArrowRight, UserX } from "lucide-react" // Remove unused User import
 import { cn } from "@/lib/utils"
 import type { Test } from "@/types/tests/test"
 import type { TestAttempt } from "@/types/tests/test-attempt"
+import type { GuestAttemptSummary } from "@/types/tests/guest-attempt"
 import { getAttemptProgress } from "../utils/attempt"
 
 interface TestCardProps {
   test: Test;
   viewType?: "grid" | "list";
-  attempt?: TestAttempt;
+  attempt?: TestAttempt | GuestAttemptSummary;
   isAuthenticated?: boolean;
 }
 

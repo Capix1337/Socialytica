@@ -8,9 +8,10 @@ import { ArrowRight } from "lucide-react"
 import Link from "next/link"
 import { getAttemptProgress } from "../utils/attempt"
 import type { TestAttempt } from "@/types/tests/test-attempt"
+import type { GuestAttemptSummary } from "@/types/tests/guest-attempt"
 
 interface InProgressTestsProps {
-  attempts: TestAttempt[]
+  attempts: (TestAttempt | GuestAttemptSummary)[]
 }
 
 export function InProgressTests({ attempts }: InProgressTestsProps) {
