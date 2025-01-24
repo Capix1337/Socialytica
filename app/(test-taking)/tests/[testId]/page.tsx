@@ -38,7 +38,7 @@ export default async function TestPage({ params }: PageProps) {
         <TestDetails 
           test={response.test} 
           attempts={response.attempts}
-          isAuthenticated={isAuthenticated} // Pass authentication status
+          isAuthenticated={isAuthenticated} // Passed down to StartTestButton
         />
       </div>
     );

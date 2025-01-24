@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { toast } from "sonner"
 import { guestStorage } from "@/lib/storage/guest-storage"
-import type { TestAttemptApiResponse, GuestTestAttemptData } from "@/types/tests/test-attempt"
+import type { GuestTestAttemptData } from "@/types/tests/test-attempt"
 
 interface StartTestButtonProps {
   testId: string;
@@ -23,19 +23,23 @@ export function StartTestButton({
 
   const startTest = async () => {
     try {
-      setIsLoading(true)
+      setIsLoading(true);
 
       let guestData = null;
+      // Determine the correct endpoint based on auth status
+      const endpoint = isAuthenticated 
+        ? "/api/tests/attempt"
+        : "/api/tests/guest/attempt";
+
       if (!isAuthenticated) {
         guestData = guestStorage.initGuest();
       }
 
-      const response = await fetch("/api/tests/attempt", {
+      const response = await fetch(endpoint, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ 
           testId,
-          isGuest: !isAuthenticated,
           guestId: guestData?.guestId
         })
       });
@@ -45,13 +49,13 @@ export function StartTestButton({
         throw new Error(error.message || "Failed to start test");
       }
 
-      const data: TestAttemptApiResponse = await response.json();
-
+      const data = await response.json();
+      
       // Store attempt data in localStorage if guest mode
       if (!isAuthenticated && guestData) {
         const guestAttemptData: GuestTestAttemptData = {
-          attemptId: data.testAttempt.id,
-          testId: data.testAttempt.testId,
+          attemptId: data.guestAttempt.id, // Note: Changed from data.testAttempt to data.guestAttempt
+          testId: data.guestAttempt.testId,
           guestId: guestData.guestId,
           startedAt: Date.now(),
           status: "IN_PROGRESS",
@@ -61,7 +65,9 @@ export function StartTestButton({
         guestStorage.saveAttempt(guestAttemptData);
       }
 
-      router.push(`/tests/${testId}/attempt/${data.testAttempt.id}`);
+      // Use the correct ID from the response
+      const attemptId = isAuthenticated ? data.testAttempt.id : data.guestAttempt.id;
+      router.push(`/tests/${testId}/attempt/${attemptId}`);
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Failed to start test");
     } finally {
