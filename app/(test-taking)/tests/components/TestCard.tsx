@@ -5,12 +5,13 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter }
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
-import { ArrowRight, UserX } from "lucide-react" // Remove unused User import
+import { ArrowRight, UserX } from "lucide-react"
 import { cn } from "@/lib/utils"
 import type { Test } from "@/types/tests/test"
 import type { TestAttempt } from "@/types/tests/test-attempt"
 import type { GuestAttemptSummary } from "@/types/tests/guest-attempt"
 import { getAttemptProgress } from "../utils/attempt"
+import { isGuestAttempt } from "../utils/type-guards" // Add this import
 
 interface TestCardProps {
   test: Test;
@@ -26,13 +27,14 @@ export function TestCard({
   isAuthenticated = false 
 }: TestCardProps) {
   const progressInfo = attempt && getAttemptProgress(attempt)
-  const isGuestAttempt = attempt && isGuestAttempt(attempt)
+  // Now isGuestAttempt is properly imported and can be used
+  const isGuest = attempt && isGuestAttempt(attempt)
 
   return (
     <Card className={cn(
       "flex flex-col transition-all hover:shadow-md",
       viewType === "grid" ? "h-full min-h-[400px]" : "min-h-[200px]",
-      isGuestAttempt && "border-dashed"
+      isGuest && "border-dashed"
     )}>
       <Link href={`/tests/${test.id}`} className="flex-1">
         <CardHeader>
@@ -82,14 +84,14 @@ export function TestCard({
                 value={progressInfo.progress}
                 className={cn(
                   "h-2",
-                  isGuestAttempt && "opacity-80" // Slightly dimmed for guest attempts
+                  isGuest && "opacity-80" // Slightly dimmed for guest attempts
                 )}
               />
               <div className="flex justify-between items-center text-xs">
                 <span className="text-muted-foreground">
                   {progressInfo.answeredQuestions} of {progressInfo.totalQuestions} questions
                 </span>
-                {isGuestAttempt && (
+                {isGuest && (
                   <span className="text-muted-foreground flex items-center gap-1">
                     <UserX className="h-3 w-3" />
                     Guest Progress
@@ -105,7 +107,7 @@ export function TestCard({
         <Button 
           className={cn(
             "w-full",
-            isGuestAttempt && "border-dashed" // Consistent guest styling
+            isGuest && "border-dashed" // Consistent guest styling
           )} 
           asChild
         >
@@ -117,7 +119,7 @@ export function TestCard({
             {attempt ? (
               <>
                 Continue Test
-                {isGuestAttempt && <UserX className="h-4 w-4 mx-1" />}
+                {isGuest && <UserX className="h-4 w-4 mx-1" />}
                 <ArrowRight className="h-4 w-4 ml-1" />
               </>
             ) : (
