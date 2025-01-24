@@ -46,7 +46,7 @@ export function RecentlyTakenTests({ attempts }: RecentlyTakenTestsProps) {
                 </p>
               </div>
               <div className="flex items-center gap-4">
-                {score !== null && (
+                {typeof score === 'number' && (
                   <Badge 
                     variant="secondary"
                     className={cn(
