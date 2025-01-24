@@ -1,5 +1,6 @@
 import { v4 as uuidv4 } from 'uuid';
 import type { GuestStorageData, GuestTestAttemptData, StorageError } from './types';
+import type { GuestAttemptSummary } from '@/types/tests/guest-attempt'; // Add this import
 
 const STORAGE_KEYS = {
   GUEST_ID: 'guest_id',
@@ -276,6 +277,179 @@ export class GuestStorage {
       message: 'Storage operation failed',
       code: 'INVALID_DATA'
     };
+  }
+
+  /**
+   * Get all in-progress attempts
+   */
+  public getInProgressAttempts(): GuestAttemptSummary[] {
+    if (!this.isClient) return [];
+
+    try {
+      const guestData = this.getGuestData();
+      if (!guestData) return [];
+
+      const attempts: GuestAttemptSummary[] = [];
+      
+      // Iterate through localStorage to find guest attempts
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key?.startsWith(`${STORAGE_KEYS.GUEST_ATTEMPT}_`)) {
+          const attemptData: GuestTestAttemptData = JSON.parse(
+            localStorage.getItem(key) || '{}'
+          );
+
+          if (
+            attemptData.status === 'IN_PROGRESS' && 
+            !this.isAttemptExpired(attemptData)
+          ) {
+            attempts.push({
+              id: attemptData.attemptId,
+              testId: attemptData.testId,
+              testTitle: attemptData.testTitle || 'Untitled Test',
+              startedAt: attemptData.startedAt,
+              status: attemptData.status,
+              progress: {
+                answeredQuestions: attemptData.responses.length,
+                totalQuestions: attemptData.totalQuestions || 0,
+                percentageComplete: attemptData.totalQuestions 
+                  ? (attemptData.responses.length / attemptData.totalQuestions) * 100 
+                  : 0
+              }
+            });
+          }
+        }
+      }
+
+      return attempts;
+    } catch (error) {
+      console.error('Failed to get in-progress attempts:', error);
+      return [];
+    }
+  }
+
+  /**
+   * Get completed attempts with limit
+   */
+  public getCompletedAttempts(limit: number = 3): GuestAttemptSummary[] {
+    if (!this.isClient) return [];
+
+    try {
+      const attempts: GuestAttemptSummary[] = [];
+      
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key?.startsWith(`${STORAGE_KEYS.GUEST_ATTEMPT}_`)) {
+          const attemptData: GuestTestAttemptData = JSON.parse(
+            localStorage.getItem(key) || '{}'
+          );
+
+          if (
+            attemptData.status === 'COMPLETED' && 
+            !this.isAttemptExpired(attemptData)
+          ) {
+            attempts.push({
+              id: attemptData.attemptId,
+              testId: attemptData.testId,
+              testTitle: attemptData.testTitle || 'Untitled Test',
+              startedAt: attemptData.startedAt,
+              status: attemptData.status,
+              progress: {
+                answeredQuestions: attemptData.responses.length,
+                totalQuestions: attemptData.totalQuestions || 0,
+                percentageComplete: 100
+              },
+              score: {
+                totalScore: attemptData.totalScore || 0,
+                percentageScore: attemptData.percentageScore || 0
+              }
+            });
+          }
+        }
+      }
+
+      // Sort by startedAt in descending order and apply limit
+      return attempts
+        .sort((a, b) => b.startedAt - a.startedAt)
+        .slice(0, limit);
+    } catch (error) {
+      console.error('Failed to get completed attempts:', error);
+      return [];
+    }
+  }
+
+  /**
+   * Clean up expired attempts
+   */
+  public cleanupExpiredAttempts(): void {
+    if (!this.isClient) return;
+
+    try {
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key?.startsWith(`${STORAGE_KEYS.GUEST_ATTEMPT}_`)) {
+          const attemptData: GuestTestAttemptData = JSON.parse(
+            localStorage.getItem(key) || '{}'
+          );
+
+          if (this.isAttemptExpired(attemptData)) {
+            localStorage.removeItem(key);
+          }
+        }
+      }
+    } catch (error) {
+      console.error('Failed to cleanup expired attempts:', error);
+    }
+  }
+
+  /**
+   * Get all attempts for a specific test
+   */
+  public getAttemptsByTestId(testId: string): GuestAttemptSummary[] {
+    if (!this.isClient) return [];
+
+    try {
+      const attempts: GuestAttemptSummary[] = [];
+      
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key?.startsWith(`${STORAGE_KEYS.GUEST_ATTEMPT}_`)) {
+          const attemptData: GuestTestAttemptData = JSON.parse(
+            localStorage.getItem(key) || '{}'
+          );
+
+          if (
+            attemptData.testId === testId && 
+            !this.isAttemptExpired(attemptData)
+          ) {
+            attempts.push({
+              id: attemptData.attemptId,
+              testId: attemptData.testId,
+              testTitle: attemptData.testTitle || 'Untitled Test',
+              startedAt: attemptData.startedAt,
+              status: attemptData.status,
+              progress: {
+                answeredQuestions: attemptData.responses.length,
+                totalQuestions: attemptData.totalQuestions || 0,
+                percentageComplete: attemptData.status === 'COMPLETED' 
+                  ? 100 
+                  : (attemptData.responses.length / (attemptData.totalQuestions || 1)) * 100
+              },
+              score: attemptData.status === 'COMPLETED' ? {
+                totalScore: attemptData.totalScore || 0,
+                percentageScore: attemptData.percentageScore || 0
+              } : undefined
+            });
+          }
+        }
+      }
+
+      // Sort by startedAt in descending order
+      return attempts.sort((a, b) => b.startedAt - a.startedAt);
+    } catch (error) {
+      console.error('Failed to get attempts by test ID:', error);
+      return [];
+    }
   }
 }
 

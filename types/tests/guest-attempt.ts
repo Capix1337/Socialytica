@@ -102,3 +102,40 @@ export interface GuestMigrationResponse {
   migratedAttemptIds?: string[]
   error?: string
 }
+
+// Add these new interfaces
+export interface GuestAttemptSummary {
+  id: string
+  testId: string
+  testTitle: string
+  startedAt: number
+  status: 'IN_PROGRESS' | 'COMPLETED' | 'ABANDONED'
+  progress: {
+    answeredQuestions: number
+    totalQuestions: number
+    percentageComplete: number
+  }
+  score?: {
+    totalScore: number
+    percentageScore: number
+  }
+}
+
+export interface GuestTestProgress {
+  answeredQuestions: number
+  totalQuestions: number
+  percentageComplete: number
+  categoryProgress: {
+    categoryId: string
+    categoryName: string
+    answeredQuestions: number
+    totalQuestions: number
+  }[]
+}
+
+export interface GuestAttemptsResponse {
+  inProgress: GuestAttemptSummary[]
+  completed: GuestAttemptSummary[]
+  totalInProgress: number
+  totalCompleted: number
+}

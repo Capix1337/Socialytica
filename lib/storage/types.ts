@@ -8,6 +8,8 @@ export interface GuestStorageData {
   export interface GuestTestAttemptData {
     attemptId: string;
     testId: string;
+    testTitle?: string;
+    guestId: string;
     responses: {
       questionId: string;
       selectedOptionId: string;
@@ -16,6 +18,9 @@ export interface GuestStorageData {
     }[];
     startedAt: number;
     status: 'IN_PROGRESS' | 'COMPLETED' | 'ABANDONED';
+    totalQuestions?: number;
+    totalScore?: number;
+    percentageScore?: number;
     categoryScores?: {
       categoryId: string;
       actualScore: number;
