@@ -3,7 +3,7 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/utils"
 import Link from "next/link"
 import type { TestAttempt } from "@/types/tests/test-attempt"
 import type { GuestAttemptSummary } from "@/types/tests/guest-attempt"
@@ -29,12 +29,15 @@ export function RecentlyTakenTests({ attempts }: RecentlyTakenTestsProps) {
           const score = isTestAttempt(attempt)
             ? attempt.percentageScore
             : attempt.score?.percentageScore;
+          const title = isTestAttempt(attempt)
+            ? attempt.test?.title
+            : attempt.testTitle;
 
           return (
             <div key={attempt.id} className="flex items-center justify-between">
               <div>
                 <h4 className="font-medium">
-                  {attempt.test?.title ?? "Untitled Test"}
+                  {title ?? "Untitled Test"}
                 </h4>
                 <p className="text-sm text-muted-foreground">
                   {completedDate && 
@@ -56,7 +59,7 @@ export function RecentlyTakenTests({ attempts }: RecentlyTakenTestsProps) {
                   </Badge>
                 )}
                 <Link 
-                  href={`/tests/${attempt.test?.id ?? attempt.testId}/attempt/${attempt.id}/results`}
+                  href={`/tests/${isTestAttempt(attempt) ? attempt.test?.id : attempt.testId}/attempt/${attempt.id}/results`}
                   className="text-sm underline"
                 >
                   View Results
