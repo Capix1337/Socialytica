@@ -291,7 +291,6 @@ export class GuestStorage {
 
       const attempts: GuestAttemptSummary[] = [];
       
-      // Iterate through localStorage to find guest attempts
       for (let i = 0; i < localStorage.length; i++) {
         const key = localStorage.key(i);
         if (key?.startsWith(`${STORAGE_KEYS.GUEST_ATTEMPT}_`)) {
@@ -309,6 +308,7 @@ export class GuestStorage {
               testTitle: attemptData.testTitle || 'Untitled Test',
               startedAt: attemptData.startedAt,
               status: attemptData.status,
+              guestId: attemptData.guestId, // Add this line
               progress: {
                 answeredQuestions: attemptData.responses.length,
                 totalQuestions: attemptData.totalQuestions || 0,
@@ -354,6 +354,7 @@ export class GuestStorage {
               testTitle: attemptData.testTitle || 'Untitled Test',
               startedAt: attemptData.startedAt,
               status: attemptData.status,
+              guestId: attemptData.guestId, // Add this line
               progress: {
                 answeredQuestions: attemptData.responses.length,
                 totalQuestions: attemptData.totalQuestions || 0,
@@ -368,10 +369,7 @@ export class GuestStorage {
         }
       }
 
-      // Sort by startedAt in descending order and apply limit
-      return attempts
-        .sort((a, b) => b.startedAt - a.startedAt)
-        .slice(0, limit);
+      return attempts.sort((a, b) => b.startedAt - a.startedAt).slice(0, limit);
     } catch (error) {
       console.error('Failed to get completed attempts:', error);
       return [];
@@ -428,6 +426,7 @@ export class GuestStorage {
               testTitle: attemptData.testTitle || 'Untitled Test',
               startedAt: attemptData.startedAt,
               status: attemptData.status,
+              guestId: attemptData.guestId, // Add this line
               progress: {
                 answeredQuestions: attemptData.responses.length,
                 totalQuestions: attemptData.totalQuestions || 0,
