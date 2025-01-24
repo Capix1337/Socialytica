@@ -64,6 +64,7 @@ export async function GET(request: Request): Promise<NextResponse<GuestAttemptsR
         testTitle: attempt.test.title,
         startedAt: attempt.startedAt.getTime(),
         status: attempt.status,
+        guestId: attempt.guestId, // Add this line
         progress: {
           answeredQuestions: attempt.responses.length,
           totalQuestions: attempt.test.questions.length,
@@ -82,6 +83,7 @@ export async function GET(request: Request): Promise<NextResponse<GuestAttemptsR
         testTitle: attempt.test.title,
         startedAt: attempt.startedAt.getTime(),
         status: attempt.status,
+        guestId: attempt.guestId, // Add this line
         progress: {
           answeredQuestions: attempt.test.questions.length,
           totalQuestions: attempt.test.questions.length,
