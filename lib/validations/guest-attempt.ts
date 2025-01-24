@@ -37,3 +37,8 @@ export const guestResultsQuerySchema = z.object({
 export const guestMigrationSchema = z.object({
   guestId: z.string().uuid("Invalid guest ID")
 })
+
+// Schema for querying guest attempts
+export const guestAttemptsQuerySchema = z.object({
+  guestId: z.string().uuid("Invalid guest ID")
+})
