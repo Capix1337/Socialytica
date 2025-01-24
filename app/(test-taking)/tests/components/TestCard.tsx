@@ -26,7 +26,7 @@ export function TestCard({
   isAuthenticated = false 
 }: TestCardProps) {
   const progressInfo = attempt && getAttemptProgress(attempt)
-  const isGuestAttempt = attempt?.guestId != null
+  const isGuestAttempt = attempt && isGuestAttempt(attempt)
 
   return (
     <Card className={cn(

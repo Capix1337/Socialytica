@@ -110,6 +110,7 @@ export interface GuestAttemptSummary {
   testTitle: string
   startedAt: number
   status: 'IN_PROGRESS' | 'COMPLETED' | 'ABANDONED'
+  guestId: string  // Add this field
   progress: {
     answeredQuestions: number
     totalQuestions: number
