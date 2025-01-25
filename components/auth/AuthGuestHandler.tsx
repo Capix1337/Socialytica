@@ -14,11 +14,13 @@ export function AuthGuestHandler() {
 
     // Handle sign-in with guest data
     if (userId && hasGuestData && !isMigrating) {
-      toast.loading('Checking for guest test data...', {
-        duration: 1000,
-      })
+      // Store the toast ID to dismiss it later
+      const toastId = toast.loading('Checking for guest test data...')
 
       migrateGuestData().then((success) => {
+        // Dismiss the loading toast
+        toast.dismiss(toastId)
+        
         if (success) {
           toast.success('Your test data has been successfully migrated!', {
             description: 'You can now view all your test results.',
