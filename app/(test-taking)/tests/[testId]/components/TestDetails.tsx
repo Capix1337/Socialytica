@@ -1,20 +1,53 @@
-//app/(test-taking)/tests/[testId]/components/TestDetails.tsx
+"use client"
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { useEffect, useState } from "react"
+import { useRouter } from "next/navigation" // Add this
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
+import { Alert, AlertDescription } from "@/components/ui/alert"
+import { UserX } from "lucide-react"
 import { CategoryList } from "./CategoryList"
 import { StartTestButton } from "./StartTestButton"
+import { guestStorage } from "@/lib/storage/guest-storage"
 import type { Test } from "@/types/tests/test"
 import type { TestAttempt } from "@/types/tests/test-attempt"
+import type { GuestAttemptSummary } from "@/types/tests/guest-attempt"
 
 interface TestDetailsProps {
   test: Test
-  attempts?: Pick<TestAttempt, 'id' | 'startedAt' | 'completedAt' | 'status' | 'totalScore' | 'percentageScore'>[]
+  attempts?: TestAttempt[]
+  isAuthenticated?: boolean
 }
 
-export function TestDetails({ test, attempts = [] }: TestDetailsProps) {
-  const lastAttempt = attempts[0];
-  const canStartNewAttempt = !lastAttempt || 
-    lastAttempt.status !== 'IN_PROGRESS';
+export function TestDetails({ test, isAuthenticated = false }: TestDetailsProps) {
+  const router = useRouter()
+  const [guestAttempts, setGuestAttempts] = useState<GuestAttemptSummary[]>([])
+
+  useEffect(() => {
+    if (!isAuthenticated) {
+      const attempts = guestStorage.getAttemptsByTestId(test.id)
+      setGuestAttempts(attempts)
+    }
+  }, [test.id, isAuthenticated])
+
+  const inProgressAttempt = guestAttempts.find(a => a.status === 'IN_PROGRESS')
+  const recentGuestAttempts = guestAttempts
+    .filter(a => a.status === 'COMPLETED')
+    .slice(0, 3)
+
+  const handleContinueTest = (attemptId: string) => {
+    router.push(`/tests/${test.id}/attempt/${attemptId}`)
+  }
+
+  const handleViewResults = (attemptId: string) => {
+    router.push(`/tests/${test.id}/attempt/${attemptId}/results`)
+  }
+
+  const handleSignIn = () => {
+    // Store current test ID in session storage for redirect after sign in
+    sessionStorage.setItem('redirectAfterSignIn', `/tests/${test.id}`)
+    router.push('/sign-in')
+  }
 
   return (
     <div className="space-y-6">
@@ -25,6 +58,19 @@ export function TestDetails({ test, attempts = [] }: TestDetailsProps) {
           <p className="text-muted-foreground">{test.description}</p>
         )}
       </div>
+
+      {/* Guest Mode Alert */}
+      {!isAuthenticated && (
+        <Alert>
+          <UserX className="h-4 w-4" />
+          <AlertDescription>
+            You are in guest mode. Your progress will be saved locally for 30 days.
+            <Button variant="link" className="pl-1" onClick={handleSignIn}>
+              Sign in to keep your results permanently
+            </Button>
+          </AlertDescription>
+        </Alert>
+      )}
 
       {/* Categories Overview */}
       <CategoryList categories={test.categories || []} />
@@ -40,37 +86,64 @@ export function TestDetails({ test, attempts = [] }: TestDetailsProps) {
         </CardContent>
       </Card>
 
-      {/* Previous Attempts */}
-      {/* {attempts.length > 0 && (
+      {/* Guest Attempts Section */}
+      {!isAuthenticated && guestAttempts.length > 0 && (
         <Card>
           <CardHeader>
-            <CardTitle>Your Attempts</CardTitle>
-            <CardDescription>History of your previous attempts</CardDescription>
+            <CardTitle>Your Progress</CardTitle>
+            <CardDescription>
+              {inProgressAttempt ? "Continue your test or start fresh" : "Your recent attempts"}
+            </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            {attempts.map((attempt) => (
-              <div key={attempt.id} className="flex justify-between items-center">
-                <div>
-                  <p>Started: {new Date(attempt.startedAt).toLocaleDateString()}</p>
-                  <p>Status: {attempt.status}</p>
+            {inProgressAttempt && (
+              <div className="space-y-2">
+                <h4 className="font-medium">In Progress</h4>
+                <div className="flex justify-between items-center">
+                  <p className="text-sm text-muted-foreground">
+                    {inProgressAttempt.progress.answeredQuestions} of {inProgressAttempt.progress.totalQuestions} questions completed
+                  </p>
+                  <Button 
+                    variant="secondary" 
+                    size="sm"
+                    onClick={() => handleContinueTest(inProgressAttempt.id)}
+                  >
+                    Continue Test
+                  </Button>
                 </div>
-                {attempt.status === 'COMPLETED' && (
-                  <div className="text-right">
-                    <p>Scores: {attempt.totalScore.toFixed(1)}</p>
-                    <p>{attempt.percentageScore.toFixed(1)}%</p>
-                  </div>
-                )}
               </div>
-            ))}
+            )}
+
+            {recentGuestAttempts.length > 0 && (
+              <div className="space-y-2">
+                <h4 className="font-medium">Recent Attempts</h4>
+                {recentGuestAttempts.map((attempt) => (
+                  <div key={attempt.id} className="flex justify-between items-center">
+                    <p className="text-sm text-muted-foreground">
+                      Score: {attempt.score?.percentageScore.toFixed(1)}%
+                    </p>
+                    <Button 
+                      variant="ghost" 
+                      size="sm"
+                      onClick={() => handleViewResults(attempt.id)}
+                    >
+                      View Results
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            )}
           </CardContent>
         </Card>
-      )} */}
+      )}
 
       {/* Start Test Button */}
       <StartTestButton 
-        testId={test.id} 
-        disabled={!canStartNewAttempt} 
+        testId={test.id}
+        disabled={false}
+        isAuthenticated={isAuthenticated}
+        existingAttempt={inProgressAttempt}
       />
     </div>
-  );
+  )
 }

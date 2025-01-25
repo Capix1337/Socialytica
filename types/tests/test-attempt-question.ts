@@ -2,20 +2,19 @@
 
 export interface TestAttemptQuestion {
   id: string
+  questionId: string          // Add this
   testAttemptId: string
-  questionId: string
   question: {
     id: string
     title: string
     categoryId: string | null
-    category?: {  // Change this to accept null
+    category: {
       id: string
       name: string
-    } | null     // Add null as possible type
+    } | null
     options: {
       id: string
       text: string
-      point: number
     }[]
   }
   selectedOptionId: string | null

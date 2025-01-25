@@ -3,7 +3,7 @@
 import { Test } from "./test"
 import { Question } from "./question"
 import { Option } from "./option"
-import { Category } from "./category"
+// import { Category } from "./category"
 
 export type TestStatus = 'IN_PROGRESS' | 'COMPLETED' | 'ABANDONED'
 
@@ -44,7 +44,8 @@ export interface CategoryScore {
 
 export interface TestAttempt {
   id: string
-  userId: string
+  userId?: string
+  guestId?: string // Add this for guest attempts
   testId: string
   startedAt: Date
   completedAt: Date | null
@@ -58,6 +59,21 @@ export interface TestAttempt {
   updatedAt?: Date
 }
 
+// Common interface for category score display
+export interface DisplayCategoryScore {
+  category: {
+    id: string
+    name: string
+    description: string | null
+    scale: number
+    testId: string
+  }
+  scaledScore: number
+  maxScale: number
+  percentage: number
+}
+
+// Update TestAttemptResult interface
 export interface TestAttemptResult {
   test: {
     name: string   // Add this field
@@ -65,8 +81,21 @@ export interface TestAttemptResult {
   totalScore: number
   maxScore: number
   percentageScore: number
-  categoryScores: CategoryScore[]
+  categoryScores: DisplayCategoryScore[]
   responses: QuestionResponse[]
+}
+
+// Update GuestAttemptResult interface
+export interface GuestAttemptResult {
+  isBlurred: boolean
+  needsAuth: boolean
+  test: {
+    name: string
+  }
+  totalScore: number
+  maxScore: number
+  percentageScore: number
+  categoryScores: DisplayCategoryScore[]
 }
 
 export interface TestAttemptResponse {
@@ -93,7 +122,8 @@ export interface TestAttemptApiResponse {
   testAttempt: {
     id: string
     testId: string
-    userId: string
+    userId?: string
+    guestId?: string
     startedAt: Date
     status: TestStatus
   }
@@ -123,4 +153,43 @@ export interface TestCompletionResponse {
     categoryScores: CategoryCompletion[]
   }
   error?: string
+}
+
+// Add these new types to test-attempt.ts
+
+export interface GuestAttemptData {
+  attemptId: string;
+  guestId: string;
+  testId: string;
+  startedAt: Date;
+  status: TestStatus;
+  responses?: QuestionResponse[];
+  categoryScores?: CategoryScore[];
+}
+
+export interface GuestAttemptResponse {
+  success: boolean;
+  attempt?: GuestAttemptData;
+  error?: string;
+}
+
+export interface GuestTestAttemptData {
+  attemptId: string;
+  testId: string;
+  guestId: string;  // Add this
+  responses: {
+    questionId: string;
+    selectedOptionId: string;
+    pointsEarned: number;
+    maxPoints: number;
+  }[];
+  startedAt: number;
+  status: 'IN_PROGRESS' | 'COMPLETED' | 'ABANDONED';
+  categoryScores?: {
+    categoryId: string;
+    actualScore: number;
+    maxScale: number;
+    rawScore: number;
+    maxRawScore: number;
+  }[];
 }

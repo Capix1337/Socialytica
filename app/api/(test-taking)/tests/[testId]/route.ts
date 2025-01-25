@@ -15,6 +15,7 @@ export async function GET(req: Request) {
       return new NextResponse('Invalid test ID', { status: 400 })
     }
 
+    // Fetch test details - always visible to guests and users
     const test = await prisma.test.findUnique({
       where: {
         id: testId,
@@ -52,14 +53,14 @@ export async function GET(req: Request) {
       )
     }
 
-    // Explicitly type the attempts array using Pick to select only the fields we need
+    // Get attempts only if user is authenticated
     let attempts: Pick<TestAttempt, 'id' | 'startedAt' | 'completedAt' | 'status' | 'totalScore' | 'percentageScore'>[] = []
     
     if (userId) {
       attempts = await prisma.testAttempt.findMany({
         where: {
-          testId: testId,
-          userId: userId
+          testId,
+          userId
         },
         select: {
           id: true,

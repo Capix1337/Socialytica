@@ -9,7 +9,8 @@ export const questionResponseSchema = z.object({
 
 // Schema for starting a test attempt
 export const startTestAttemptSchema = z.object({
-  testId: z.string().uuid("Invalid test ID format")
+  testId: z.string().uuid("Invalid test ID format"),
+  guestId: z.string().uuid("Invalid guest ID").optional() // Add optional guestId
 })
 
 // Schema for submitting test responses

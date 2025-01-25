@@ -36,6 +36,7 @@ model Test {
   questions    Question[]
   categories   Category[]
   testAttempts TestAttempt[] 
+  guestAttempts GuestAttempt[]   // Add this line
 
   @@index([createdBy])
 }
@@ -53,6 +54,7 @@ model Category {
   updatedAt     DateTime        @default(now())
 
   @@index([testId])
+  GuestCategoryScore GuestCategoryScore[]
 }
 
 model Question {
@@ -63,7 +65,8 @@ model Question {
   categoryId       String?
   category         Category?         @relation(fields: [categoryId], references: [id], onDelete: SetNull)
   options          Option[]
-  questionResponses QuestionResponse[] // Added this relation
+  questionResponses QuestionResponse[]
+  guestResponses   GuestResponse[]   // Single relationship to GuestResponse
   createdAt        DateTime          @default(now())
   updatedAt        DateTime          @default(now())
 
@@ -77,7 +80,8 @@ model Option {
   point            Int
   questionId       String
   question         Question          @relation(fields: [questionId], references: [id], onDelete: Cascade)
-  questionResponses QuestionResponse[] // Added this relation
+  questionResponses QuestionResponse[]
+  guestResponses   GuestResponse[]   // Single relationship to GuestResponse
   createdAt        DateTime          @default(now())
   updatedAt        DateTime          @default(now())
 
@@ -162,4 +166,62 @@ enum TestStatus {
   IN_PROGRESS
   COMPLETED
   ABANDONED
+}
+
+model GuestAttempt {
+  id              String            @id @default(cuid())
+  guestId         String            // Browser's unique identifier
+  testId          String
+  startedAt       DateTime          @default(now())
+  completedAt     DateTime?         
+  expiresAt       DateTime          // 30-day expiration
+  totalScore      Float             @default(0)
+  percentageScore Float             @default(0)
+  status          TestStatus        @default(IN_PROGRESS)
+  test            Test              @relation(fields: [testId], references: [id], onDelete: Cascade)
+  responses       GuestResponse[]
+  categoryScores  GuestCategoryScore[]
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @default(now())
+
+  @@index([guestId])
+  @@index([testId])
+  @@index([status])
+  @@index([expiresAt])
+}
+
+model GuestResponse {
+  id              String       @id @default(cuid())
+  guestAttemptId  String
+  questionId      String
+  selectedOptionId String
+  pointsEarned    Float
+  maxPoints       Float
+  guestAttempt    GuestAttempt @relation(fields: [guestAttemptId], references: [id], onDelete: Cascade)
+  question        Question     @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  selectedOption  Option       @relation(fields: [selectedOptionId], references: [id], onDelete: Cascade)
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @default(now())
+
+  @@unique([guestAttemptId, questionId])  // Ensure one response per question per attempt
+  @@index([guestAttemptId])
+  @@index([questionId])
+  @@index([selectedOptionId])
+}
+
+model GuestCategoryScore {
+  id             String      @id @default(cuid())
+  guestAttemptId String
+  categoryId     String
+  actualScore    Float       // Scaled score for category
+  maxScale       Float       // Highest possible scale for category
+  rawScore       Int        // Sum of actual points
+  maxRawScore    Int        // Sum of max possible points
+  guestAttempt   GuestAttempt @relation(fields: [guestAttemptId], references: [id], onDelete: Cascade)
+  category       Category    @relation(fields: [categoryId], references: [id])
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @default(now())
+
+  @@index([guestAttemptId])
+  @@index([categoryId])
 }

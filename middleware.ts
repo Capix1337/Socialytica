@@ -2,26 +2,25 @@ import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server'
 import { NextResponse } from 'next/server'
 import { analytics } from './utils/analytics'
 
-const isPublicRoute = createRouteMatcher([
-  '/sign-in(.*)', 
-  '/sign-up(.*)', 
-  '/api(.*)', 
-  '/',
-  '/404(.*)',
-  '/about',
-  '/contact',
-  '/terms',
-  '/privacy',
-  "/blog(.*)",
-  "/our-framework",
-  "/Psychometrics",
-
+// Protected routes that require authentication
+const isProtectedRoute = createRouteMatcher([
+  '/dashboard(.*)',  // All dashboard routes require auth
+  '/profile(.*)'     // Profile routes require auth
 ])
 
-const isAdminRoute = createRouteMatcher(['/admindash(.*)'])
+// Guest-enabled routes (allow both authenticated and guest access)
+const isGuestEnabledRoute = createRouteMatcher([
+  '/tests/(.*)/attempt/(.*)',  // Test attempt routes
+  '/tests/(.*)/results/(.*)'   // Test results routes
+])
+
+// Admin only routes
+const isAdminRoute = createRouteMatcher([
+  '/admindash(.*)'  // All admin dashboard routes
+])
 
 export default clerkMiddleware(async (auth, req) => {
-  // Track page views for analytics
+  // Analytics tracking
   if (req.nextUrl.pathname === '/') {
     try {
       await analytics.track('pageview', {
@@ -29,33 +28,40 @@ export default clerkMiddleware(async (auth, req) => {
         country: req.headers.get('x-vercel-ip-country') || 'unknown',
       })
     } catch (err) {
-      // Fail silently to not affect request
       console.error(err)
     }
   }
 
-  if (isPublicRoute(req)) {
+  // Handle guest-enabled routes
+  if (isGuestEnabledRoute(req)) {
+    // Allow access regardless of auth state
     return NextResponse.next()
   }
 
-  const { userId, redirectToSignIn } = await auth()
+  // Check for protected routes
+  if (isProtectedRoute(req)) {
+    const { userId, redirectToSignIn } = await auth()
+    if (!userId) {
+      return redirectToSignIn({ returnBackUrl: req.url })
+    }
+  }
 
-  // Protect all routes starting with `/admin`
-  if (isAdminRoute(req) && (await auth()).sessionClaims?.metadata?.role !== 'admin') {
-    const url = new URL('/404', req.url)
-    return NextResponse.redirect(url)
+  // Check for admin routes
+  if (isAdminRoute(req)) {
+    const { sessionClaims } = await auth()
+    if (sessionClaims?.metadata?.role !== 'admin') {
+      const url = new URL('/404', req.url)
+      return NextResponse.redirect(url)
+    }
   }
-  // For other protected routes, redirect to sign-in if not logged in
-  if (!userId) {
-    return redirectToSignIn()
-  }
+
+  // All other routes are public by default
+  return NextResponse.next()
 })
 
 export const config = {
   matcher: [
-    // Skip Next.js internals and all static files, unless found in search params
     '/((?!_next|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)',
-    // Always run for API routes
     '/(api|trpc)(.*)',
   ],
 }

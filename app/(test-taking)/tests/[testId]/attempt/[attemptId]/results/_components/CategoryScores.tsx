@@ -1,10 +1,10 @@
 // app/(test-taking)/tests/[testId]/attempt/[attemptId]/results/_components/CategoryScores.tsx
 
-import { CategoryScore } from "@/types/tests/test-attempt"
+import { DisplayCategoryScore } from "@/types/tests/test-attempt"
 import { Progress } from "@/components/ui/progress"
 
 interface CategoryScoresProps {
-  categoryScores: CategoryScore[]
+  categoryScores: DisplayCategoryScore[]
 }
 
 export function CategoryScores({ categoryScores }: CategoryScoresProps) {
@@ -14,7 +14,7 @@ export function CategoryScores({ categoryScores }: CategoryScoresProps) {
       <div className="grid gap-6">
         {categoryScores.map((score) => (
           <div 
-            key={score.categoryId} 
+            key={score.category.id} 
             className="p-4 space-y-4 rounded-lg border bg-gradient-to-br from-white to-gray-50 dark:from-gray-800 dark:to-gray-900 shadow-sm"
           >
             <div className="flex justify-between items-center">
@@ -28,13 +28,12 @@ export function CategoryScores({ categoryScores }: CategoryScoresProps) {
               </div>
               <div className="text-right">
                 <span className="text-2xl font-bold text-primary">
-                  {(score.actualScore / score.maxScale * 100).toFixed(1)}%
+                  {score.percentage.toFixed(1)}%
                 </span>
               </div>
             </div>
-
             <Progress 
-              value={(score.actualScore / score.maxScale * 100)} 
+              value={score.percentage} 
               className="h-2"
             />
           </div>
