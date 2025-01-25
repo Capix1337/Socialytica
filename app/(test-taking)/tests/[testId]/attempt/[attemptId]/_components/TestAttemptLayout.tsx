@@ -74,11 +74,11 @@ export function TestAttemptLayout() {
             currentCategory={currentCategory?.name || ""}
             totalQuestions={totalQuestions}
             answeredQuestions={answeredQuestions}
-            currentCategoryProgress={
-              currentCategory
-                ? (currentCategory.answeredQuestions / currentCategory.totalQuestions) * 100
-                : 0
-            }
+            // currentCategoryProgress={
+            //   currentCategory
+            //     ? (currentCategory.answeredQuestions / currentCategory.totalQuestions) * 100
+            //     : 0
+            // }
           />
         </div>
 
