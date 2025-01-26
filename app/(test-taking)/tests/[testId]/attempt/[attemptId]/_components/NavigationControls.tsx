@@ -14,6 +14,7 @@ import {
 import { useRouter } from "next/navigation"
 import { AlertTriangle } from "lucide-react"
 import { useAuth } from "@clerk/nextjs"
+import { useTestAttempt } from "@/hooks/useTestAttempt"
 
 interface NavigationControlsProps {
   testId: string
@@ -41,10 +42,10 @@ export function NavigationControls({
   const [showConfirmDialog, setShowConfirmDialog] = useState(false)
   const router = useRouter()
   const { isSignedIn } = useAuth()
+  const { isCategoryCompleted, isLastCategory } = useTestAttempt()
 
   const handleCompleteTest = async () => {
     try {
-      // Use different endpoints for guest and authenticated users
       const endpoint = isSignedIn
         ? `/api/tests/attempt/${attemptId}/complete`
         : `/api/tests/guest/attempt/${attemptId}/complete`
@@ -67,8 +68,6 @@ export function NavigationControls({
       }
     } catch (error) {
       console.error('Error completing test:', error)
-    } finally {
-      setShowConfirmDialog(false)
     }
   }
 
@@ -135,12 +134,13 @@ export function NavigationControls({
             <span className="text-sm text-muted-foreground">
               {answeredQuestions} of {totalQuestions} answered
             </span>
-            <Button
-              onClick={() => setShowConfirmDialog(true)}
-              disabled={answeredQuestions < totalQuestions}
-            >
-              Complete Test
-            </Button>
+            {isCategoryCompleted && isLastCategory && (
+              <Button
+                onClick={() => setShowConfirmDialog(true)}
+              >
+                Complete Test
+              </Button>
+            )}
           </div>
         </div>
       </div>

@@ -24,12 +24,14 @@ export function QuestionManager({ currentCategory }: QuestionManagerProps) {
     setCurrentQuestionId,
     isCategoryCompleted,
     isLastCategory,
-    handleNextCategory,
+    moveToNextCategory,
   } = useTestAttempt()
 
   const questions = currentCategory.questions
   const totalQuestions = questions.length
-  const answeredQuestions = questions.filter(q => getQuestionData(q).isAnswered).length
+  const answeredQuestions = questions.filter(q => 
+    getQuestionData(q).isAnswered
+  ).length
 
   const currentQuestionIndex = questions.findIndex(q => 
     getQuestionData(q).id === currentQuestionId
@@ -38,9 +40,9 @@ export function QuestionManager({ currentCategory }: QuestionManagerProps) {
   // Auto-advance to next category when current is completed
   React.useEffect(() => {
     if (isCategoryCompleted && !isLastCategory) {
-      handleNextCategory()
+      moveToNextCategory()
     }
-  }, [isCategoryCompleted, isLastCategory, handleNextCategory])
+  }, [isCategoryCompleted, isLastCategory, moveToNextCategory])
 
   return (
     <>
