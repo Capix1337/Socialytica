@@ -146,10 +146,10 @@ export function TestAttemptProvider({ children, params }: TestAttemptProviderPro
         ? `/api/tests/attempt/${attemptId}/questions`
         : `/api/tests/guest/attempt/${attemptId}/questions`
 
-      // Optimistic update for both guest and authenticated users
+      // Optimistic update for both user types
       setQuestions(prevQuestions => 
         prevQuestions.map(q => {
-          if (q.id === questionId) {
+          if ((isGuestQuestion(q) ? q.id : q.questionId) === questionId) {
             return {
               ...q,
               selectedOptionId: optionId,
@@ -160,6 +160,24 @@ export function TestAttemptProvider({ children, params }: TestAttemptProviderPro
         })
       )
 
+      // Update categories state for immediate UI feedback
+      setCategories(prevCategories => 
+        prevCategories.map(category => ({
+          ...category,
+          questions: category.questions.map(q => {
+            if ((isGuestQuestion(q) ? q.id : q.questionId) === questionId) {
+              return {
+                ...q,
+                selectedOptionId: optionId,
+                isAnswered: true
+              }
+            }
+            return q
+          })
+        }))
+      )
+
+      // Make API call
       const res = await fetch(endpoint, {
         method: 'PATCH',
         headers: {
@@ -172,10 +190,10 @@ export function TestAttemptProvider({ children, params }: TestAttemptProviderPro
       })
 
       if (!res.ok) {
-        // Revert on error
+        // Revert optimistic updates on error
         setQuestions(prevQuestions => 
           prevQuestions.map(q => {
-            if (q.id === questionId) {
+            if ((isGuestQuestion(q) ? q.id : q.questionId) === questionId) {
               return {
                 ...q,
                 selectedOptionId: null,
@@ -185,25 +203,30 @@ export function TestAttemptProvider({ children, params }: TestAttemptProviderPro
             return q
           })
         )
+
+        setCategories(prevCategories => 
+          prevCategories.map(category => ({
+            ...category,
+            questions: category.questions.map(q => {
+              if ((isGuestQuestion(q) ? q.id : q.questionId) === questionId) {
+                return {
+                  ...q,
+                  selectedOptionId: null,
+                  isAnswered: false
+                }
+              }
+              return q
+            })
+          }))
+        )
+
         throw new Error('Failed to save answer')
       }
 
-      // Update categories state to maintain consistency
-      setCategories(prevCategories => 
-        prevCategories.map(category => ({
-          ...category,
-          questions: category.questions.map(q => {
-            if (q.id === questionId) {
-              return {
-                ...q,
-                selectedOptionId: optionId,
-                isAnswered: true
-              }
-            }
-            return q
-          })
-        }))
-      )
+      // Save progress for guest users
+      if (!isSignedIn) {
+        saveProgress()
+      }
 
     } catch (error) {
       console.error('Failed to save answer:', error)
