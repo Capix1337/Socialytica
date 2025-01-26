@@ -4,7 +4,7 @@
 import { useState, useEffect, useCallback } from "react"
 import { useAuth } from "@clerk/nextjs"
 import { guestStorage, type GuestCategoryProgress } from "@/lib/storage/guest-storage"
-import { TestAttemptContext, type CategoryState } from "./TestAttemptContext" // Add CategoryState import
+import { TestAttemptContext, type CategoryState } from "./TestAttemptContext"
 import type { TestAttemptQuestion } from "@/types/tests/test-attempt-question"
 import type { GuestAttemptQuestion } from "@/types/tests/guest-attempt"
 
