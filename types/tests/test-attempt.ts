@@ -52,6 +52,7 @@ export interface TestAttempt {
   status: TestStatus
   totalScore: number | null
   percentageScore: number | null
+  currentCategoryId: string | null // Add this
   test?: Test
   responses?: QuestionResponse[]
   categoryScores?: CategoryScore[]

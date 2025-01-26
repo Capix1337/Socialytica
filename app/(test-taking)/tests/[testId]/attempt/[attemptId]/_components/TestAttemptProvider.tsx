@@ -68,6 +68,7 @@ export function TestAttemptProvider({ children, params }: TestAttemptProviderPro
 
   // Get current category and completion status
   const currentCategory = categories[currentCategoryIndex] || null
+  const nextCategory = categories[currentCategoryIndex + 1] || null
   const isCategoryCompleted = currentCategory?.questions.every(q => 
     isGuestQuestion(q) ? !!q.selectedOptionId : q.isAnswered
   ) || false
@@ -198,8 +199,8 @@ export function TestAttemptProvider({ children, params }: TestAttemptProviderPro
     questions,
     currentQuestionId,
     currentCategory,
+    nextCategory, // Add this line to include nextCategory
     categories,
-    nextCategoryId: isLastCategory ? null : categories[currentCategoryIndex + 1]?.id || null,
     isLoading,
     showCompletionDialog,
     setShowCompletionDialog,
