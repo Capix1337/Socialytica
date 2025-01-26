@@ -11,7 +11,6 @@ interface TestHeaderProps {
   currentCategory: string
   totalQuestions: number
   answeredQuestions: number
-  // Removed: currentCategoryProgress
 }
 
 export function TestHeader({ 
@@ -51,10 +50,10 @@ export function TestHeader({
         </div>
 
         {/* Overall progress bar section */}
-        <div className="px-4 pb-4">
+        <div className="px-4 pb-4 space-y-3">
           <div className="space-y-1.5">
             <div className="flex justify-between text-sm">
-              <span>Progress</span>
+              <span>Overall Progress</span>
               <span>{overallProgress}%</span>
             </div>
             <Progress value={overallProgress} className="h-2" />
