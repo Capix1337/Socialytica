@@ -12,8 +12,9 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import { useRouter } from "next/navigation"
-import { AlertTriangle } from "lucide-react"
+import { AlertTriangle, ArrowRight } from "lucide-react"
 import { useAuth } from "@clerk/nextjs"
+import { useTestAttempt } from "./TestAttemptContext"
 
 interface NavigationControlsProps {
   testId: string
@@ -39,12 +40,19 @@ export function NavigationControls({
   onPrevious,
 }: NavigationControlsProps) {
   const [showConfirmDialog, setShowConfirmDialog] = useState(false)
+  const [showCategoryTransition, setShowCategoryTransition] = useState(false)
   const router = useRouter()
   const { isSignedIn } = useAuth()
+  const { 
+    isCategoryCompleted, 
+    isLastCategory,
+    currentCategory,
+    nextCategory,
+    moveToNextCategory 
+  } = useTestAttempt()
 
   const handleCompleteTest = async () => {
     try {
-      // Use different endpoints for guest and authenticated users
       const endpoint = isSignedIn
         ? `/api/tests/attempt/${attemptId}/complete`
         : `/api/tests/guest/attempt/${attemptId}/complete`
@@ -67,8 +75,6 @@ export function NavigationControls({
       }
     } catch (error) {
       console.error('Error completing test:', error)
-    } finally {
-      setShowConfirmDialog(false)
     }
   }
 
@@ -107,6 +113,14 @@ export function NavigationControls({
     })
   }
 
+  const handleCategoryTransition = () => {
+    setShowCategoryTransition(true)
+    setTimeout(() => {
+      moveToNextCategory()
+      setShowCategoryTransition(false)
+    }, 1500) // Show transition UI for 1.5 seconds
+  }
+
   return (
     <>
       <div className="bg-white py-4 px-4 md:px-6">
@@ -135,15 +149,39 @@ export function NavigationControls({
             <span className="text-sm text-muted-foreground">
               {answeredQuestions} of {totalQuestions} answered
             </span>
-            <Button
-              onClick={() => setShowConfirmDialog(true)}
-              disabled={answeredQuestions < totalQuestions}
-            >
-              Complete Test
-            </Button>
+            {isCategoryCompleted && !isLastCategory && (
+              <Button
+                onClick={handleCategoryTransition}
+                className="gap-2"
+              >
+                Next Category <ArrowRight className="h-4 w-4" />
+              </Button>
+            )}
+            {isCategoryCompleted && isLastCategory && (
+              <Button
+                onClick={() => setShowConfirmDialog(true)}
+              >
+                Complete Test
+              </Button>
+            )}
           </div>
         </div>
       </div>
+
+      {/* Category Transition Dialog */}
+      <Dialog open={showCategoryTransition} onOpenChange={setShowCategoryTransition}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Moving to Next Category</DialogTitle>
+            <DialogDescription>
+              <div className="space-y-2">
+                <p>You&apos;ve completed: {currentCategory?.name}</p>
+                <p>Up next: {nextCategory?.name}</p>
+              </div>
+            </DialogDescription>
+          </DialogHeader>
+        </DialogContent>
+      </Dialog>
 
       <Dialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
         <DialogContent>

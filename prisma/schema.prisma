@@ -55,6 +55,8 @@ model Category {
 
   @@index([testId])
   GuestCategoryScore GuestCategoryScore[]
+  TestAttempt TestAttempt[] @relation("CurrentCategory")
+  GuestAttempt GuestAttempt[] @relation("GuestCurrentCategory")
 }
 
 model Question {
@@ -99,6 +101,8 @@ model TestAttempt {
   totalScore      Float             @default(0)  // Changed to have default
   percentageScore Float             @default(0)  // Changed to have default
   status          TestStatus        @default(IN_PROGRESS)
+  currentCategoryId String?         // Add optional field
+  currentCategory Category?         @relation("CurrentCategory", fields: [currentCategoryId], references: [id]) // Add optional relation
   user            User              @relation(fields: [userId], references: [id], onDelete: Cascade)
   test            Test              @relation(fields: [testId], references: [id], onDelete: Cascade)
   responses       QuestionResponse[]
@@ -109,6 +113,7 @@ model TestAttempt {
   @@index([userId])
   @@index([testId])
   @@index([status])
+  @@index([currentCategoryId])
 }
 
 model QuestionResponse {
@@ -178,6 +183,8 @@ model GuestAttempt {
   totalScore      Float             @default(0)
   percentageScore Float             @default(0)
   status          TestStatus        @default(IN_PROGRESS)
+  currentCategoryId String?         // Add optional field
+  currentCategory Category?         @relation("GuestCurrentCategory", fields: [currentCategoryId], references: [id]) // Add optional relation
   test            Test              @relation(fields: [testId], references: [id], onDelete: Cascade)
   responses       GuestResponse[]
   categoryScores  GuestCategoryScore[]
@@ -188,6 +195,7 @@ model GuestAttempt {
   @@index([testId])
   @@index([status])
   @@index([expiresAt])
+  @@index([currentCategoryId])
 }
 
 model GuestResponse {

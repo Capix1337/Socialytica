@@ -7,21 +7,20 @@ import {
   testAttemptQuestionsQuerySchema, 
   submitAnswerSchema 
 } from "@/lib/validations/test-attempt-question"
+// Remove unused import if we're not using it directly
+// import { TestAttemptQuestion } from "@/types/tests/test-attempt-question"
 import type { 
-  TestAttemptQuestion,
   TestAttemptQuestionsResponse,
   SubmitAnswerResponse 
 } from "@/types/tests/test-attempt-question"
 
 export async function GET(req: Request) {
   try {
-    // 1. Get clerk user ID
     const { userId: clerkUserId } = await auth()
     if (!clerkUserId) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    // 2. Get attempt ID from URL
     const attemptId = req.url.split('/attempt/')[1].split('/')[0]
     const validation = testAttemptQuestionsQuerySchema.safeParse({ attemptId })
     
@@ -32,7 +31,6 @@ export async function GET(req: Request) {
       }, { status: 400 })
     }
 
-    // 3. Get user ID from database
     const user = await prisma.user.findUnique({
       where: { clerkUserId },
       select: { id: true }
@@ -42,7 +40,6 @@ export async function GET(req: Request) {
       return NextResponse.json({ error: "User not found" }, { status: 404 })
     }
 
-    // 4. Get test attempt with questions
     const attempt = await prisma.testAttempt.findFirst({
       where: {
         id: attemptId,
@@ -52,22 +49,29 @@ export async function GET(req: Request) {
       include: {
         test: {
           select: {
-            questions: {
+            categories: {
+              orderBy: { id: 'asc' },
               select: {
                 id: true,
-                title: true,
-                categoryId: true,
-                category: {
+                name: true,
+                questions: {
                   select: {
                     id: true,
-                    name: true
-                  }
-                },
-                options: {
-                  select: {
-                    id: true,
-                    text: true,
-                    point: true
+                    title: true,
+                    categoryId: true,
+                    category: {
+                      select: {
+                        id: true,
+                        name: true
+                      }
+                    },
+                    options: {
+                      select: {
+                        id: true,
+                        text: true,
+                        point: true
+                      }
+                    }
                   }
                 }
               }
@@ -87,35 +91,45 @@ export async function GET(req: Request) {
       return NextResponse.json({ error: "Test attempt not found" }, { status: 404 })
     }
 
-    // 5. Format response
-    const questions: TestAttemptQuestion[] = attempt.test.questions.map(question => ({
-      id: `${attempt.id}_${question.id}`,
-      testAttemptId: attempt.id,
-      questionId: question.id,
-      question: {
-        ...question,
-        categoryId: question.categoryId,
-        category: question.category
-      },
-      selectedOptionId: attempt.responses.find(r => r.questionId === question.id)?.selectedOptionId ?? null,
-      isAnswered: attempt.responses.some(r => r.questionId === question.id),
-      createdAt: new Date(),
-      updatedAt: new Date()
-    }))
-
     const response: TestAttemptQuestionsResponse = {
-      questions,
-      totalQuestions: questions.length,
-      answeredQuestions: attempt.responses.length
+      questions: attempt.test.categories.flatMap(category => 
+        category.questions.map(question => ({
+          id: `${attempt.id}_${question.id}`,
+          testAttemptId: attempt.id,
+          questionId: question.id,
+          question: {
+            ...question,
+            categoryId: question.categoryId,
+            category: question.category
+          },
+          selectedOptionId: attempt.responses.find(r => r.questionId === question.id)?.selectedOptionId ?? null,
+          isAnswered: attempt.responses.some(r => r.questionId === question.id),
+          createdAt: new Date(),
+          updatedAt: new Date()
+        }))
+      ),
+      totalQuestions: attempt.test.categories.reduce((sum, cat) => sum + cat.questions.length, 0),
+      answeredQuestions: attempt.responses.length,
+      categories: attempt.test.categories.map(cat => ({
+        id: cat.id,
+        name: cat.name,
+        isCompleted: cat.questions.every(q => 
+          attempt.responses.some(r => r.questionId === q.id)
+        )
+      })),
+      currentCategoryId: attempt.test.categories[0]?.id || null,
+      nextCategoryId: attempt.test.categories.find((cat, index) => 
+        index > 0 && !cat.questions.every(q => 
+          attempt.responses.some(r => r.questionId === q.id)
+        )
+      )?.id || null
     }
 
     return NextResponse.json(response)
 
   } catch (error) {
     console.error("[TEST_ATTEMPT_QUESTIONS_GET]", error)
-    return NextResponse.json({ 
-      error: "Internal server error" 
-    }, { status: 500 })
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 })
   }
 }
 

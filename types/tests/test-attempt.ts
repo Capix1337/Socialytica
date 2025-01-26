@@ -3,7 +3,7 @@
 import { Test } from "./test"
 import { Question } from "./question"
 import { Option } from "./option"
-// import { Category } from "./category"
+import { TestAttemptQuestion } from "./test-attempt-question" // Add this import
 
 export type TestStatus = 'IN_PROGRESS' | 'COMPLETED' | 'ABANDONED'
 
@@ -52,6 +52,7 @@ export interface TestAttempt {
   status: TestStatus
   totalScore: number | null
   percentageScore: number | null
+  currentCategoryId: string | null // Add this
   test?: Test
   responses?: QuestionResponse[]
   categoryScores?: CategoryScore[]
@@ -192,4 +193,73 @@ export interface GuestTestAttemptData {
     rawScore: number;
     maxRawScore: number;
   }[];
+}
+
+export interface TestAttemptQuestionsResponse {
+  questions: TestAttemptQuestion[]
+  totalQuestions: number
+  answeredQuestions: number
+  categories: {
+    id: string
+    name: string
+    isCompleted: boolean
+  }[]
+  nextCategoryId: string | null
+}
+
+// Add these new types for category progression
+export interface CategoryProgression {
+  currentCategoryId: string
+  nextCategoryId: string | null
+  isCompleted: boolean
+  progress: {
+    answeredQuestions: number
+    totalQuestions: number
+    percentage: number
+  }
+}
+
+export interface CategoryTransitionState {
+  fromCategory: {
+    id: string
+    name: string
+    isCompleted: boolean
+  }
+  toCategory: {
+    id: string
+    name: string
+  } | null
+  timestamp: Date
+}
+
+export interface CategoryState {
+  id: string
+  name: string
+  isCompleted: boolean
+  progress: {
+    answeredQuestions: number
+    totalQuestions: number
+    percentage: number
+  }
+  transitionState?: CategoryTransitionState
+}
+
+// Update TestAttemptQuestionsResponse to include category info
+export interface TestAttemptQuestionsResponse {
+  questions: TestAttemptQuestion[]
+  totalQuestions: number
+  answeredQuestions: number
+  currentCategory: {
+    id: string
+    name: string
+    progress: {
+      answered: number
+      total: number
+      percentage: number
+    }
+  }
+  nextCategory: {
+    id: string
+    name: string
+  } | null
 }

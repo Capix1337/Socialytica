@@ -1,13 +1,11 @@
-// app/(test-taking)/tests/[testId]/attempt/[attemptId]/_components/QuestionManager.tsx
 "use client"
 
+import { useEffect } from "react" // Add this import
 import { useTestAttempt } from "./TestAttemptContext"
 import { QuestionCard } from "./QuestionCard"
 import { NavigationControls } from "./NavigationControls"
 import { cn } from "@/lib/utils"
-import { 
-    // isGuestQuestion, 
-    getQuestionData } from "@/lib/utils/question-helpers"
+import { getQuestionData } from "@/lib/utils/question-helpers"
 import type { TestAttemptQuestion } from "@/types/tests/test-attempt-question"
 import type { GuestAttemptQuestion } from "@/types/tests/guest-attempt"
 
@@ -22,31 +20,64 @@ export function QuestionManager({ currentCategory }: QuestionManagerProps) {
   const {
     testId,
     attemptId,
-    questions,
     currentQuestionId,
     handleAnswerSelect,
-    setCurrentQuestionId
+    setCurrentQuestionId,
+    isCategoryCompleted,
+    isLastCategory,
+    moveToNextCategory,
   } = useTestAttempt()
 
+  const questions = currentCategory.questions
   const totalQuestions = questions.length
-  const answeredQuestions = questions.filter(q => getQuestionData(q).isAnswered).length
+  const answeredQuestions = questions.filter(q => 
+    getQuestionData(q).isAnswered
+  ).length
+
+  const currentQuestionIndex = questions.findIndex(q => 
+    getQuestionData(q).id === currentQuestionId
+  )
+
+  // Auto-advance to next category when current is completed
+  useEffect(() => {
+    if (isCategoryCompleted && !isLastCategory) {
+      // Add a small delay before category transition
+      const timer = setTimeout(() => {
+        moveToNextCategory()
+      }, 1000) // 1 second delay
+      
+      return () => clearTimeout(timer)
+    }
+  }, [isCategoryCompleted, isLastCategory, moveToNextCategory])
+
+  // Handle question navigation
+  const handleNext = () => {
+    const nextQuestion = questions[currentQuestionIndex + 1]
+    if (nextQuestion) {
+      setCurrentQuestionId(getQuestionData(nextQuestion).id)
+    }
+  }
+
+  const handlePrevious = () => {
+    const prevQuestion = questions[currentQuestionIndex - 1]
+    if (prevQuestion) {
+      setCurrentQuestionId(getQuestionData(prevQuestion).id)
+    }
+  }
 
   return (
     <>
       <main className="space-y-6 mb-20">
-        {currentCategory?.questions.map((question, index) => {
+        {questions.map((question, index) => {
           const questionData = getQuestionData(question)
           
           return (
             <QuestionCard
-              key={question.id}
+              key={questionData.id}
               question={{
                 id: questionData.id,
                 title: questionData.title,
-                options: questionData.options.map(opt => ({
-                  id: opt.id,
-                  text: opt.text
-                }))
+                options: questionData.options
               }}
               questionNumber={index + 1}
               selectedOption={question.selectedOptionId || undefined}
@@ -54,7 +85,7 @@ export function QuestionManager({ currentCategory }: QuestionManagerProps) {
               onAnswerSelect={(optionId) => handleAnswerSelect(questionData.id, optionId)}
               className={cn(
                 "transition-all duration-200",
-                question.id === currentQuestionId 
+                questionData.id === currentQuestionId 
                   ? "opacity-100 ring-2 ring-primary" 
                   : "opacity-70 hover:opacity-90"
               )}
@@ -67,23 +98,13 @@ export function QuestionManager({ currentCategory }: QuestionManagerProps) {
         <NavigationControls
           testId={testId}
           attemptId={attemptId}
-          currentQuestionNumber={questions.findIndex(q => q.id === currentQuestionId) + 1}
+          currentQuestionNumber={currentQuestionIndex + 1}
           totalQuestions={totalQuestions}
           answeredQuestions={answeredQuestions}
-          canGoNext={questions.findIndex(q => q.id === currentQuestionId) < questions.length - 1}
-          canGoPrevious={questions.findIndex(q => q.id === currentQuestionId) > 0}
-          onNext={() => {
-            const currentIndex = questions.findIndex(q => q.id === currentQuestionId)
-            if (currentIndex < questions.length - 1) {
-              setCurrentQuestionId(questions[currentIndex + 1].id)
-            }
-          }}
-          onPrevious={() => {
-            const currentIndex = questions.findIndex(q => q.id === currentQuestionId)
-            if (currentIndex > 0) {
-              setCurrentQuestionId(questions[currentIndex - 1].id)
-            }
-          }}
+          canGoNext={currentQuestionIndex < questions.length - 1}
+          canGoPrevious={currentQuestionIndex > 0}
+          onNext={handleNext}
+          onPrevious={handlePrevious}
         />
       </div>
     </>

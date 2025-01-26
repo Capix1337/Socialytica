@@ -1,4 +1,5 @@
 import type {  Category } from "@prisma/client"
+import { TestStatus } from './test-attempt'
 
 export interface GuestAttemptApiResponse {
   guestAttempt: {
@@ -139,4 +140,28 @@ export interface GuestAttemptsResponse {
   completed: GuestAttemptSummary[]
   totalInProgress: number
   totalCompleted: number
+}
+
+export interface GuestAttempt {
+  id: string
+  guestId: string
+  testId: string
+  startedAt: Date
+  completedAt: Date | null
+  status: TestStatus
+  currentCategoryId: string | null
+  expiresAt: Date
+  responses?: Array<{
+    questionId: string
+    selectedOptionId: string
+    pointsEarned: number
+    maxPoints: number
+  }>
+  categoryScores?: Array<{
+    categoryId: string
+    actualScore: number
+    maxScale: number
+    rawScore: number
+    maxRawScore: number
+  }>
 }

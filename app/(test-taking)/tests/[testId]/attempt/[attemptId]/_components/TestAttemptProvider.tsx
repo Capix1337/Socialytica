@@ -3,8 +3,8 @@
 
 import { useState, useEffect, useCallback } from "react"
 import { useAuth } from "@clerk/nextjs"
-import { guestStorage } from "@/lib/storage/guest-storage"
-import { TestAttemptContext } from "./TestAttemptContext"
+import { guestStorage, type GuestCategoryProgress } from "@/lib/storage/guest-storage"
+import { TestAttemptContext, type CategoryState } from "./TestAttemptContext"
 import type { TestAttemptQuestion } from "@/types/tests/test-attempt-question"
 import type { GuestAttemptQuestion } from "@/types/tests/guest-attempt"
 
@@ -27,11 +27,80 @@ export function TestAttemptProvider({ children, params }: TestAttemptProviderPro
   const { isSignedIn } = useAuth()
   const [questions, setQuestions] = useState<(TestAttemptQuestion | GuestAttemptQuestion)[]>([])
   const [currentQuestionId, setCurrentQuestionId] = useState<string>("")
-  const [currentCategoryId, setCurrentCategoryId] = useState<string>("")
+  const [currentCategoryIndex, setCurrentCategoryIndex] = useState(0)
+  const [categories, setCategories] = useState<CategoryState[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [attemptId, setAttemptId] = useState<string>("")
   const [testId, setTestId] = useState<string>("")
   const [showCompletionDialog, setShowCompletionDialog] = useState(false)
+
+  // Initialize categories from questions
+  const initializeCategories = useCallback((questions: (TestAttemptQuestion | GuestAttemptQuestion)[]) => {
+    const categorizedQuestions = questions.reduce((acc, question) => {
+      const categoryId = isGuestQuestion(question) 
+        ? question.category?.id || "uncategorized"
+        : question.question.categoryId || "uncategorized"
+      
+      const categoryName = isGuestQuestion(question)
+        ? question.category?.name || "Uncategorized"
+        : question.question.category?.name || "Uncategorized"
+
+      if (!acc[categoryId]) {
+        acc[categoryId] = {
+          id: categoryId,
+          name: categoryName,
+          isCompleted: false,
+          questions: []
+        }
+      }
+      acc[categoryId].questions.push(question)
+      return acc
+    }, {} as Record<string, CategoryState>)
+
+    const sortedCategories = Object.values(categorizedQuestions)
+    setCategories(sortedCategories)
+    
+    // Set initial question if needed
+    if (sortedCategories.length && !currentQuestionId && sortedCategories[0].questions.length) {
+      setCurrentQuestionId(sortedCategories[0].questions[0].id)
+    }
+  }, [currentQuestionId])
+
+  // Get current category and completion status
+  const currentCategory = categories[currentCategoryIndex] || null
+  const nextCategory = categories[currentCategoryIndex + 1] || null
+  const isCategoryCompleted = currentCategory?.questions.every(q => 
+    isGuestQuestion(q) ? !!q.selectedOptionId : q.isAnswered
+  ) || false
+  const isLastCategory = currentCategoryIndex === categories.length - 1
+
+  // Define saveProgress before using it
+  const saveProgress = useCallback(() => {
+    if (!isSignedIn && attemptId) {
+      const progress: GuestCategoryProgress = {
+        currentCategoryIndex,
+        completedCategories: categories
+          .filter(cat => cat.questions.every(q => 
+            isGuestQuestion(q) ? !!q.selectedOptionId : q.isAnswered
+          ))
+          .map(cat => cat.id),
+        lastUpdated: Date.now(),
+        categoryTransitions: []
+      }
+      guestStorage.saveAttemptProgress(attemptId, progress)
+    }
+  }, [attemptId, categories, currentCategoryIndex, isSignedIn])
+
+  // Handle moving to next category
+  const handleNextCategory = useCallback(() => {
+    if (isCategoryCompleted && !isLastCategory) {
+      setCurrentCategoryIndex(prev => prev + 1)
+      const nextCategory = categories[currentCategoryIndex + 1]
+      if (nextCategory?.questions.length) {
+        setCurrentQuestionId(nextCategory.questions[0].id)
+      }
+    }
+  }, [isCategoryCompleted, isLastCategory, categories, currentCategoryIndex])
 
   // Handle loading guest attempt data
   useEffect(() => {
@@ -57,44 +126,78 @@ export function TestAttemptProvider({ children, params }: TestAttemptProviderPro
     }
   }, [isSignedIn, attemptId])
 
-  // Fetch questions
+  // Fetch questions and initialize categories
   const fetchQuestions = useCallback(async () => {
-    if (!attemptId) return
-
     try {
+      setIsLoading(true)
       const endpoint = isSignedIn 
         ? `/api/tests/attempt/${attemptId}/questions`
         : `/api/tests/guest/attempt/${attemptId}/questions`
 
-      const response = await fetch(endpoint)
-      if (!response.ok) {
-        throw new Error(await response.text())
+      // Only make the request to the appropriate endpoint based on auth status
+      const res = await fetch(endpoint)
+      
+      if (!res.ok) {
+        throw new Error('Failed to fetch questions')
       }
 
-      const data = await response.json()
+      const data = await res.json()
       setQuestions(data.questions)
-      
-      if (data.questions.length > 0) {
-        setCurrentQuestionId(data.questions[0].id)
-        setCurrentCategoryId(
-          data.questions[0]?.question?.categoryId || "uncategorized"
-        )
-      }
+      initializeCategories(data.questions)
     } catch (error) {
-      console.error("Failed to load questions:", error)
+      console.error('Error fetching questions:', error)
     } finally {
       setIsLoading(false)
     }
-  }, [attemptId, isSignedIn])
+  }, [attemptId, isSignedIn, initializeCategories])
+
+  // Use effect to fetch questions on mount and auth state change
+  useEffect(() => {
+    fetchQuestions()
+  }, [fetchQuestions, isSignedIn])
 
   // Handle answer selection
   const handleAnswerSelect = useCallback(async (questionId: string, optionId: string) => {
     try {
-      const endpoint = isSignedIn 
+      const endpoint = isSignedIn
         ? `/api/tests/attempt/${attemptId}/questions`
         : `/api/tests/guest/attempt/${attemptId}/questions`
 
-      const response = await fetch(endpoint, {
+      // Always do optimistic update regardless of auth status
+      setQuestions(prevQuestions => 
+        prevQuestions.map(q => {
+          // Check both questionId and q.id for compatibility
+          const qId = isGuestQuestion(q) ? q.id : q.questionId
+          if (qId === questionId) {
+            return {
+              ...q,
+              selectedOptionId: optionId,
+              isAnswered: true
+            }
+          }
+          return q
+        })
+      )
+
+      // Always update categories immediately
+      setCategories(prevCategories => 
+        prevCategories.map(category => ({
+          ...category,
+          questions: category.questions.map(q => {
+            const qId = isGuestQuestion(q) ? q.id : q.questionId
+            if (qId === questionId) {
+              return {
+                ...q,
+                selectedOptionId: optionId,
+                isAnswered: true
+              }
+            }
+            return q
+          })
+        }))
+      )
+
+      const res = await fetch(endpoint, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json'
@@ -105,36 +208,38 @@ export function TestAttemptProvider({ children, params }: TestAttemptProviderPro
         })
       })
 
-      if (!response.ok) {
-        throw new Error('Failed to submit answer')
-      }
-
-      const data = await response.json()
-
-      if (!isSignedIn && data.success) {
-        guestStorage.saveGuestResponse(
-          attemptId,
-          questionId,
-          optionId,
-          data.pointsEarned,
-          data.maxPoints
+      if (!res.ok) {
+        // Revert on error for both guest and logged-in users
+        setQuestions(prevQuestions => 
+          prevQuestions.map(q => {
+            const qId = isGuestQuestion(q) ? q.id : q.questionId
+            if (qId === questionId) {
+              return {
+                ...q,
+                selectedOptionId: null,
+                isAnswered: false
+              }
+            }
+            return q
+          })
         )
+        throw new Error('Failed to save answer')
       }
 
-      setQuestions(prev => prev.map(q => {
-        if ((isGuestQuestion(q) ? q.id : q.questionId) === questionId) {
-          return {
-            ...q,
-            selectedOptionId: optionId,
-            isAnswered: !isGuestQuestion(q)
-          }
-        }
-        return q
-      }))
+      // Check category completion and navigate after successful save
+      const updatedCategory = categories[currentCategoryIndex]
+      const categoryComplete = updatedCategory.questions.every(q => 
+        isGuestQuestion(q) ? !!q.selectedOptionId : q.isAnswered
+      )
+
+      if (categoryComplete && !isLastCategory) {
+        handleNextCategory()
+      }
+
     } catch (error) {
-      console.error("Error saving answer:", error)
+      console.error('Failed to save answer:', error)
     }
-  }, [attemptId, isSignedIn])
+}, [attemptId, isSignedIn, categories, currentCategoryIndex, isLastCategory, handleNextCategory])
 
   // Initialize params
   useEffect(() => {
@@ -144,23 +249,26 @@ export function TestAttemptProvider({ children, params }: TestAttemptProviderPro
     })
   }, [params])
 
-  // Fetch questions when attemptId is available
   useEffect(() => {
-    fetchQuestions()
-  }, [fetchQuestions])
+    saveProgress()
+  }, [saveProgress, questions, currentCategoryIndex])
 
   const value = {
     testId,
     attemptId,
     questions,
     currentQuestionId,
-    currentCategoryId,
+    currentCategory,
+    nextCategory, // Add this line to include nextCategory
+    categories,
     isLoading,
     showCompletionDialog,
     setShowCompletionDialog,
     handleAnswerSelect,
     setCurrentQuestionId,
-    setCurrentCategoryId
+    moveToNextCategory: handleNextCategory,
+    isCategoryCompleted,
+    isLastCategory
   }
 
   return (

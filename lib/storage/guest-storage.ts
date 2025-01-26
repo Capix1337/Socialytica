@@ -10,6 +10,17 @@ const STORAGE_KEYS = {
 
 const EXPIRATION_DAYS = 30;
 
+export interface GuestCategoryProgress {
+  currentCategoryIndex: number
+  completedCategories: string[]
+  lastUpdated: number
+  categoryTransitions: Array<{
+    fromCategoryId: string
+    toCategoryId: string
+    timestamp: number
+  }>
+}
+
 export class GuestStorage {
   private isClient = typeof window !== 'undefined';
 
@@ -448,6 +459,141 @@ export class GuestStorage {
     } catch (error) {
       console.error('Failed to get attempts by test ID:', error);
       return [];
+    }
+  }
+
+  public saveAttemptProgress(
+    attemptId: string, 
+    progress: GuestCategoryProgress
+  ): void {
+    if (!this.isClient) return
+
+    try {
+      const attemptData = this.getAttempt(attemptId)
+      if (attemptData) {
+        // Update category progress with timestamp
+        attemptData.categoryProgress = {
+          ...progress,
+          lastUpdated: Date.now()
+        }
+
+        // Store the attempt data
+        const key = `${STORAGE_KEYS.GUEST_ATTEMPT}_${attemptId}`
+        localStorage.setItem(key, JSON.stringify(attemptData))
+      }
+    } catch (error) {
+      console.error('Failed to save category progress:', error)
+    }
+  }
+
+  /**
+   * Record category transition
+   */
+  public recordCategoryTransition(
+    attemptId: string,
+    fromCategoryId: string,
+    toCategoryId: string
+  ): void {
+    if (!this.isClient) return
+
+    try {
+      const attemptData = this.getAttempt(attemptId)
+      if (attemptData) {
+        // Initialize category progress if it doesn't exist
+        if (!attemptData.categoryProgress) {
+          attemptData.categoryProgress = {
+            currentCategoryIndex: 0,
+            completedCategories: [],
+            lastUpdated: Date.now(),
+            categoryTransitions: []
+          }
+        }
+
+        // Add transition record
+        attemptData.categoryProgress.categoryTransitions.push({
+          fromCategoryId,
+          toCategoryId,
+          timestamp: Date.now()
+        })
+
+        // Update current category
+        const currentIndex = attemptData.categoryProgress.currentCategoryIndex
+        attemptData.categoryProgress.currentCategoryIndex = currentIndex + 1
+
+        // Mark previous category as completed
+        if (!attemptData.categoryProgress.completedCategories.includes(fromCategoryId)) {
+          attemptData.categoryProgress.completedCategories.push(fromCategoryId)
+        }
+
+        // Save updated attempt data
+        const key = `${STORAGE_KEYS.GUEST_ATTEMPT}_${attemptId}`
+        localStorage.setItem(key, JSON.stringify(attemptData))
+      }
+    } catch (error) {
+      console.error('Failed to record category transition:', error)
+    }
+  }
+
+  /**
+   * Get category completion status
+   */
+  public getCategoryCompletionStatus(
+    attemptId: string,
+    categoryId: string
+  ): boolean {
+    if (!this.isClient) return false
+
+    try {
+      const attemptData = this.getAttempt(attemptId)
+      return attemptData?.categoryProgress?.completedCategories.includes(categoryId) || false
+    } catch (error) {
+      console.error('Failed to get category completion status:', error)
+      return false
+    }
+  }
+
+  /**
+   * Get current category progress
+   */
+  public getCurrentCategoryProgress(attemptId: string): {
+    currentIndex: number,
+    completedCount: number,
+    lastTransition?: {
+      fromCategoryId: string
+      toCategoryId: string
+      timestamp: number
+    }
+  } | null {
+    if (!this.isClient) return null
+
+    try {
+      const attemptData = this.getAttempt(attemptId)
+      if (!attemptData?.categoryProgress) return null
+
+      const { currentCategoryIndex, completedCategories, categoryTransitions } = attemptData.categoryProgress
+
+      return {
+        currentIndex: currentCategoryIndex,
+        completedCount: completedCategories.length,
+        lastTransition: categoryTransitions[categoryTransitions.length - 1]
+      }
+    } catch (error) {
+      console.error('Failed to get current category progress:', error)
+      return null
+    }
+  }
+
+  public getAttemptProgress(
+    attemptId: string
+  ): GuestCategoryProgress | null {
+    if (!this.isClient) return null
+
+    try {
+      const attemptData = this.getAttempt(attemptId)
+      return attemptData?.categoryProgress || null
+    } catch (error) {
+      console.error('Failed to get category progress:', error)
+      return null
     }
   }
 }

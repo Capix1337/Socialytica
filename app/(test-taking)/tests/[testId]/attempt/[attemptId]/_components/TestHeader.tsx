@@ -11,7 +11,6 @@ interface TestHeaderProps {
   currentCategory: string
   totalQuestions: number
   answeredQuestions: number
-  currentCategoryProgress: number
 }
 
 export function TestHeader({ 
@@ -19,7 +18,6 @@ export function TestHeader({
   currentCategory,
   totalQuestions,
   answeredQuestions,
-  currentCategoryProgress
 }: TestHeaderProps) {
   const overallProgress = Math.round((answeredQuestions / totalQuestions) * 100)
 
@@ -40,8 +38,8 @@ export function TestHeader({
           
           <div className="flex-1 min-w-0">
             <h1 className="text-lg font-semibold truncate">{title}</h1>
-            <div className="text-sm text-muted-foreground mt-0.5">
-              {currentCategory}
+            <div className="flex items-center gap-2 text-sm text-muted-foreground mt-0.5">
+              <span>{currentCategory}</span>
             </div>
           </div>
 
@@ -58,15 +56,6 @@ export function TestHeader({
               <span>{overallProgress}%</span>
             </div>
             <Progress value={overallProgress} className="h-2" />
-          </div>
-
-          {/* Category progress */}
-          <div className="space-y-1.5">
-            <div className="flex justify-between text-sm">
-              <span>Category Progress</span>
-              <span>{currentCategoryProgress}%</span>
-            </div>
-            <Progress value={currentCategoryProgress} className="h-2" />
           </div>
         </div>
       </div>

@@ -2,7 +2,7 @@
 
 export interface TestAttemptQuestion {
   id: string
-  questionId: string          // Add this
+  questionId: string
   testAttemptId: string
   question: {
     id: string
@@ -34,6 +34,13 @@ export interface TestAttemptQuestionsResponse {
   questions: TestAttemptQuestion[]
   totalQuestions: number
   answeredQuestions: number
+  categories: {
+    id: string
+    name: string
+    isCompleted: boolean
+  }[]
+  nextCategoryId: string | null
+  currentCategoryId: string | null
 }
 
 export interface TestAttemptQuestionError {

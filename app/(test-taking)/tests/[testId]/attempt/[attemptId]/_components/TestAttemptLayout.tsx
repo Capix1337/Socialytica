@@ -1,9 +1,7 @@
-// app/(test-taking)/tests/[testId]/attempt/[attemptId]/_components/TestAttemptLayout.tsx
 "use client"
 
 import { useTestAttempt } from "./TestAttemptContext"
 import { TestHeader } from "./TestHeader"
-import { CategoryTabs } from "./CategoryTabs"
 import { QuestionManager } from "./QuestionManager"
 import { CompletionDialog } from "./CompletionDialog"
 import { LoadingState } from "./LoadingState"
@@ -13,53 +11,16 @@ export function TestAttemptLayout() {
   const {
     isLoading,
     questions,
-    currentCategoryId,
-    setCurrentCategoryId, // Add this
+    currentCategory, // Now using currentCategory from context
     showCompletionDialog,
     setShowCompletionDialog,
     testId,
-    attemptId
+    attemptId,
   } = useTestAttempt()
 
   if (isLoading) return <LoadingState />
 
-  // Group questions by category for display
-  const questionsByCategory = questions.reduce((acc, q) => {
-    const categoryId = isGuestQuestion(q) 
-      ? q.category?.id || "uncategorized"
-      : q.question.categoryId || "uncategorized"
-      
-    const categoryName = isGuestQuestion(q)
-      ? q.category?.name || "Uncategorized"
-      : q.question.category?.name || "Uncategorized"
-
-    if (!acc[categoryId]) {
-      acc[categoryId] = {
-        id: categoryId,
-        name: categoryName,
-        questions: [],
-        totalQuestions: 0,
-        answeredQuestions: 0
-      }
-    }
-
-    acc[categoryId].questions.push(q)
-    acc[categoryId].totalQuestions++
-    acc[categoryId].answeredQuestions += isGuestQuestion(q) 
-      ? Number(!!q.selectedOptionId)
-      : Number(q.isAnswered)
-
-    return acc
-  }, {} as Record<string, {
-    id: string
-    name: string
-    questions: typeof questions
-    totalQuestions: number
-    answeredQuestions: number
-  }>)
-
-  const categories = Object.values(questionsByCategory)
-  const currentCategory = questionsByCategory[currentCategoryId]
+  // Calculate total progress
   const totalQuestions = questions.length
   const answeredQuestions = questions.filter(q => 
     isGuestQuestion(q) ? !!q.selectedOptionId : q.isAnswered
@@ -74,21 +35,11 @@ export function TestAttemptLayout() {
             currentCategory={currentCategory?.name || ""}
             totalQuestions={totalQuestions}
             answeredQuestions={answeredQuestions}
-            currentCategoryProgress={
-              currentCategory
-                ? (currentCategory.answeredQuestions / currentCategory.totalQuestions) * 100
-                : 0
-            }
           />
         </div>
 
         <div className="container max-w-7xl mx-auto px-4 mt-6">
-          <CategoryTabs
-            categories={categories}
-            currentCategoryId={currentCategoryId}
-            onCategoryChange={setCurrentCategoryId} // Add this prop
-          />
-          <QuestionManager currentCategory={currentCategory} />
+          {currentCategory && <QuestionManager currentCategory={currentCategory} />}
         </div>
 
         <CompletionDialog
