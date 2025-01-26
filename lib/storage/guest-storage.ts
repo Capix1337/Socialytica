@@ -10,6 +10,12 @@ const STORAGE_KEYS = {
 
 const EXPIRATION_DAYS = 30;
 
+interface GuestCategoryProgress {
+  currentCategoryIndex: number
+  categoryOrder: string[]
+  completedCategories: string[]
+}
+
 export class GuestStorage {
   private isClient = typeof window !== 'undefined';
 
@@ -448,6 +454,38 @@ export class GuestStorage {
     } catch (error) {
       console.error('Failed to get attempts by test ID:', error);
       return [];
+    }
+  }
+
+  public saveAttemptProgress(
+    attemptId: string, 
+    progress: GuestCategoryProgress
+  ): void {
+    if (!this.isClient) return
+
+    try {
+      const attemptData = this.getAttempt(attemptId)
+      if (attemptData) {
+        attemptData.categoryProgress = progress
+        const key = `${STORAGE_KEYS.GUEST_ATTEMPT}_${attemptId}`
+        localStorage.setItem(key, JSON.stringify(attemptData))
+      }
+    } catch (error) {
+      console.error('Failed to save category progress:', error)
+    }
+  }
+
+  public getAttemptProgress(
+    attemptId: string
+  ): GuestCategoryProgress | null {
+    if (!this.isClient) return null
+
+    try {
+      const attemptData = this.getAttempt(attemptId)
+      return attemptData?.categoryProgress || null
+    } catch (error) {
+      console.error('Failed to get category progress:', error)
+      return null
     }
   }
 }

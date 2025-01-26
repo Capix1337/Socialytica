@@ -58,6 +58,7 @@ export function TestAttemptProvider({ children, params }: TestAttemptProviderPro
   const [attemptId, setAttemptId] = useState<string>("")
   const [testId, setTestId] = useState<string>("")
   const [showCompletionDialog, setShowCompletionDialog] = useState(false)
+  const [categoryOrder, setCategoryOrder] = useState<string[]>([])
 
   // Get current category and completion status
   const currentCategory = categories[currentCategoryIndex] || null
@@ -65,6 +66,22 @@ export function TestAttemptProvider({ children, params }: TestAttemptProviderPro
     isGuestQuestion(q) ? !!q.selectedOptionId : q.isAnswered
   ) || false
   const isLastCategory = currentCategoryIndex === categories.length - 1
+
+  // Save progress including category state
+  const saveProgress = useCallback(() => {
+    if (!isSignedIn && attemptId) {
+      const progress = {
+        currentCategoryIndex,
+        categoryOrder: categories.map(c => c.id),
+        completedCategories: categories
+          .filter(cat => cat.questions.every(q => 
+            isGuestQuestion(q) ? !!q.selectedOptionId : q.isAnswered
+          ))
+          .map(cat => cat.id)
+      }
+      guestStorage.saveAttemptProgress(attemptId, progress)
+    }
+  }, [isSignedIn, attemptId, currentCategoryIndex, categories])
 
   // Handle moving to next category
   const handleNextCategory = useCallback(() => {
@@ -74,10 +91,29 @@ export function TestAttemptProvider({ children, params }: TestAttemptProviderPro
       if (nextCategory?.questions.length) {
         setCurrentQuestionId(nextCategory.questions[0].id)
       }
+      saveProgress() // Save progress after category change
     }
-  }, [isCategoryCompleted, isLastCategory, categories, currentCategoryIndex])
+  }, [isCategoryCompleted, isLastCategory, categories, currentCategoryIndex, saveProgress])
 
-  // Initialize categories from questions
+  // Resume functionality
+  const resumeProgress = useCallback(() => {
+    if (!isSignedIn && attemptId) {
+      const savedProgress = guestStorage.getAttemptProgress(attemptId)
+      if (savedProgress) {
+        setCurrentCategoryIndex(savedProgress.currentCategoryIndex)
+        setCategoryOrder(savedProgress.categoryOrder)
+        // Restore category state based on saved order
+        setCategories(prev => {
+          const ordered = savedProgress.categoryOrder
+            .map(id => prev.find(c => c.id === id))
+            .filter((c): c is CategoryState => c !== undefined)
+          return ordered
+        })
+      }
+    }
+  }, [isSignedIn, attemptId])
+
+  // Initialize categories from questions with order preservation
   const initializeCategories = useCallback((questions: (TestAttemptQuestion | GuestAttemptQuestion)[]) => {
     const categorizedQuestions = questions.reduce((acc, question) => {
       const categoryId = isGuestQuestion(question) 
@@ -102,6 +138,7 @@ export function TestAttemptProvider({ children, params }: TestAttemptProviderPro
 
     const sortedCategories = Object.values(categorizedQuestions)
     setCategories(sortedCategories)
+    setCategoryOrder(sortedCategories.map(c => c.id))
     
     // Set initial question
     if (sortedCategories.length && sortedCategories[0].questions.length) {
@@ -191,6 +228,18 @@ export function TestAttemptProvider({ children, params }: TestAttemptProviderPro
       fetchQuestions()
     }
   }, [attemptId, fetchQuestions])
+
+  // Effect to save progress on changes
+  useEffect(() => {
+    saveProgress()
+  }, [saveProgress, questions, currentCategoryIndex])
+
+  // Effect to resume progress on mount
+  useEffect(() => {
+    if (attemptId) {
+      resumeProgress()
+    }
+  }, [attemptId, resumeProgress])
 
   const value = {
     testId,
