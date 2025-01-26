@@ -16,6 +16,10 @@ export interface CategoryState {
   questions: (TestAttemptQuestion | GuestAttemptQuestion)[]
 }
 
+const getQuestionId = (question: TestAttemptQuestion | GuestAttemptQuestion): string => {
+  return isGuestQuestion(question) ? question.id : question.questionId
+}
+
 interface TestAttemptContextType {
   testId: string
   attemptId: string
@@ -89,26 +93,40 @@ export function TestAttemptProvider({ children, params }: TestAttemptProviderPro
   // Handle moving to next category
   const handleNextCategory = useCallback(() => {
     if (isCategoryCompleted && !isLastCategory) {
-      // Record transition before changing category
-      if (!isSignedIn && attemptId && currentCategory) {
+      // Record transition for both guest and logged-in users
+      if (currentCategory) {
         const nextCat = categories[currentCategoryIndex + 1]
         if (nextCat) {
-          guestStorage.recordCategoryTransition(
-            attemptId,
-            currentCategory.id,
-            nextCat.id
-          )
+          if (!isSignedIn) {
+            guestStorage.recordCategoryTransition(
+              attemptId,
+              currentCategory.id,
+              nextCat.id
+            )
+          }
         }
       }
       
+      // Update category index
       setCurrentCategoryIndex(prev => prev + 1)
+      
+      // Set first question of next category
       const nextCategory = categories[currentCategoryIndex + 1]
       if (nextCategory?.questions.length) {
-        setCurrentQuestionId(nextCategory.questions[0].id)
+        const firstQuestion = nextCategory.questions[0]
+        const questionId = getQuestionId(firstQuestion)
+        setCurrentQuestionId(questionId)
       }
-      saveProgress()
     }
-  }, [isCategoryCompleted, isLastCategory, categories, currentCategoryIndex, saveProgress, attemptId, isSignedIn, currentCategory])
+  }, [
+    isCategoryCompleted, 
+    isLastCategory, 
+    categories, 
+    currentCategoryIndex, 
+    currentCategory, 
+    isSignedIn, 
+    attemptId
+  ])
 
   // Resume functionality
   const resumeProgress = useCallback(() => {
@@ -207,7 +225,7 @@ export function TestAttemptProvider({ children, params }: TestAttemptProviderPro
 
       // Update questions state
       setQuestions(prev => prev.map(q => {
-        if ((isGuestQuestion(q) ? q.id : q.questionId) === questionId) {
+        if (getQuestionId(q) === questionId) {
           return { ...q, selectedOptionId: optionId, isAnswered: !isGuestQuestion(q) }
         }
         return q
@@ -279,3 +297,4 @@ export function TestAttemptProvider({ children, params }: TestAttemptProviderPro
     </TestAttemptContext.Provider>
   )
 }
+
