@@ -110,40 +110,57 @@ export function TestAttemptProvider({ children, params }: TestAttemptProviderPro
   }, [isSignedIn, attemptId])
 
   // Fetch questions and initialize categories
-  useEffect(() => {
-    if (!attemptId) return
-
-    const fetchQuestions = async () => {
-      try {
-        setIsLoading(true)
-        const endpoint = isSignedIn 
-          ? `/api/tests/attempt/${attemptId}/questions`
-          : `/api/tests/guest/attempt/${attemptId}/questions`
-
-        const response = await fetch(endpoint)
-        if (!response.ok) throw new Error(await response.text())
-
-        const data = await response.json()
-        setQuestions(data.questions)
-        initializeCategories(data.questions)
-      } catch (error) {
-        console.error("Failed to load questions:", error)
-      } finally {
-        setIsLoading(false)
-      }
-    }
-
-    void fetchQuestions()
-  }, [attemptId, isSignedIn, initializeCategories])
-
-  // Handle answer selection
-  const handleAnswerSelect = useCallback(async (questionId: string, optionId: string) => {
+  const fetchQuestions = useCallback(async () => {
     try {
+      setIsLoading(true)
       const endpoint = isSignedIn 
         ? `/api/tests/attempt/${attemptId}/questions`
         : `/api/tests/guest/attempt/${attemptId}/questions`
 
-      const response = await fetch(endpoint, {
+      // Only make the request to the appropriate endpoint based on auth status
+      const res = await fetch(endpoint)
+      
+      if (!res.ok) {
+        throw new Error('Failed to fetch questions')
+      }
+
+      const data = await res.json()
+      setQuestions(data.questions)
+      initializeCategories(data.questions)
+    } catch (error) {
+      console.error('Error fetching questions:', error)
+    } finally {
+      setIsLoading(false)
+    }
+  }, [attemptId, isSignedIn, initializeCategories])
+
+  // Use effect to fetch questions on mount and auth state change
+  useEffect(() => {
+    fetchQuestions()
+  }, [fetchQuestions, isSignedIn])
+
+  // Handle answer selection
+  const handleAnswerSelect = useCallback(async (questionId: string, optionId: string) => {
+    try {
+      const endpoint = isSignedIn
+        ? `/api/tests/attempt/${attemptId}/questions`
+        : `/api/tests/guest/attempt/${attemptId}/questions`
+
+      // Optimistic update for both guest and authenticated users
+      setQuestions(prevQuestions => 
+        prevQuestions.map(q => {
+          if (q.id === questionId) {
+            return {
+              ...q,
+              selectedOptionId: optionId,
+              isAnswered: true // Set this for both user types
+            }
+          }
+          return q
+        })
+      )
+
+      const res = await fetch(endpoint, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json'
@@ -154,34 +171,42 @@ export function TestAttemptProvider({ children, params }: TestAttemptProviderPro
         })
       })
 
-      if (!response.ok) {
-        throw new Error('Failed to submit answer')
-      }
-
-      const data = await response.json()
-
-      if (!isSignedIn && data.success) {
-        guestStorage.saveGuestResponse(
-          attemptId,
-          questionId,
-          optionId,
-          data.pointsEarned,
-          data.maxPoints
+      if (!res.ok) {
+        // Revert on error
+        setQuestions(prevQuestions => 
+          prevQuestions.map(q => {
+            if (q.id === questionId) {
+              return {
+                ...q,
+                selectedOptionId: null,
+                isAnswered: false
+              }
+            }
+            return q
+          })
         )
+        throw new Error('Failed to save answer')
       }
 
-      setQuestions(prev => prev.map(q => {
-        if ((isGuestQuestion(q) ? q.id : q.questionId) === questionId) {
-          return {
-            ...q,
-            selectedOptionId: optionId,
-            isAnswered: !isGuestQuestion(q)
-          }
-        }
-        return q
-      }))
+      // Update categories state to maintain consistency
+      setCategories(prevCategories => 
+        prevCategories.map(category => ({
+          ...category,
+          questions: category.questions.map(q => {
+            if (q.id === questionId) {
+              return {
+                ...q,
+                selectedOptionId: optionId,
+                isAnswered: true
+              }
+            }
+            return q
+          })
+        }))
+      )
+
     } catch (error) {
-      console.error("Error saving answer:", error)
+      console.error('Failed to save answer:', error)
     }
   }, [attemptId, isSignedIn])
 

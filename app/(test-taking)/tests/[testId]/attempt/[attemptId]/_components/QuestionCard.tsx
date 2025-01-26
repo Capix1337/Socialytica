@@ -30,12 +30,13 @@ export function QuestionCard({
   selectedOption,
   isAnswered,
   onAnswerSelect,
-  className // Add this
+  className,
 }: QuestionCardProps) {
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   const handleOptionSelect = async (optionId: string) => {
     if (isSubmitting) return
+
     setIsSubmitting(true)
     try {
       await onAnswerSelect(optionId)
@@ -44,16 +45,15 @@ export function QuestionCard({
     }
   }
 
-  // Group options using the utility function
   const { leftGroup, middleOption, rightGroup } = groupOptions(question.options)
 
   return (
-    <Card 
+    <Card
       id={`question-${questionNumber}`}
       className={cn(
         "transition-all duration-200",
         isAnswered && "ring-2 ring-primary/10",
-        className // Add this
+        className
       )}
     >
       <CardHeader className="border-b bg-muted/40">
