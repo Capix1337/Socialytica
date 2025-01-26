@@ -3,7 +3,6 @@
 
 import { useTestAttempt } from "./TestAttemptContext"
 import { TestHeader } from "./TestHeader"
-import { CategoryTabs } from "./CategoryTabs"
 import { QuestionManager } from "./QuestionManager"
 import { CompletionDialog } from "./CompletionDialog"
 import { LoadingState } from "./LoadingState"
@@ -14,7 +13,6 @@ export function TestAttemptLayout() {
     isLoading,
     questions,
     currentCategoryId,
-    setCurrentCategoryId, // Add this
     showCompletionDialog,
     setShowCompletionDialog,
     testId,
@@ -50,15 +48,8 @@ export function TestAttemptLayout() {
       : Number(q.isAnswered)
 
     return acc
-  }, {} as Record<string, {
-    id: string
-    name: string
-    questions: typeof questions
-    totalQuestions: number
-    answeredQuestions: number
-  }>)
+  }, {})
 
-  const categories = Object.values(questionsByCategory)
   const currentCategory = questionsByCategory[currentCategoryId]
   const totalQuestions = questions.length
   const answeredQuestions = questions.filter(q => 
@@ -74,20 +65,10 @@ export function TestAttemptLayout() {
             currentCategory={currentCategory?.name || ""}
             totalQuestions={totalQuestions}
             answeredQuestions={answeredQuestions}
-            // currentCategoryProgress={
-            //   currentCategory
-            //     ? (currentCategory.answeredQuestions / currentCategory.totalQuestions) * 100
-            //     : 0
-            // }
           />
         </div>
 
         <div className="container max-w-7xl mx-auto px-4 mt-6">
-          <CategoryTabs
-            categories={categories}
-            currentCategoryId={currentCategoryId}
-            onCategoryChange={setCurrentCategoryId} // Add this prop
-          />
           <QuestionManager currentCategory={currentCategory} />
         </div>
 
