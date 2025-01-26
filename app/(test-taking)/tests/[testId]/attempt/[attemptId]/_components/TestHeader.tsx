@@ -24,7 +24,6 @@ export function TestHeader({
   return (
     <header className="bg-white border-b">
       <div className="container max-w-7xl mx-auto">
-        {/* Top section with title and progress counter */}
         <div className="flex items-center h-16 px-4">
           <Button
             variant="ghost"
@@ -39,8 +38,8 @@ export function TestHeader({
           
           <div className="flex-1 min-w-0">
             <h1 className="text-lg font-semibold truncate">{title}</h1>
-            <div className="text-sm text-muted-foreground mt-0.5">
-              {currentCategory}
+            <div className="flex items-center gap-2 text-sm text-muted-foreground mt-0.5">
+              <span>{currentCategory}</span>
             </div>
           </div>
 
@@ -49,8 +48,8 @@ export function TestHeader({
           </div>
         </div>
 
-        {/* Overall progress bar section */}
         <div className="px-4 pb-4 space-y-3">
+          {/* Overall progress */}
           <div className="space-y-1.5">
             <div className="flex justify-between text-sm">
               <span>Overall Progress</span>
