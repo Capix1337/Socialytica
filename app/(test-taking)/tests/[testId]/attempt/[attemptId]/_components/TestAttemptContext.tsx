@@ -21,14 +21,16 @@ interface TestAttemptContextType {
   questions: (TestAttemptQuestion | GuestAttemptQuestion)[]
   currentQuestionId: string
   currentCategory: CategoryState | null
+  categories: CategoryState[]
+  nextCategoryId: string | null
   isLoading: boolean
   showCompletionDialog: boolean
   setShowCompletionDialog: (show: boolean) => void
   handleAnswerSelect: (questionId: string, optionId: string) => Promise<void>
   setCurrentQuestionId: (id: string) => void
+  moveToNextCategory: () => void
   isCategoryCompleted: boolean
   isLastCategory: boolean
-  handleNextCategory: () => void
 }
 
 export const TestAttemptContext = createContext<TestAttemptContextType | undefined>(undefined)
@@ -196,14 +198,16 @@ export function TestAttemptProvider({ children, params }: TestAttemptProviderPro
     questions,
     currentQuestionId,
     currentCategory,
+    categories,
+    nextCategoryId: isLastCategory ? null : categories[currentCategoryIndex + 1]?.id || null,
     isLoading,
     showCompletionDialog,
     setShowCompletionDialog,
     handleAnswerSelect,
     setCurrentQuestionId,
+    moveToNextCategory: handleNextCategory,
     isCategoryCompleted,
-    isLastCategory,
-    handleNextCategory
+    isLastCategory
   }
 
   return (

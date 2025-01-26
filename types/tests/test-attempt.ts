@@ -193,3 +193,15 @@ export interface GuestTestAttemptData {
     maxRawScore: number;
   }[];
 }
+
+export interface TestAttemptQuestionsResponse {
+  questions: TestAttemptQuestion[]
+  totalQuestions: number
+  answeredQuestions: number
+  categories: {
+    id: string
+    name: string
+    isCompleted: boolean
+  }[]
+  nextCategoryId: string | null
+}
