@@ -58,7 +58,7 @@ export function TestAttemptProvider({ children, params }: TestAttemptProviderPro
   const [attemptId, setAttemptId] = useState<string>("")
   const [testId, setTestId] = useState<string>("")
   const [showCompletionDialog, setShowCompletionDialog] = useState(false)
-  const [categoryOrder, setCategoryOrder] = useState<string[]>([])
+  // const [categoryOrder, setCategoryOrder] = useState<string[]>([])
 
   // Get current category and completion status
   const currentCategory = categories[currentCategoryIndex] || null
@@ -72,7 +72,7 @@ export function TestAttemptProvider({ children, params }: TestAttemptProviderPro
     if (!isSignedIn && attemptId) {
       const progress = {
         currentCategoryIndex,
-        categoryOrder: categories.map(c => c.id),
+        // Remove categoryOrder from saved progress
         completedCategories: categories
           .filter(cat => cat.questions.every(q => 
             isGuestQuestion(q) ? !!q.selectedOptionId : q.isAnswered
