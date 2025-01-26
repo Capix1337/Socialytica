@@ -78,7 +78,9 @@ export function TestAttemptProvider({ children, params }: TestAttemptProviderPro
           .filter(cat => cat.questions.every(q => 
             isGuestQuestion(q) ? !!q.selectedOptionId : q.isAnswered
           ))
-          .map(cat => cat.id)
+          .map(cat => cat.id),
+        lastUpdated: Date.now(), // Add timestamp
+        categoryTransitions: [], // Initialize empty transitions array
       }
       guestStorage.saveAttemptProgress(attemptId, progress)
     }
@@ -87,14 +89,26 @@ export function TestAttemptProvider({ children, params }: TestAttemptProviderPro
   // Handle moving to next category
   const handleNextCategory = useCallback(() => {
     if (isCategoryCompleted && !isLastCategory) {
+      // Record transition before changing category
+      if (!isSignedIn && attemptId && currentCategory) {
+        const nextCat = categories[currentCategoryIndex + 1]
+        if (nextCat) {
+          guestStorage.recordCategoryTransition(
+            attemptId,
+            currentCategory.id,
+            nextCat.id
+          )
+        }
+      }
+      
       setCurrentCategoryIndex(prev => prev + 1)
       const nextCategory = categories[currentCategoryIndex + 1]
       if (nextCategory?.questions.length) {
         setCurrentQuestionId(nextCategory.questions[0].id)
       }
-      saveProgress() // Save progress after category change
+      saveProgress()
     }
-  }, [isCategoryCompleted, isLastCategory, categories, currentCategoryIndex, saveProgress])
+  }, [isCategoryCompleted, isLastCategory, categories, currentCategoryIndex, saveProgress, attemptId, isSignedIn, currentCategory])
 
   // Resume functionality
   const resumeProgress = useCallback(() => {
