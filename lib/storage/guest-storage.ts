@@ -14,11 +14,11 @@ export interface GuestCategoryProgress {
   currentCategoryIndex: number
   completedCategories: string[]
   lastUpdated: number
-  categoryTransitions: {
+  categoryTransitions: Array<{
     fromCategoryId: string
     toCategoryId: string
     timestamp: number
-  }[]
+  }>
 }
 
 export class GuestStorage {
