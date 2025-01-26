@@ -14,7 +14,7 @@ import {
 import { useRouter } from "next/navigation"
 import { AlertTriangle } from "lucide-react"
 import { useAuth } from "@clerk/nextjs"
-import { useTestAttempt } from "@/hooks/useTestAttempt"
+import { useTestAttempt } from "./TestAttemptContext"
 
 interface NavigationControlsProps {
   testId: string

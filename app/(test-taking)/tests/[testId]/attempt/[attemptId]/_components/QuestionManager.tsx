@@ -1,5 +1,6 @@
 "use client"
 
+import { useEffect } from "react" // Add this import
 import { useTestAttempt } from "./TestAttemptContext"
 import { QuestionCard } from "./QuestionCard"
 import { NavigationControls } from "./NavigationControls"
@@ -38,7 +39,7 @@ export function QuestionManager({ currentCategory }: QuestionManagerProps) {
   )
 
   // Auto-advance to next category when current is completed
-  React.useEffect(() => {
+  useEffect(() => { // Change from React.useEffect to useEffect
     if (isCategoryCompleted && !isLastCategory) {
       moveToNextCategory()
     }

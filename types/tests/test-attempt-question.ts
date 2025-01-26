@@ -34,6 +34,13 @@ export interface TestAttemptQuestionsResponse {
   questions: TestAttemptQuestion[]
   totalQuestions: number
   answeredQuestions: number
+  categories: {
+    id: string
+    name: string
+    isCompleted: boolean
+  }[]
+  nextCategoryId: string | null
+  currentCategoryId: string | null // Add this field
 }
 
 export interface TestAttemptQuestionError {

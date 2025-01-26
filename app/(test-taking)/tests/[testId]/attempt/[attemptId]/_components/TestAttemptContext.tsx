@@ -7,8 +7,9 @@ import { guestStorage } from "@/lib/storage/guest-storage"
 import { isGuestQuestion } from "@/lib/utils/question-helpers"
 import type { TestAttemptQuestion } from "@/types/tests/test-attempt-question"
 import type { GuestAttemptQuestion } from "@/types/tests/guest-attempt"
+import type { GuestCategoryProgress } from "@/lib/storage/guest-storage" // Add this import
 
-interface CategoryState {
+export interface CategoryState {
   id: string
   name: string
   isCompleted: boolean
@@ -70,9 +71,8 @@ export function TestAttemptProvider({ children, params }: TestAttemptProviderPro
   // Save progress including category state
   const saveProgress = useCallback(() => {
     if (!isSignedIn && attemptId) {
-      const progress = {
+      const progress: GuestCategoryProgress = {
         currentCategoryIndex,
-        // Remove categoryOrder from saved progress
         completedCategories: categories
           .filter(cat => cat.questions.every(q => 
             isGuestQuestion(q) ? !!q.selectedOptionId : q.isAnswered
@@ -101,13 +101,13 @@ export function TestAttemptProvider({ children, params }: TestAttemptProviderPro
       const savedProgress = guestStorage.getAttemptProgress(attemptId)
       if (savedProgress) {
         setCurrentCategoryIndex(savedProgress.currentCategoryIndex)
-        setCategoryOrder(savedProgress.categoryOrder)
-        // Restore category state based on saved order
+        // Remove reference to categoryOrder
         setCategories(prev => {
-          const ordered = savedProgress.categoryOrder
-            .map(id => prev.find(c => c.id === id))
-            .filter((c): c is CategoryState => c !== undefined)
-          return ordered
+          // Mark categories as completed based on saved completedCategories
+          return prev.map(category => ({
+            ...category,
+            isCompleted: savedProgress.completedCategories.includes(category.id)
+          }))
         })
       }
     }

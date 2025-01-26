@@ -10,9 +10,8 @@ const STORAGE_KEYS = {
 
 const EXPIRATION_DAYS = 30;
 
-interface GuestCategoryProgress {
+export interface GuestCategoryProgress {
   currentCategoryIndex: number
-  categoryOrder: string[]
   completedCategories: string[]
 }
 
