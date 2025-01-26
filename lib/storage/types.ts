@@ -1,3 +1,5 @@
+import type { GuestCategoryProgress } from './guest-storage';
+
 export interface GuestStorageData {
     guestId: string;
     currentAttemptId: string | null;
@@ -28,6 +30,8 @@ export interface GuestStorageData {
       rawScore: number;
       maxRawScore: number;
     }[];
+    // Add this property
+    categoryProgress?: GuestCategoryProgress;
   }
   
   export interface StorageKeys {

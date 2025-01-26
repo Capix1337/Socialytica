@@ -117,7 +117,12 @@ export async function GET(req: Request) {
           attempt.responses.some(r => r.questionId === q.id)
         )
       })),
-      currentCategoryId: attempt.test.categories[0]?.id || null
+      currentCategoryId: attempt.test.categories[0]?.id || null,
+      nextCategoryId: attempt.test.categories.find((cat, index) => 
+        index > 0 && !cat.questions.every(q => 
+          attempt.responses.some(r => r.questionId === q.id)
+        )
+      )?.id || null
     }
 
     return NextResponse.json(response)

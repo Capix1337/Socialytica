@@ -2,7 +2,7 @@
 
 export interface TestAttemptQuestion {
   id: string
-  questionId: string          // Add this
+  questionId: string
   testAttemptId: string
   question: {
     id: string
@@ -40,7 +40,7 @@ export interface TestAttemptQuestionsResponse {
     isCompleted: boolean
   }[]
   nextCategoryId: string | null
-  currentCategoryId: string | null // Add this field
+  currentCategoryId: string | null
 }
 
 export interface TestAttemptQuestionError {
