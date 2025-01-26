@@ -74,6 +74,23 @@ export function TestAttemptProvider({ children, params }: TestAttemptProviderPro
   ) || false
   const isLastCategory = currentCategoryIndex === categories.length - 1
 
+  // Define saveProgress before using it
+  const saveProgress = useCallback(() => {
+    if (!isSignedIn && attemptId) {
+      const progress: GuestCategoryProgress = {
+        currentCategoryIndex,
+        completedCategories: categories
+          .filter(cat => cat.questions.every(q => 
+            isGuestQuestion(q) ? !!q.selectedOptionId : q.isAnswered
+          ))
+          .map(cat => cat.id),
+        lastUpdated: Date.now(),
+        categoryTransitions: []
+      }
+      guestStorage.saveAttemptProgress(attemptId, progress)
+    }
+  }, [attemptId, categories, currentCategoryIndex, isSignedIn])
+
   // Handle moving to next category
   const handleNextCategory = useCallback(() => {
     if (isCategoryCompleted && !isLastCategory) {
@@ -222,6 +239,10 @@ export function TestAttemptProvider({ children, params }: TestAttemptProviderPro
       setTestId(resolvedParams.testId)
     })
   }, [params])
+
+  useEffect(() => {
+    saveProgress()
+  }, [saveProgress, questions, currentCategoryIndex])
 
   const value = {
     testId,
