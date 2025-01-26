@@ -67,6 +67,7 @@ export function TestAttemptProvider({ children, params }: TestAttemptProviderPro
     isGuestQuestion(q) ? !!q.selectedOptionId : q.isAnswered
   ) || false
   const isLastCategory = currentCategoryIndex === categories.length - 1
+  const nextCategoryId = isLastCategory ? null : categories[currentCategoryIndex + 1]?.id || null
 
   // Save progress including category state
   const saveProgress = useCallback(() => {
@@ -247,7 +248,7 @@ export function TestAttemptProvider({ children, params }: TestAttemptProviderPro
     currentQuestionId,
     currentCategory,
     categories,
-    nextCategoryId: isLastCategory ? null : categories[currentCategoryIndex + 1]?.id || null,
+    nextCategoryId,
     isLoading,
     showCompletionDialog,
     setShowCompletionDialog,
