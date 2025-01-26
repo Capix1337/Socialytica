@@ -138,7 +138,6 @@ export function TestAttemptProvider({ children, params }: TestAttemptProviderPro
 
     const sortedCategories = Object.values(categorizedQuestions)
     setCategories(sortedCategories)
-    setCategoryOrder(sortedCategories.map(c => c.id))
     
     // Set initial question
     if (sortedCategories.length && sortedCategories[0].questions.length) {
