@@ -39,11 +39,31 @@ export function QuestionManager({ currentCategory }: QuestionManagerProps) {
   )
 
   // Auto-advance to next category when current is completed
-  useEffect(() => { // Change from React.useEffect to useEffect
+  useEffect(() => {
     if (isCategoryCompleted && !isLastCategory) {
-      moveToNextCategory()
+      // Add a small delay before category transition
+      const timer = setTimeout(() => {
+        moveToNextCategory()
+      }, 1000) // 1 second delay
+      
+      return () => clearTimeout(timer)
     }
   }, [isCategoryCompleted, isLastCategory, moveToNextCategory])
+
+  // Handle question navigation
+  const handleNext = () => {
+    const nextQuestion = questions[currentQuestionIndex + 1]
+    if (nextQuestion) {
+      setCurrentQuestionId(getQuestionData(nextQuestion).id)
+    }
+  }
+
+  const handlePrevious = () => {
+    const prevQuestion = questions[currentQuestionIndex - 1]
+    if (prevQuestion) {
+      setCurrentQuestionId(getQuestionData(prevQuestion).id)
+    }
+  }
 
   return (
     <>
@@ -83,18 +103,8 @@ export function QuestionManager({ currentCategory }: QuestionManagerProps) {
           answeredQuestions={answeredQuestions}
           canGoNext={currentQuestionIndex < questions.length - 1}
           canGoPrevious={currentQuestionIndex > 0}
-          onNext={() => {
-            const nextQuestion = questions[currentQuestionIndex + 1]
-            if (nextQuestion) {
-              setCurrentQuestionId(getQuestionData(nextQuestion).id)
-            }
-          }}
-          onPrevious={() => {
-            const prevQuestion = questions[currentQuestionIndex - 1]
-            if (prevQuestion) {
-              setCurrentQuestionId(getQuestionData(prevQuestion).id)
-            }
-          }}
+          onNext={handleNext}
+          onPrevious={handlePrevious}
         />
       </div>
     </>

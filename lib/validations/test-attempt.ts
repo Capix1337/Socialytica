@@ -1,5 +1,6 @@
 //lib/validation/test-attempt.ts
 import * as z from "zod"
+import { z } from "zod"
 
 // Schema for a question response when submitting answers
 export const questionResponseSchema = z.object({
@@ -19,6 +20,19 @@ export const submitTestResponsesSchema = z.object({
   responses: z.array(questionResponseSchema)
 })
 
+// Add new schema for category completion
+export const categoryCompletionSchema = z.object({
+  categoryId: z.string().cuid("Invalid category ID"),
+  isCompleted: z.boolean(),
+  nextCategoryId: z.string().cuid("Invalid next category ID").nullable()
+})
+
 export type QuestionResponseInput = z.infer<typeof questionResponseSchema>
 export type StartTestAttemptInput = z.infer<typeof startTestAttemptSchema>
 export type SubmitTestResponsesInput = z.infer<typeof submitTestResponsesSchema>
+
+// Add type for category completion response
+export type CategoryCompletionResponse = {
+  success: boolean
+  nextCategoryId: string | null
+}
