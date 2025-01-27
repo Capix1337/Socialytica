@@ -1,9 +1,10 @@
 // types/tests/test-attempt.ts
 
-import { Test } from "./test"
+// import { Test } from "./test"
 import { Question } from "./question"
 import { Option } from "./option"
 import { TestAttemptQuestion } from "./test-attempt-question" // Add this import
+import type { TestProgress, TestScore, TestStatus } from './progress'
 
 export type TestStatus = 'IN_PROGRESS' | 'COMPLETED' | 'ABANDONED'
 
@@ -53,11 +54,26 @@ export interface TestAttempt {
   totalScore: number | null
   percentageScore: number | null
   currentCategoryId: string | null // Add this
-  test?: Test
-  responses?: QuestionResponse[]
-  categoryScores?: CategoryScore[]
+  test?: {
+    id: string
+    title: string
+    questions: Array<{ id: string }>
+  }
+  responses?: Array<{
+    id: string
+    questionId: string
+    selectedOptionId: string
+  }>
   createdAt?: Date
   updatedAt?: Date
+  progress: TestProgress
+  score?: TestScore
+}
+
+export interface TestResponse {
+  questionId: string
+  selectedOptionId: string
+  isCorrect?: boolean
 }
 
 // Common interface for category score display
@@ -104,10 +120,10 @@ export interface TestAttemptResponse {
 }
 
 export interface TestAttemptsResponse {
-  testAttempts: TestAttempt[]
-  totalAttempts: number
-  currentPage: number
-  totalPages: number
+  inProgress: TestAttemptSummary[]
+  completed: TestAttemptSummary[]
+  totalInProgress: number
+  totalCompleted: number
 }
 
 export interface TestAttemptError {
@@ -117,6 +133,11 @@ export interface TestAttemptError {
 
 export interface CreateTestAttemptInput {
   testId: string
+  guestId?: string
+}
+
+export interface UpdateTestAttemptInput {
+  response: TestResponse
 }
 
 export interface TestAttemptApiResponse {
@@ -262,4 +283,21 @@ export interface TestAttemptQuestionsResponse {
     id: string
     name: string
   } | null
+}
+
+export interface TestAttemptSummary {
+  id: string
+  testId: string
+  testTitle: string
+  startedAt: Date
+  status: TestStatus
+  progress: {
+    answeredQuestions: number
+    totalQuestions: number
+    percentageComplete: number
+  }
+  score?: {
+    totalScore: number
+    percentageScore: number
+  }
 }

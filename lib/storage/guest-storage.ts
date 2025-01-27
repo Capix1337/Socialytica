@@ -1,6 +1,7 @@
 import { v4 as uuidv4 } from 'uuid';
 import type { GuestStorageData, GuestTestAttemptData, StorageError } from './types';
 import type { GuestAttemptSummary } from '@/types/tests/guest-attempt'; // Add this import
+import { transformAttemptData, normalizeAttemptData } from '@/utils/tests/attempt'
 
 const STORAGE_KEYS = {
   GUEST_ID: 'guest_id',
@@ -313,21 +314,12 @@ export class GuestStorage {
             attemptData.status === 'IN_PROGRESS' && 
             !this.isAttemptExpired(attemptData)
           ) {
-            attempts.push({
-              id: attemptData.attemptId,
-              testId: attemptData.testId,
-              testTitle: attemptData.testTitle || 'Untitled Test',
-              startedAt: attemptData.startedAt,
-              status: attemptData.status,
-              guestId: attemptData.guestId, // Add this line
-              progress: {
-                answeredQuestions: attemptData.responses.length,
-                totalQuestions: attemptData.totalQuestions || 0,
-                percentageComplete: attemptData.totalQuestions 
-                  ? (attemptData.responses.length / attemptData.totalQuestions) * 100 
-                  : 0
-              }
-            });
+            const attempt = transformAttemptData({
+              ...attemptData,
+              test: { questions: { length: attemptData.totalQuestions } }
+            }, true)
+            
+            attempts.push(normalizeAttemptData(attempt));
           }
         }
       }
@@ -359,23 +351,12 @@ export class GuestStorage {
             attemptData.status === 'COMPLETED' && 
             !this.isAttemptExpired(attemptData)
           ) {
-            attempts.push({
-              id: attemptData.attemptId,
-              testId: attemptData.testId,
-              testTitle: attemptData.testTitle || 'Untitled Test',
-              startedAt: attemptData.startedAt,
-              status: attemptData.status,
-              guestId: attemptData.guestId, // Add this line
-              progress: {
-                answeredQuestions: attemptData.responses.length,
-                totalQuestions: attemptData.totalQuestions || 0,
-                percentageComplete: 100
-              },
-              score: {
-                totalScore: attemptData.totalScore || 0,
-                percentageScore: attemptData.percentageScore || 0
-              }
-            });
+            const attempt = transformAttemptData({
+              ...attemptData,
+              test: { questions: { length: attemptData.totalQuestions } }
+            }, true)
+            
+            attempts.push(normalizeAttemptData(attempt));
           }
         }
       }
@@ -431,25 +412,12 @@ export class GuestStorage {
             attemptData.testId === testId && 
             !this.isAttemptExpired(attemptData)
           ) {
-            attempts.push({
-              id: attemptData.attemptId,
-              testId: attemptData.testId,
-              testTitle: attemptData.testTitle || 'Untitled Test',
-              startedAt: attemptData.startedAt,
-              status: attemptData.status,
-              guestId: attemptData.guestId, // Add this line
-              progress: {
-                answeredQuestions: attemptData.responses.length,
-                totalQuestions: attemptData.totalQuestions || 0,
-                percentageComplete: attemptData.status === 'COMPLETED' 
-                  ? 100 
-                  : (attemptData.responses.length / (attemptData.totalQuestions || 1)) * 100
-              },
-              score: attemptData.status === 'COMPLETED' ? {
-                totalScore: attemptData.totalScore || 0,
-                percentageScore: attemptData.percentageScore || 0
-              } : undefined
-            });
+            const attempt = transformAttemptData({
+              ...attemptData,
+              test: { questions: { length: attemptData.totalQuestions } }
+            }, true)
+            
+            attempts.push(normalizeAttemptData(attempt));
           }
         }
       }

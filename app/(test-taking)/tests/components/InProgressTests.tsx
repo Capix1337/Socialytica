@@ -7,8 +7,7 @@ import { Progress } from "@/components/ui/progress"
 import { ArrowRight, UserX } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import Link from "next/link"
-import { getAttemptProgress } from "../utils/attempt"
-import { isTestAttempt } from "../utils/type-guards"
+import { getAttemptProgress, isTestAttempt } from "../utils/attempt"
 import type { TestAttempt } from "@/types/tests/test-attempt"
 import type { GuestAttemptSummary } from "@/types/tests/guest-attempt"
 
@@ -26,7 +25,7 @@ export function InProgressTests({ attempts }: InProgressTestsProps) {
       </CardHeader>
       <CardContent className="grid gap-4">
         {attempts.map((attempt) => {
-          const { answeredQuestions, totalQuestions, progress } = getAttemptProgress(attempt)
+          const { answeredQuestions, totalQuestions, percentageComplete } = getAttemptProgress(attempt)
           const isGuest = !isTestAttempt(attempt)
           
           return (
@@ -54,7 +53,7 @@ export function InProgressTests({ attempts }: InProgressTestsProps) {
                   </Button>
                 </div>
               </div>
-              <Progress value={progress} className="h-2" />
+              <Progress value={percentageComplete} className="h-2" />
             </div>
           )
         })}

@@ -3,12 +3,19 @@
 import { auth } from "@clerk/nextjs/server"
 import { NextResponse } from "next/server"
 import prisma from "@/lib/prisma"
+import type { TestAttemptsResponse } from "@/types/tests/test-attempt"
 
-export async function GET() {
+export async function GET(): Promise<NextResponse<TestAttemptsResponse>> {
   try {
     const { userId: clerkUserId } = await auth()
     if (!clerkUserId) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+      // Return empty response structure for unauthorized
+      return NextResponse.json({
+        inProgress: [],
+        completed: [],
+        totalInProgress: 0,
+        totalCompleted: 0
+      }, { status: 401 })
     }
 
     const user = await prisma.user.findUnique({
@@ -17,9 +24,16 @@ export async function GET() {
     })
 
     if (!user) {
-      return NextResponse.json({ error: "User not found" }, { status: 404 })
+      // Return empty response structure for missing user
+      return NextResponse.json({
+        inProgress: [],
+        completed: [],
+        totalInProgress: 0,
+        totalCompleted: 0
+      }, { status: 404 })
     }
 
+    // Enhanced query to include all needed data
     const attempts = await prisma.testAttempt.findMany({
       where: {
         userId: user.id
@@ -28,7 +42,19 @@ export async function GET() {
         test: {
           select: {
             id: true,
-            title: true
+            title: true,
+            questions: {
+              select: {
+                id: true
+              }
+            }
+          }
+        },
+        responses: {
+          select: {
+            id: true,
+            questionId: true,
+            selectedOptionId: true
           }
         }
       },
@@ -37,15 +63,51 @@ export async function GET() {
       }
     })
 
-    const inProgress = attempts.filter(a => a.status === "IN_PROGRESS")
-    const completed = attempts
-      .filter(a => a.status === "COMPLETED")
-      .slice(0, 5)
+    // Transform data to include progress information
+    const formattedAttempts = attempts.map(attempt => ({
+      id: attempt.id,
+      testId: attempt.test.id,
+      testTitle: attempt.test.title,
+      startedAt: attempt.startedAt,
+      status: attempt.status,
+      progress: {
+        answeredQuestions: attempt.responses.length,
+        totalQuestions: attempt.test.questions.length,
+        percentageComplete: Math.round(
+          (attempt.responses.length / attempt.test.questions.length) * 100
+        )
+      },
+      ...(attempt.status === 'COMPLETED' && {
+        score: {
+          totalScore: attempt.totalScore,
+          percentageScore: attempt.percentageScore
+        }
+      })
+    }))
 
-    return NextResponse.json({ inProgress, completed })
+    // Split attempts by status
+    const inProgress = formattedAttempts.filter(a => a.status === "IN_PROGRESS")
+    const completed = formattedAttempts
+      .filter(a => a.status === "COMPLETED")
+      .slice(0, 5) // Limit completed tests to 5
+
+    const response: TestAttemptsResponse = {
+      inProgress,
+      completed,
+      totalInProgress: inProgress.length,
+      totalCompleted: completed.length
+    }
+
+    return NextResponse.json(response)
 
   } catch (error) {
     console.error("[TEST_ATTEMPTS_GET]", error)
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 })
+    // Return empty response structure for errors
+    return NextResponse.json({
+      inProgress: [],
+      completed: [],
+      totalInProgress: 0,
+      totalCompleted: 0
+    }, { status: 500 })
   }
 }
