@@ -3,7 +3,6 @@
 import { useTestAttempt } from "./TestAttemptContext"
 import { TestHeader } from "./TestHeader"
 import { QuestionManager } from "./QuestionManager"
-import { CompletionDialog } from "./CompletionDialog"
 import { LoadingState } from "./LoadingState"
 import { isGuestQuestion } from "@/lib/utils/question-helpers"
 
@@ -11,11 +10,7 @@ export function TestAttemptLayout() {
   const {
     isLoading,
     questions,
-    currentCategory, // Now using currentCategory from context
-    showCompletionDialog,
-    setShowCompletionDialog,
-    testId,
-    attemptId,
+    currentCategory,
   } = useTestAttempt()
 
   if (isLoading) return <LoadingState />
@@ -41,14 +36,6 @@ export function TestAttemptLayout() {
         <div className="container max-w-7xl mx-auto px-4 mt-6">
           {currentCategory && <QuestionManager currentCategory={currentCategory} />}
         </div>
-
-        <CompletionDialog
-          isOpen={showCompletionDialog}
-          onOpenChange={setShowCompletionDialog}
-          testId={testId}
-          attemptId={attemptId}
-          questions={questions}
-        />
       </div>
     </div>
   )
