@@ -78,10 +78,10 @@ export function TestCard({
             <div className="space-y-2">
               <div className="flex justify-between items-center text-sm">
                 <span className="text-muted-foreground">Progress</span>
-                <span>{progressInfo.progress}%</span>
+                <span>{progressInfo.percentageComplete}%</span>
               </div>
               <Progress 
-                value={progressInfo.progress}
+                value={progressInfo.percentageComplete}
                 className={cn(
                   "h-2",
                   isGuest && "opacity-80" // Slightly dimmed for guest attempts

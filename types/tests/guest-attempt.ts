@@ -165,3 +165,5 @@ export interface GuestAttempt {
     maxRawScore: number
   }>
 }
+
+export type TestStatus = 'IN_PROGRESS' | 'COMPLETED' | 'ABANDONED'

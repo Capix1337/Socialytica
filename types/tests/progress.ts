@@ -9,7 +9,7 @@ export interface TestScore {
   percentageScore: number
 }
 
-export type TestStatus = 'NOT_STARTED' | 'IN_PROGRESS' | 'COMPLETED'
+export type TestStatus = 'IN_PROGRESS' | 'COMPLETED' | 'ABANDONED'
 
 export interface BaseAttemptSummary {
   id: string

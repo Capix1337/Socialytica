@@ -1,61 +1,25 @@
-// app/api/(test-taking)/tests/[testId]/route.ts
+import type { TestStatus } from "@/types/tests/progress"
+import prisma from "@/lib/prisma"
+import { auth } from "@clerk/nextjs/server"
+import { NextResponse } from "next/server"
 
-import { auth } from '@clerk/nextjs/server'
-import { NextResponse } from 'next/server'
-import prisma from '@/lib/prisma'
-import type { TestAttempt } from '@/types/tests/test-attempt'
-
-export async function GET(req: Request) {
+export async function GET(
+  req: Request,
+  { params }: { params: { testId: string } }
+) {
   try {
     const { userId } = await auth()
-
-    // Extract testId from URL following admin route pattern
-    const testId = req.url.split('/tests/')[1].split('/')[0]
-    if (!testId) {
-      return new NextResponse('Invalid test ID', { status: 400 })
-    }
-
-    // Fetch test details - always visible to guests and users
-    const test = await prisma.test.findUnique({
-      where: {
-        id: testId,
-        isPublished: true // Only return published tests
-      },
-      select: {
-        id: true,
-        title: true,
-        description: true,
-        categories: {
-          select: {
-            id: true,
-            name: true,
-            description: true,
-            scale: true,
-            _count: {
-              select: {
-                questions: true
-              }
-            }
-          }
-        },
-        _count: {  // Add this to get total questions count
-          select: {
-            questions: true
-          }
-        }
-      }
-    })
-
-    if (!test) {
-      return NextResponse.json(
-        { message: 'Test not found' },
-        { status: 404 }
-      )
-    }
-
-    // Get attempts only if user is authenticated
-    let attempts: Pick<TestAttempt, 'id' | 'startedAt' | 'completedAt' | 'status' | 'totalScore' | 'percentageScore'>[] = []
+    const { testId } = params
     
+    let attempts: Array<{
+      status: TestStatus
+      id: string
+      startedAt: Date
+      completedAt: Date | null
+      totalScore: number
+      percentageScore: number
+    }> = []
+
     if (userId) {
       attempts = await prisma.testAttempt.findMany({
         where: {
@@ -64,9 +28,9 @@ export async function GET(req: Request) {
         },
         select: {
           id: true,
+          status: true,
           startedAt: true,
           completedAt: true,
-          status: true,
           totalScore: true,
           percentageScore: true
         },
@@ -76,12 +40,9 @@ export async function GET(req: Request) {
       })
     }
 
-    return NextResponse.json({ 
-      test,
-      attempts
-    })
+    return NextResponse.json({ attempts })
   } catch (error) {
-    console.error('[TEST_GET]', error)
+    console.error("[TEST_GET]", error)
     return NextResponse.json(
       { message: 'Internal Server Error' },
       { status: 500 }
