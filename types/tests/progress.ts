@@ -1,3 +1,5 @@
+export type TestStatus = 'IN_PROGRESS' | 'COMPLETED' | 'ABANDONED'
+
 export interface TestProgress {
   answeredQuestions: number
   totalQuestions: number
@@ -9,8 +11,6 @@ export interface TestScore {
   percentageScore: number
 }
 
-export type TestStatus = 'IN_PROGRESS' | 'COMPLETED' | 'ABANDONED'
-
 export interface BaseAttemptSummary {
   id: string
   testId: string
@@ -21,8 +21,22 @@ export interface BaseAttemptSummary {
   score?: TestScore
 }
 
-export interface GuestAttemptSummary extends BaseAttemptSummary {
+export interface GuestAttemptSummary {
+  id: string
+  testId: string
+  testTitle: string
+  startedAt: number // Changed from Date to number
+  status: TestStatus
   guestId: string
+  progress: {
+    answeredQuestions: number
+    totalQuestions: number
+    percentageComplete: number
+  }
+  score?: {
+    totalScore: number
+    percentageScore: number
+  }
 }
 
 export interface UserAttemptSummary extends BaseAttemptSummary {
@@ -49,5 +63,16 @@ export interface UserAttempt extends TestAttemptBase {
     id: string
     questionId: string
     selectedOptionId: string
+  }>
+}
+
+export interface GuestCategoryProgress {
+  currentCategoryIndex: number
+  completedCategories: string[]
+  lastUpdated: number
+  categoryTransitions: Array<{
+    fromCategoryId: string
+    toCategoryId: string
+    timestamp: number
   }>
 }

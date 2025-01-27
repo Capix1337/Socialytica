@@ -7,7 +7,7 @@ import { guestStorage } from "@/lib/storage/guest-storage"
 import { isGuestQuestion } from "@/lib/utils/question-helpers"
 import type { TestAttemptQuestion } from "@/types/tests/test-attempt-question"
 import type { GuestAttemptQuestion } from "@/types/tests/guest-attempt"
-import type { GuestCategoryProgress } from "@/lib/storage/guest-storage" // Add this import
+import type { GuestCategoryProgress } from "@/types/tests/progress" // Updated import path
 
 export interface CategoryState {
   id: string

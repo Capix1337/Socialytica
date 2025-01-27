@@ -42,7 +42,8 @@ export async function GET(
                 description: true,
                 scale: true
               }
-            }
+            },
+            questions: true
           }
         },
         responses: true,
@@ -56,7 +57,14 @@ export async function GET(
       }, { status: 404 })
     }
 
-    const response: GuestAttemptDetails = {
+    // Transform the category scores to match the expected format
+    const transformedCategoryScores = attempt.categoryScores.map(cs => ({
+      categoryId: cs.categoryId,
+      score: cs.actualScore,
+      total: cs.maxScale
+    }))
+
+    return NextResponse.json({
       id: attempt.id,
       guestId: attempt.guestId,
       test: attempt.test,
@@ -64,12 +72,15 @@ export async function GET(
       status: attempt.status,
       expiresAt: attempt.expiresAt,
       progress: {
+        answeredQuestions: attempt.responses.length,
+        totalQuestions: attempt.test.questions.length,
+        percentageComplete: Math.round(
+          (attempt.responses.length / attempt.test.questions.length) * 100
+        ),
         totalResponses: attempt.responses.length,
-        categoryScores: attempt.categoryScores
+        categoryScores: transformedCategoryScores
       }
-    }
-
-    return NextResponse.json(response)
+    })
 
   } catch (error) {
     console.error("[GUEST_ATTEMPT_GET]", error)

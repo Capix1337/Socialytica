@@ -1,5 +1,11 @@
-import type {  Category } from "@prisma/client"
-import { TestStatus } from './test-attempt'
+import type { Category } from "@prisma/client"
+import type { TestStatus } from '@/types/tests/progress'
+
+export interface CategoryScore {
+  categoryId: string
+  score: number
+  total: number
+}
 
 export interface GuestAttemptApiResponse {
   guestAttempt: {
@@ -12,30 +18,25 @@ export interface GuestAttemptApiResponse {
   }
 }
 
+export interface GuestAttemptProgress {
+  answeredQuestions: number
+  totalQuestions: number
+  percentageComplete: number
+  totalResponses?: number
+  categoryScores?: CategoryScore[]
+}
+
 export interface GuestAttemptDetails {
   id: string
   guestId: string
   test: {
     title: string
     description?: string | null
-    categories: {
-      id: string
-      name: string
-      description?: string | null
-      scale: number
-    }[]
   }
-  startedAt: Date
-  status: string
+  startedAt: Date | number
+  status: TestStatus
   expiresAt: Date
-  progress: {
-    totalResponses: number
-    categoryScores?: {
-      categoryId: string
-      actualScore: number
-      maxScale: number
-    }[]
-  }
+  progress?: GuestAttemptProgress
 }
 
 export interface GuestAttemptQuestion {
@@ -110,8 +111,8 @@ export interface GuestAttemptSummary {
   testId: string
   testTitle: string
   startedAt: number
-  status: 'IN_PROGRESS' | 'COMPLETED' | 'ABANDONED'
-  guestId: string  // Add this field
+  status: TestStatus 
+  guestId: string // This is required
   progress: {
     answeredQuestions: number
     totalQuestions: number
@@ -166,4 +167,34 @@ export interface GuestAttempt {
   }>
 }
 
-export type TestStatus = 'IN_PROGRESS' | 'COMPLETED' | 'ABANDONED'
+export interface GuestTestResponse {
+  questionId: string
+  selectedOptionId: string
+  pointsEarned: number
+  maxPoints: number
+}
+
+export interface GuestTestAttemptData {
+  attemptId: string
+  testId: string
+  testTitle?: string
+  guestId: string
+  status: TestStatus
+  startedAt: number
+  responses: GuestTestResponse[]
+  totalQuestions: number
+  categoryProgress?: GuestCategoryProgress
+}
+
+// lib/storage/guest-storage.ts
+export interface GuestCategoryProgress {
+  currentCategoryIndex: number
+  completedCategories: string[]
+  lastUpdated: number
+  categoryTransitions: Array<{
+    fromCategoryId: string
+    toCategoryId: string
+    timestamp: number
+  }>
+}
+

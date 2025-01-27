@@ -1,7 +1,8 @@
 import { v4 as uuidv4 } from 'uuid';
 import type { GuestStorageData, GuestTestAttemptData, StorageError } from './types';
 import type { GuestAttemptSummary } from '@/types/tests/guest-attempt'; // Add this import
-import { transformAttemptData, normalizeAttemptData } from '@/utils/tests/attempt'
+import type { GuestCategoryProgress } from '@/types/tests/progress'
+// import { transformAttemptData, normalizeAttemptData } from '@/utils/tests/attempt'
 
 const STORAGE_KEYS = {
   GUEST_ID: 'guest_id',
@@ -10,17 +11,6 @@ const STORAGE_KEYS = {
 } as const;
 
 const EXPIRATION_DAYS = 30;
-
-export interface GuestCategoryProgress {
-  currentCategoryIndex: number
-  completedCategories: string[]
-  lastUpdated: number
-  categoryTransitions: Array<{
-    fromCategoryId: string
-    toCategoryId: string
-    timestamp: number
-  }>
-}
 
 export class GuestStorage {
   private isClient = typeof window !== 'undefined';
@@ -298,9 +288,6 @@ export class GuestStorage {
     if (!this.isClient) return [];
 
     try {
-      const guestData = this.getGuestData();
-      if (!guestData) return [];
-
       const attempts: GuestAttemptSummary[] = [];
       
       for (let i = 0; i < localStorage.length; i++) {
@@ -314,12 +301,24 @@ export class GuestStorage {
             attemptData.status === 'IN_PROGRESS' && 
             !this.isAttemptExpired(attemptData)
           ) {
-            const attempt = transformAttemptData({
-              ...attemptData,
-              test: { questions: { length: attemptData.totalQuestions } }
-            }, true)
-            
-            attempts.push(normalizeAttemptData(attempt));
+            // Create attempt summary directly instead of using transform
+            const attempt: GuestAttemptSummary = {
+              id: attemptData.attemptId,
+              testId: attemptData.testId,
+              testTitle: attemptData.testTitle || 'Untitled Test',
+              startedAt: attemptData.startedAt,
+              status: attemptData.status,
+              guestId: attemptData.guestId,
+              progress: {
+                answeredQuestions: attemptData.responses.length,
+                totalQuestions: attemptData.totalQuestions || 0,
+                percentageComplete: Math.round(
+                  (attemptData.responses.length / (attemptData.totalQuestions || 1)) * 100
+                )
+              }
+            };
+
+            attempts.push(attempt);
           }
         }
       }
@@ -351,12 +350,31 @@ export class GuestStorage {
             attemptData.status === 'COMPLETED' && 
             !this.isAttemptExpired(attemptData)
           ) {
-            const attempt = transformAttemptData({
-              ...attemptData,
-              test: { questions: { length: attemptData.totalQuestions } }
-            }, true)
-            
-            attempts.push(normalizeAttemptData(attempt));
+            // Create attempt summary directly
+            const attempt: GuestAttemptSummary = {
+              id: attemptData.attemptId,
+              testId: attemptData.testId,
+              testTitle: attemptData.testTitle || 'Untitled Test',
+              startedAt: attemptData.startedAt,
+              status: attemptData.status,
+              guestId: attemptData.guestId,
+              progress: {
+                answeredQuestions: attemptData.responses.length,
+                totalQuestions: attemptData.totalQuestions || 0,
+                percentageComplete: attemptData.status === 'COMPLETED'
+                  ? 100
+                  : Math.round((attemptData.responses.length / (attemptData.totalQuestions || 1)) * 100)
+              }
+            };
+
+            if (attemptData.status === 'COMPLETED') {
+              attempt.score = {
+                totalScore: attemptData.totalScore || 0,
+                percentageScore: attemptData.percentageScore || 0
+              };
+            }
+
+            attempts.push(attempt);
           }
         }
       }
@@ -408,16 +426,31 @@ export class GuestStorage {
             localStorage.getItem(key) || '{}'
           );
 
-          if (
-            attemptData.testId === testId && 
-            !this.isAttemptExpired(attemptData)
-          ) {
-            const attempt = transformAttemptData({
-              ...attemptData,
-              test: { questions: { length: attemptData.totalQuestions } }
-            }, true)
-            
-            attempts.push(normalizeAttemptData(attempt));
+          if (attemptData.testId === testId && !this.isAttemptExpired(attemptData)) {
+            const attempt: GuestAttemptSummary = {
+              id: attemptData.attemptId,
+              testId: attemptData.testId,
+              testTitle: attemptData.testTitle || 'Untitled Test',
+              startedAt: attemptData.startedAt,
+              status: attemptData.status,
+              guestId: attemptData.guestId,
+              progress: {
+                answeredQuestions: attemptData.responses.length,
+                totalQuestions: attemptData.totalQuestions || 0,
+                percentageComplete: attemptData.status === 'COMPLETED'
+                  ? 100
+                  : Math.round((attemptData.responses.length / (attemptData.totalQuestions || 1)) * 100)
+              }
+            }
+          
+            if (attemptData.status === 'COMPLETED') {
+              attempt.score = {
+                totalScore: attemptData.totalScore || 0,
+                percentageScore: attemptData.percentageScore || 0
+              }
+            }
+          
+            attempts.push(attempt)
           }
         }
       }

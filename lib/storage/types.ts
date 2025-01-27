@@ -1,4 +1,4 @@
-import type { GuestCategoryProgress } from './guest-storage';
+import type { GuestCategoryProgress } from '@/types/tests/progress'
 
 export interface GuestStorageData {
     guestId: string;
@@ -30,7 +30,6 @@ export interface GuestStorageData {
       rawScore: number;
       maxRawScore: number;
     }[];
-    // Add this property
     categoryProgress?: GuestCategoryProgress;
   }
   
@@ -42,5 +41,5 @@ export interface GuestStorageData {
   
   export interface StorageError {
     message: string;
-    code: 'STORAGE_FULL' | 'INVALID_DATA' | 'EXPIRED' | 'NOT_FOUND';
+    code: string;
   }
