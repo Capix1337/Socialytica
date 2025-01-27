@@ -53,6 +53,7 @@ interface TestAttemptProviderProps {
   params: Promise<{ testId: string; attemptId: string }>
 }
 
+// Remove dialog-related state
 export function TestAttemptProvider({ children, params }: TestAttemptProviderProps) {
   const { isSignedIn } = useAuth()
   const [questions, setQuestions] = useState<(TestAttemptQuestion | GuestAttemptQuestion)[]>([])
@@ -62,8 +63,7 @@ export function TestAttemptProvider({ children, params }: TestAttemptProviderPro
   const [isLoading, setIsLoading] = useState(true)
   const [attemptId, setAttemptId] = useState<string>("")
   const [testId, setTestId] = useState<string>("")
-  const [showCompletionDialog, setShowCompletionDialog] = useState(false)
-  // const [categoryOrder, setCategoryOrder] = useState<string[]>([])
+  const [showCompletionDialog, setShowCompletionDialog] = useState(false) // Add this line
 
   // Get current category and completion status
   const currentCategory = categories[currentCategoryIndex] || null
@@ -282,8 +282,8 @@ export function TestAttemptProvider({ children, params }: TestAttemptProviderPro
     nextCategory, // Add this line
     categories,
     isLoading,
-    showCompletionDialog,
-    setShowCompletionDialog,
+    showCompletionDialog,        // Now properly declared
+    setShowCompletionDialog,     // Now properly declared
     handleAnswerSelect,
     setCurrentQuestionId,
     moveToNextCategory: handleNextCategory,
