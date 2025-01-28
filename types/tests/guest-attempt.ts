@@ -1,5 +1,8 @@
-import type {  Category } from "@prisma/client"
+import type { Category } from "@prisma/client"
 import { TestStatus } from './test-attempt'
+
+// Define specific status type for guest attempts
+export type GuestAttemptStatus = 'IN_PROGRESS' | 'COMPLETED' | 'ABANDONED';
 
 export interface GuestAttemptApiResponse {
   guestAttempt: {
@@ -110,7 +113,7 @@ export interface GuestAttemptSummary {
   testId: string
   testTitle: string
   startedAt: number
-  status: 'IN_PROGRESS' | 'COMPLETED' | 'ABANDONED'
+  status: GuestAttemptStatus // Use more specific status type
   guestId: string  // Add this field
   progress: {
     answeredQuestions: number

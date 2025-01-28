@@ -5,7 +5,7 @@ import { Question } from "./question"
 import { Option } from "./option"
 import { TestAttemptQuestion } from "./test-attempt-question" // Add this import
 
-export type TestStatus = 'IN_PROGRESS' | 'COMPLETED' | 'ABANDONED'
+export type TestStatus = 'IN_PROGRESS' | 'COMPLETED' | 'ABANDONED'| 'CLEANUP_PENDING';
 
 export interface QuestionResponse {
   id: string

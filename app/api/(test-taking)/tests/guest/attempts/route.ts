@@ -1,7 +1,10 @@
 import { NextResponse } from "next/server"
 import prisma from "@/lib/prisma"
 import { guestAttemptsQuerySchema } from "@/lib/validations/guest-attempt"
-import type { GuestAttemptsResponse } from "@/types/tests/guest-attempt"
+import type { 
+  GuestAttemptsResponse, 
+  GuestAttemptStatus 
+} from "@/types/tests/guest-attempt"
 
 export async function GET(request: Request): Promise<NextResponse<GuestAttemptsResponse | { error: string }>> {
   try {
@@ -63,8 +66,8 @@ export async function GET(request: Request): Promise<NextResponse<GuestAttemptsR
         testId: attempt.testId,
         testTitle: attempt.test.title,
         startedAt: attempt.startedAt.getTime(),
-        status: attempt.status,
-        guestId: attempt.guestId, // Add this line
+        status: attempt.status as GuestAttemptStatus,
+        guestId: attempt.guestId,
         progress: {
           answeredQuestions: attempt.responses.length,
           totalQuestions: attempt.test.questions.length,
@@ -82,8 +85,8 @@ export async function GET(request: Request): Promise<NextResponse<GuestAttemptsR
         testId: attempt.testId,
         testTitle: attempt.test.title,
         startedAt: attempt.startedAt.getTime(),
-        status: attempt.status,
-        guestId: attempt.guestId, // Add this line
+        status: attempt.status as GuestAttemptStatus,
+        guestId: attempt.guestId,
         progress: {
           answeredQuestions: attempt.test.questions.length,
           totalQuestions: attempt.test.questions.length,

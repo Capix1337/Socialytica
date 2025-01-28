@@ -2,13 +2,14 @@ import prisma from '@/lib/prisma';
 import { guestStorage } from '@/lib/storage/guest-storage';
 import type { CleanupResult, CleanupOptions } from './types';
 import { logger } from '@/lib/logger';
+import type { TestStatus } from '@/types/tests/test-attempt.ts';
 
 export class CleanupService {
   private readonly BATCH_SIZE = 100;
 
   async cleanupExpiredGuestData(options: CleanupOptions = {}): Promise<CleanupResult> {
     try {
-      logger.info('Starting cleanup process', { options: JSON.stringify(options) });
+      logger.info('Starting cleanup process', { options });
       const startTime = Date.now();
 
       const cutoffDate = new Date();
@@ -50,10 +51,14 @@ export class CleanupService {
         page++;
         totalDeleted += result.count;
 
+        // Clean local storage
         for (const attempt of result.attempts) {
           try {
             if (attempt.guestId) {
-              await this.cleanupGuestStorage(attempt.guestId);
+              const guestData = guestStorage.getGuestData();
+              if (guestData?.guestId === attempt.guestId) {
+                guestStorage.clearGuestData();
+              }
             }
           } catch (error) {
             logger.error('Error clearing localStorage', { 
@@ -74,8 +79,8 @@ export class CleanupService {
       };
 
     } catch (error) {
-      logger.error('Cleanup error', { 
-        error: error instanceof Error ? error.message : 'Unknown error'
+      logger.error('Cleanup failed', { 
+        error: error instanceof Error ? error.message : 'Unknown error' 
       });
       return {
         success: false,
@@ -85,33 +90,12 @@ export class CleanupService {
     }
   }
 
-  private async cleanupGuestStorage(guestId: string): Promise<boolean> {
-    try {
-      const beforeCleanup = guestStorage.getGuestData();
-      if (beforeCleanup?.guestId === guestId) {
-        guestStorage.clearGuestData();
-        
-        const afterCleanup = guestStorage.getGuestData();
-        if (afterCleanup?.guestId === guestId) {
-          throw new Error('Storage cleanup verification failed');
-        }
-      }
-      return true;
-    } catch (error) {
-      logger.error('Storage cleanup failed', { 
-        guestId,
-        error: error instanceof Error ? error.message : 'Unknown error'
-      });
-      throw error;
-    }
-  }
-
   public async recoverInterruptedCleanups(): Promise<void> {
     try {
       logger.info('Starting recovery of interrupted cleanups');
       const incompleteCleanups = await prisma.guestAttempt.findMany({
         where: {
-          status: { equals: 'CLEANUP_PENDING' }
+          status: 'CLEANUP_PENDING' as TestStatus
         }
       });
 

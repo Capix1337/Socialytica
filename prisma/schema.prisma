@@ -171,6 +171,7 @@ enum TestStatus {
   IN_PROGRESS
   COMPLETED
   ABANDONED
+  CLEANUP_PENDING
 }
 
 model GuestAttempt {
