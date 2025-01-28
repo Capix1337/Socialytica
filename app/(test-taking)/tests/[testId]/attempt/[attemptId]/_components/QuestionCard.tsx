@@ -8,6 +8,7 @@ import { groupOptions } from "@/lib/utils/option-grouping"
 import { OPTION_COLORS, OPTION_LABELS } from "@/lib/constants/option-labels"
 
 interface QuestionCardProps {
+  id?: string; // Add this line
   question: {
     id: string
     title: string
@@ -24,6 +25,7 @@ interface QuestionCardProps {
 }
 
 export function QuestionCard({
+  id, // Add this to props
   question,
   questionNumber,
   selectedOption,
@@ -39,7 +41,7 @@ export function QuestionCard({
 
   return (
     <Card
-      id={`question-${questionNumber}`}
+      id={id} // Add this attribute
       className={cn(
         "transition-all duration-200",
         isAnswered && "ring-2 ring-primary/10",

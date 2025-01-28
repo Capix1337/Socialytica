@@ -65,20 +65,17 @@ export function QuestionManager({ currentCategory }: QuestionManagerProps) {
     }
   }
 
-  // Updated scroll function to scroll to a specific element
+  // Updated scroll function with better timing and smoothness
   const scrollToNextQuestion = (currentIndex: number) => {
     requestAnimationFrame(() => {
       const nextQuestionElement = document.getElementById(`question-${currentIndex + 2}`);
       if (nextQuestionElement) {
-        const headerOffset = 100; // Adjust based on your header height
-        nextQuestionElement.scrollIntoView({
-          behavior: 'smooth',
-          block: 'start'
-        });
-        
-        // Fine-tune the scroll position to account for the header
-        window.scrollBy({
-          top: -headerOffset,
+        const headerOffset = 200;
+        const elementPosition = nextQuestionElement.getBoundingClientRect().top;
+        const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+
+        window.scrollTo({
+          top: offsetPosition,
           behavior: 'smooth'
         });
       }
@@ -87,18 +84,17 @@ export function QuestionManager({ currentCategory }: QuestionManagerProps) {
 
   // Modified answer selection handler
   const handleQuestionAnswer = async (questionId: string, optionId: string) => {
-    // Find current index before updating state
     const currentIndex = questions.findIndex(q => getQuestionData(q).id === questionId);
     
+    // Handle the answer selection
     await handleAnswerSelect(questionId, optionId);
 
-    if (currentIndex < questions.length - 1) {
-      const nextQuestion = questions[currentIndex + 1];
-      if (nextQuestion) {
-        setCurrentQuestionId(getQuestionData(nextQuestion).id);
+    // Wait a tiny bit for the DOM to update
+    setTimeout(() => {
+      if (currentIndex < questions.length - 1) {
         scrollToNextQuestion(currentIndex);
       }
-    }
+    }, 50);
   };
 
   return (
@@ -109,6 +105,7 @@ export function QuestionManager({ currentCategory }: QuestionManagerProps) {
           
           return (
             <QuestionCard
+              id={`question-${index + 1}`} // Add this ID attribute
               key={questionData.id}
               question={{
                 id: questionData.id,
