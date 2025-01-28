@@ -3,6 +3,7 @@
 
 import { createContext, useContext, useState, useCallback, useEffect } from "react"
 import { useAuth } from "@clerk/nextjs"
+import { toast } from "sonner" // Add this import
 import { guestStorage } from "@/lib/storage/guest-storage"
 import { isGuestQuestion } from "@/lib/utils/question-helpers"
 import type { TestAttemptQuestion } from "@/types/tests/test-attempt-question"
