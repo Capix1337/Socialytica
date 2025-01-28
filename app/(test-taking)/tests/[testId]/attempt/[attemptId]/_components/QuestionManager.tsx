@@ -65,6 +65,42 @@ export function QuestionManager({ currentCategory }: QuestionManagerProps) {
     }
   }
 
+  // Updated scroll function to scroll to a specific element
+  const scrollToNextQuestion = (currentIndex: number) => {
+    requestAnimationFrame(() => {
+      const nextQuestionElement = document.getElementById(`question-${currentIndex + 2}`);
+      if (nextQuestionElement) {
+        const headerOffset = 100; // Adjust based on your header height
+        nextQuestionElement.scrollIntoView({
+          behavior: 'smooth',
+          block: 'start'
+        });
+        
+        // Fine-tune the scroll position to account for the header
+        window.scrollBy({
+          top: -headerOffset,
+          behavior: 'smooth'
+        });
+      }
+    });
+  };
+
+  // Modified answer selection handler
+  const handleQuestionAnswer = async (questionId: string, optionId: string) => {
+    // Find current index before updating state
+    const currentIndex = questions.findIndex(q => getQuestionData(q).id === questionId);
+    
+    await handleAnswerSelect(questionId, optionId);
+
+    if (currentIndex < questions.length - 1) {
+      const nextQuestion = questions[currentIndex + 1];
+      if (nextQuestion) {
+        setCurrentQuestionId(getQuestionData(nextQuestion).id);
+        scrollToNextQuestion(currentIndex);
+      }
+    }
+  };
+
   return (
     <>
       <main className="space-y-6 mb-20">
@@ -82,7 +118,7 @@ export function QuestionManager({ currentCategory }: QuestionManagerProps) {
               questionNumber={index + 1}
               selectedOption={question.selectedOptionId || undefined}
               isAnswered={questionData.isAnswered}
-              onAnswerSelect={(optionId) => handleAnswerSelect(questionData.id, optionId)}
+              onAnswerSelect={(optionId) => handleQuestionAnswer(questionData.id, optionId)}
               className={cn(
                 "transition-all duration-200",
                 questionData.id === currentQuestionId 

@@ -62,13 +62,15 @@ export function TestCard({
           <div className="mb-4">
             <div className="flex flex-wrap gap-2 max-h-[80px] overflow-y-auto scrollbar-thin">
               {test.categories?.map((category) => (
-                <Badge 
-                  key={category.id} 
-                  variant="secondary"
-                  className="text-xs whitespace-nowrap"
-                >
-                  {category.name}
-                </Badge>
+                <div key={category.id} className="flex-shrink-0">
+                  <Badge 
+                    key={category.id} 
+                    variant="secondary"
+                    className="text-xs whitespace-nowrap"
+                  >
+                    {category.name}
+                  </Badge>
+                </div>
               ))}
             </div>
           </div>

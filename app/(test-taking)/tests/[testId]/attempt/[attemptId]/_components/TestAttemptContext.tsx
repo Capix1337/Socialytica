@@ -180,26 +180,35 @@ export function TestAttemptProvider({ children, params }: TestAttemptProviderPro
 
   // Fetch questions
   const fetchQuestions = useCallback(async () => {
-    if (!attemptId) return
+    if (!attemptId || !testId) return // Add testId check
 
     try {
       setIsLoading(true)
       const endpoint = isSignedIn 
-        ? `/api/tests/attempt/${attemptId}/questions`
-        : `/api/tests/guest/attempt/${attemptId}/questions`
+        ? `/api/tests/${testId}/attempt/${attemptId}/questions` // Updated path
+        : `/api/tests/${testId}/guest/attempt/${attemptId}/questions` // Updated path
 
       const response = await fetch(endpoint)
-      if (!response.ok) throw new Error(await response.text())
+      
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}))
+        throw new Error(errorData.error || `Failed to fetch questions: ${response.status}`)
+      }
 
       const data = await response.json()
+      if (!data.questions) {
+        throw new Error('No questions data received')
+      }
+
       setQuestions(data.questions)
       initializeCategories(data.questions)
     } catch (error) {
       console.error("Failed to load questions:", error)
+      toast.error("Failed to load questions. Please try refreshing the page.")
     } finally {
       setIsLoading(false)
     }
-  }, [attemptId, isSignedIn, initializeCategories])
+  }, [attemptId, testId, isSignedIn, initializeCategories]) // Add testId to dependencies
 
   // Handle answer selection
   const handleAnswerSelect = useCallback(async (questionId: string, optionId: string) => {
@@ -256,10 +265,10 @@ export function TestAttemptProvider({ children, params }: TestAttemptProviderPro
 
   // Fetch questions when attemptId is available
   useEffect(() => {
-    if (attemptId) {
+    if (attemptId && testId) { // Check for both
       fetchQuestions()
     }
-  }, [attemptId, fetchQuestions])
+  }, [attemptId, testId, fetchQuestions])
 
   // Effect to save progress on changes
   useEffect(() => {

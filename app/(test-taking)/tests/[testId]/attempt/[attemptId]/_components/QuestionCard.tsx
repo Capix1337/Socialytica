@@ -1,7 +1,6 @@
-// app/(test-taking)/tests/[testId]/attempt/[attemptId]/_components/QuestionCard.tsx
 "use client"
 
-import { useState } from "react"
+// import { useState } from "react"
 import { Card, CardHeader, CardContent } from "@/components/ui/card"
 import { OptionCircle } from "@/components/ui/option-circle"
 import { cn } from "@/lib/utils"
@@ -32,18 +31,9 @@ export function QuestionCard({
   onAnswerSelect,
   className,
 }: QuestionCardProps) {
-  const [isSubmitting, setIsSubmitting] = useState(false)
-
-  const handleOptionSelect = async (optionId: string) => {
-    if (isSubmitting) return
-
-    setIsSubmitting(true)
-    try {
-      await onAnswerSelect(optionId)
-    } finally {
-      setIsSubmitting(false)
-    }
-  }
+  const handleOptionSelect = (optionId: string) => {
+    onAnswerSelect(optionId);
+  };
 
   const { leftGroup, middleOption, rightGroup } = groupOptions(question.options)
 
@@ -90,7 +80,6 @@ export function QuestionCard({
                   selected={selectedOption === option.id}
                   groupColor={OPTION_COLORS.agree}
                   onClick={() => handleOptionSelect(option.id)}
-                  disabled={isSubmitting}
                 />
               ))}
             </div>
@@ -109,7 +98,6 @@ export function QuestionCard({
                   selected={selectedOption === middleOption.id}
                   groupColor={OPTION_COLORS.neutral}
                   onClick={() => handleOptionSelect(middleOption.id)}
-                  disabled={isSubmitting}
                 />
               </div>
             )}
@@ -128,7 +116,6 @@ export function QuestionCard({
                   selected={selectedOption === option.id}
                   groupColor={OPTION_COLORS.disagree}
                   onClick={() => handleOptionSelect(option.id)}
-                  disabled={isSubmitting}
                 />
               ))}
             </div>
