@@ -51,12 +51,19 @@ export function QuestionCard({
     <Card
       id={`question-${questionNumber}`}
       className={cn(
-        "transition-all duration-200",
-        isAnswered && "ring-2 ring-primary/10",
-        className
+        "transition-all duration-500", // Slower transition
+        "scroll-mt-40", // Offset for header when scrolling
+        className,
+        "hover:shadow-md",
+        "focus-within:shadow-lg",
+        "relative", // For z-index handling
+        isAnswered && "ring-1 ring-primary/10"
       )}
     >
-      <CardHeader className="border-b bg-muted/40">
+      <CardHeader className={cn(
+        "border-b",
+        isAnswered ? "bg-muted/20" : "bg-background"
+      )}>
         <div className="flex items-center gap-2">
           <span className="flex h-6 w-6 items-center justify-center rounded-full bg-primary/10 text-sm font-medium">
             {questionNumber}
@@ -67,8 +74,8 @@ export function QuestionCard({
         </div>
       </CardHeader>
       
-      <CardContent className="p-2 sm:p-4 md:p-6">
-        <p className="text-base font-medium mb-4 md:mb-8">{question.title}</p>
+      <CardContent className="p-6 md:p-8">
+        <p className="text-base font-medium mb-8">{question.title}</p>
         
         <div className="flex flex-col items-center space-y-4 md:space-y-8">
           {/* Labels */}
