@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect } from "react"
+import { useEffect, useState } from "react"
 import { useAuth } from "@clerk/nextjs"
 import { useGuestMigration } from "@/hooks/use-guest-migration"
 import { toast } from "sonner"
@@ -8,26 +8,49 @@ import { toast } from "sonner"
 export function AuthGuestHandler() {
   const { userId, isLoaded } = useAuth()
   const { migrateGuestData, isMigrating, hasGuestData } = useGuestMigration()
+  const [hasMigrated, setHasMigrated] = useState(() => {
+    // Check if migration was previously completed
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('guestDataMigrated') === 'true'
+    }
+    return false
+  })
 
   useEffect(() => {
-    if (!isLoaded) return
+    if (!isLoaded || !userId || !hasGuestData || isMigrating || hasMigrated) return
 
-    // Handle sign-in with guest data
-    if (userId && hasGuestData && !isMigrating) {
-      toast.loading('Checking for guest test data...', {
-        duration: 1000,
-      })
+    const migrationToast = toast.loading('Migrating your guest test data...', {
+      duration: Infinity,
+    })
 
-      migrateGuestData().then((success) => {
+    migrateGuestData()
+      .then((success) => {
         if (success) {
-          toast.success('Your test data has been successfully migrated!', {
-            description: 'You can now view all your test results.',
+          setHasMigrated(true)
+          localStorage.setItem('guestDataMigrated', 'true')
+          toast.success('Test data migration complete!', {
+            description: 'All your test results are now available in your account.',
+          })
+        } else {
+          toast.error('Migration failed', {
+            description: 'Please try again or contact support if the issue persists.',
           })
         }
       })
-    }
-  }, [userId, isLoaded, hasGuestData, isMigrating, migrateGuestData])
+      .catch((error) => {
+        toast.error('Migration error', {
+          description: 'An unexpected error occurred during migration.',
+        })
+        console.error('Migration error:', error)
+      })
+      .finally(() => {
+        toast.dismiss(migrationToast)
+      })
 
-  // This is a utility component - no UI needed
+    return () => {
+      toast.dismiss(migrationToast)
+    }
+  }, [userId, isLoaded, hasGuestData, isMigrating, hasMigrated, migrateGuestData])
+
   return null
 }

@@ -252,14 +252,51 @@ export class GuestStorage {
 
     try {
       const guestData = this.getGuestData();
-      if (guestData?.currentAttemptId) {
-        localStorage.removeItem(
-          `${STORAGE_KEYS.GUEST_ATTEMPT}_${guestData.currentAttemptId}`
+      if (!guestData) return;
+
+      // Begin transaction-like cleanup
+      const cleanupOperations: Array<() => void> = [];
+
+      // Collect all cleanup operations
+      if (guestData.currentAttemptId) {
+        cleanupOperations.push(() => 
+          localStorage.removeItem(`${STORAGE_KEYS.GUEST_ATTEMPT}_${guestData.currentAttemptId}`)
         );
       }
-      localStorage.removeItem(STORAGE_KEYS.GUEST_ID);
+      cleanupOperations.push(() => 
+        localStorage.removeItem(STORAGE_KEYS.GUEST_ID)
+      );
+
+      // Execute all operations
+      cleanupOperations.forEach(operation => operation());
+
+      // Verify cleanup
+      const verificationResult = this.verifyCleanup(guestData.guestId);
+      if (!verificationResult) {
+        throw new Error('Storage cleanup verification failed');
+      }
     } catch (error) {
-      console.error('Storage operation failed:', error);
+      console.error('Storage cleanup failed:', error);
+      throw error;
+    }
+  }
+
+  public verifyCleanup(guestId: string): boolean {
+    try {
+      // Check if guest ID is removed
+      const guestData = this.getGuestData();
+      if (guestData?.guestId === guestId) return false;
+
+      // Check if all related attempts are removed
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key?.includes(guestId)) return false;
+      }
+
+      return true;
+    } catch (error) {
+      console.error('Cleanup verification failed:', error);
+      return false;
     }
   }
 
@@ -390,10 +427,17 @@ export class GuestStorage {
   /**
    * Clean up expired attempts
    */
-  public cleanupExpiredAttempts(): void {
-    if (!this.isClient) return;
+  public async cleanupExpiredAttempts(): Promise<{
+    success: boolean;
+    cleanedCount: number;
+  }> {
+    if (!this.isClient) return { success: false, cleanedCount: 0 };
 
     try {
+      let cleanedCount = 0;
+      const keysToRemove: string[] = [];
+
+      // Collect keys to remove
       for (let i = 0; i < localStorage.length; i++) {
         const key = localStorage.key(i);
         if (key?.startsWith(`${STORAGE_KEYS.GUEST_ATTEMPT}_`)) {
@@ -402,12 +446,32 @@ export class GuestStorage {
           );
 
           if (this.isAttemptExpired(attemptData)) {
-            localStorage.removeItem(key);
+            keysToRemove.push(key);
           }
         }
       }
+
+      // Remove collected keys
+      keysToRemove.forEach(key => {
+        localStorage.removeItem(key);
+        cleanedCount++;
+      });
+
+      // Verify cleanup
+      const verificationPassed = keysToRemove.every(key => 
+        localStorage.getItem(key) === null
+      );
+
+      return {
+        success: verificationPassed,
+        cleanedCount
+      };
     } catch (error) {
       console.error('Failed to cleanup expired attempts:', error);
+      return {
+        success: false,
+        cleanedCount: 0
+      };
     }
   }
 
