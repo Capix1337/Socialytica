@@ -81,6 +81,7 @@ export interface TestsResponse {
 export interface TestError {
   message: string
   errors?: Record<string, string[]>
+  slug?: string  // Add for slug-related errors
 }
 
 export type { User }
