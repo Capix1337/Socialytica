@@ -27,6 +27,7 @@ model User {
 model Test {
   id           String        @id @default(uuid())
   title        String
+  slug         String        @unique // Add this field
   description  String?
   isPublished  Boolean       @default(false)
   createdAt    DateTime      @default(now())
@@ -35,8 +36,8 @@ model Test {
   user         User          @relation(fields: [createdBy], references: [id])
   questions    Question[]
   categories   Category[]
-  testAttempts TestAttempt[] 
-  guestAttempts GuestAttempt[]   // Add this line
+  testAttempts TestAttempt[]
+  guestAttempts GuestAttempt[]
 
   @@index([createdBy])
 }
