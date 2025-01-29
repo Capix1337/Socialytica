@@ -1,15 +1,12 @@
-import { PrismaClient } from '@prisma/client'
+import { PrismaClient } from '@prisma/client';
 
-/**
- * Convert a string to a URL-friendly slug
- */
 export function generateSlug(title: string): string {
   return title
     .toLowerCase()
     .trim()
-    .replace(/[^\w\s-]/g, '')    // Remove special chars
-    .replace(/[\s_-]+/g, '-')    // Replace spaces and underscores with hyphens
-    .replace(/^-+|-+$/g, '')     // Remove leading/trailing hyphens
+    .replace(/[^\w\s-]/g, '')
+    .replace(/[\s_-]+/g, '-')
+    .replace(/^-+|-+$/g, '');
 }
 
 /**

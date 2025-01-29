@@ -21,11 +21,17 @@ export const categorySchema = z.object({
   questions: z.array(questionSchema).default([])
 })
 
+// Add slug validation rules
+const slugRegex = /^[a-z0-9]+(?:-[a-z0-9]+)*$/
+
 // Main update schema
 export const updateTestSchema = z.object({
   id: z.string().uuid("Invalid test ID"),
   title: z.string().min(1).max(100).optional(),
-  slug: z.string().optional(),  // Add this field
+  slug: z
+    .string()
+    .regex(slugRegex, "Invalid slug format")
+    .optional(),
   description: z.string().max(500).nullable().optional(),
   isPublished: z.boolean().optional(),
   categories: z.array(categorySchema).default([])
@@ -43,7 +49,10 @@ export const testSchema = z.object({
     .string()
     .min(1, 'Title is required')
     .max(100, 'Title must be less than 100 characters'),
-  slug: z.string().optional(),  // Add this field
+  slug: z
+    .string()
+    .regex(slugRegex, "Invalid slug format")
+    .optional(), // Optional because we'll generate it
   description: z
     .string()
     .max(500, 'Description must be less than 500 characters')
