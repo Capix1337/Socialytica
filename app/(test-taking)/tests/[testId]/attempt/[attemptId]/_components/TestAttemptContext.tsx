@@ -91,43 +91,73 @@ export function TestAttemptProvider({ children, params }: TestAttemptProviderPro
     }
   }, [isSignedIn, attemptId, currentCategoryIndex, categories])
 
-  // Handle moving to next category
+  // Updated scroll helper function
+  const scrollToFirstQuestion = useCallback(() => {
+    // Reset scroll position to top immediately
+    window.scrollTo(0, 0);
+    
+    // Wait for next category to be rendered
+    setTimeout(() => {
+      const firstQuestionElement = document.querySelector(`[id^="question-"]`);
+      if (firstQuestionElement) {
+        const headerOffset = 200;
+        firstQuestionElement.scrollIntoView({
+          behavior: 'smooth',
+          block: 'start'
+        });
+        
+        // Fine-tune the scroll position
+        window.scrollBy({
+          top: -headerOffset,
+          behavior: 'smooth'
+        });
+      }
+    }, 100);
+  }, []);
+
+  // Modified handleNextCategory function
   const handleNextCategory = useCallback(() => {
     if (isCategoryCompleted && !isLastCategory) {
-      // Record transition for both guest and logged-in users
+      // Record transition and update state
       if (currentCategory) {
-        const nextCat = categories[currentCategoryIndex + 1]
+        const nextCat = categories[currentCategoryIndex + 1];
         if (nextCat) {
           if (!isSignedIn) {
             guestStorage.recordCategoryTransition(
               attemptId,
               currentCategory.id,
               nextCat.id
-            )
+            );
+          }
+          
+          // First scroll to top
+          window.scrollTo(0, 0);
+          
+          // Then update state
+          setCurrentCategoryIndex(prev => prev + 1);
+          
+          // Set first question of next category
+          const firstQuestion = nextCat.questions[0];
+          if (firstQuestion) {
+            const questionId = getQuestionId(firstQuestion);
+            setCurrentQuestionId(questionId);
+            
+            // Scroll to first question after state update
+            setTimeout(scrollToFirstQuestion, 100);
           }
         }
       }
-      
-      // Update category index
-      setCurrentCategoryIndex(prev => prev + 1)
-      
-      // Set first question of next category
-      const nextCategory = categories[currentCategoryIndex + 1]
-      if (nextCategory?.questions.length) {
-        const firstQuestion = nextCategory.questions[0]
-        const questionId = getQuestionId(firstQuestion)
-        setCurrentQuestionId(questionId)
-      }
     }
   }, [
-    isCategoryCompleted, 
-    isLastCategory, 
-    categories, 
-    currentCategoryIndex, 
-    currentCategory, 
-    isSignedIn, 
-    attemptId
-  ])
+    isCategoryCompleted,
+    isLastCategory,
+    categories,
+    currentCategoryIndex,
+    currentCategory,
+    isSignedIn,
+    attemptId,
+    scrollToFirstQuestion
+  ]);
 
   // Resume functionality
   const resumeProgress = useCallback(() => {

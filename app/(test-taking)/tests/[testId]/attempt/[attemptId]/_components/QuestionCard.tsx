@@ -43,7 +43,8 @@ export function QuestionCard({
     <Card
       id={id} // Add this attribute
       className={cn(
-        "transition-all duration-200",
+        "transition-all duration-300",
+        "will-change-transform",
         isAnswered && "ring-2 ring-primary/10",
         className
       )}

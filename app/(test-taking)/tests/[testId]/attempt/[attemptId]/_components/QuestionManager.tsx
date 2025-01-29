@@ -65,7 +65,13 @@ export function QuestionManager({ currentCategory }: QuestionManagerProps) {
     }
   }
 
-  // Updated scroll function with better timing and smoothness
+  // Add this helper function to normalize question IDs
+  const normalizeQuestionId = (questionId: string) => {
+    // Remove the attempt ID prefix if it exists (for non-guest users)
+    return questionId.includes('_') ? questionId.split('_')[1] : questionId;
+  };
+
+  // Updated scroll and highlight function
   const scrollToNextQuestion = (currentIndex: number) => {
     requestAnimationFrame(() => {
       const nextQuestionElement = document.getElementById(`question-${currentIndex + 2}`);
@@ -73,6 +79,12 @@ export function QuestionManager({ currentCategory }: QuestionManagerProps) {
         const headerOffset = 200;
         const elementPosition = nextQuestionElement.getBoundingClientRect().top;
         const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+
+        // Update current question ID before scrolling
+        const nextQuestion = questions[currentIndex + 1];
+        if (nextQuestion) {
+          setCurrentQuestionId(getQuestionData(nextQuestion).id);
+        }
 
         window.scrollTo({
           top: offsetPosition,
@@ -102,10 +114,18 @@ export function QuestionManager({ currentCategory }: QuestionManagerProps) {
       <main className="space-y-6 mb-20">
         {questions.map((question, index) => {
           const questionData = getQuestionData(question)
+          const isCurrentQuestion = normalizeQuestionId(questionData.id) === normalizeQuestionId(currentQuestionId)
+          
+          console.log('Question Debug:', {
+            questionId: questionData.id,
+            currentQuestionId,
+            isCurrentQuestion,
+            index
+          });
           
           return (
             <QuestionCard
-              id={`question-${index + 1}`} // Add this ID attribute
+              id={`question-${index + 1}`}
               key={questionData.id}
               question={{
                 id: questionData.id,
@@ -117,10 +137,24 @@ export function QuestionManager({ currentCategory }: QuestionManagerProps) {
               isAnswered={questionData.isAnswered}
               onAnswerSelect={(optionId) => handleQuestionAnswer(questionData.id, optionId)}
               className={cn(
-                "transition-all duration-200",
-                questionData.id === currentQuestionId 
-                  ? "opacity-100 ring-2 ring-primary" 
-                  : "opacity-70 hover:opacity-90"
+                "transition-all duration-300",
+                isCurrentQuestion 
+                  ? [
+                    "bg-blue-50",
+                    "ring-4",
+                    "ring-blue-500",
+                    "shadow-xl",
+                    "relative",
+                    "z-10",
+                    "scale-[1.02]"
+                  ] 
+                  : [
+                    "bg-white",
+                    "opacity-60",
+                    "blur-[2px]",
+                    "filter",
+                    "saturate-50"
+                  ]
               )}
             />
           )
