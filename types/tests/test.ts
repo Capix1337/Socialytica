@@ -7,6 +7,7 @@ import { Category } from './category'
 export interface Test {
   id: string
   title: string
+  slug: string  // Add this field
   description: string | null | undefined;
   createdAt: Date
   updatedAt: Date
@@ -27,6 +28,7 @@ export interface CreateTestInput {
   title: string;
   description?: string;
   isPublished: boolean;
+  slug?: string  // Add as optional since it will be generated
   categories?: Array<{
     name: string;
     description?: string;
@@ -46,6 +48,7 @@ export interface CreateTestInput {
 export interface UpdateTestInput {
   id: string;
   title?: string;
+  slug?: string  // Add as optional for updates
   description?: string | null;
   isPublished?: boolean;
   categories?: Array<{

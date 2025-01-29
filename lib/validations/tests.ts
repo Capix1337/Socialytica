@@ -25,6 +25,7 @@ export const categorySchema = z.object({
 export const updateTestSchema = z.object({
   id: z.string().uuid("Invalid test ID"),
   title: z.string().min(1).max(100).optional(),
+  slug: z.string().optional(),  // Add this field
   description: z.string().max(500).nullable().optional(),
   isPublished: z.boolean().optional(),
   categories: z.array(categorySchema).default([])
@@ -42,6 +43,7 @@ export const testSchema = z.object({
     .string()
     .min(1, 'Title is required')
     .max(100, 'Title must be less than 100 characters'),
+  slug: z.string().optional(),  // Add this field
   description: z
     .string()
     .max(500, 'Description must be less than 500 characters')
