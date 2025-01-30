@@ -1,10 +1,11 @@
+// app/(test-taking)/tests/[slug]/attempt/[attemptId]/_components/TestAttemptProvider.tsx
 "use client"
 
 import { useState, useEffect } from "react"
 import { useAuth } from "@clerk/nextjs"
 import { useAttemptState } from '@/hooks/useAttemptState'
 import { TestAttemptContext } from "./TestAttemptContext"
-import { LoadingState } from "./LoadingState"  // Make sure path is correct
+import { LoadingState } from "./LoadingState"
 
 interface TestAttemptProviderProps {
   children: React.ReactNode
@@ -21,7 +22,7 @@ export function TestAttemptProvider({ params, children }: TestAttemptProviderPro
   const [isLoading, setIsLoading] = useState(true)
   const [isInitialLoad, setIsInitialLoad] = useState(true)
 
-  // Get questions and handlers from useAttemptState
+  // Fetch questions using useAttemptState
   const {
     questions,
     handleAnswerSelect,
@@ -31,13 +32,14 @@ export function TestAttemptProvider({ params, children }: TestAttemptProviderPro
   } = useAttemptState({ 
     isSignedIn, 
     attemptId,
-    testId
+    testId 
   })
 
   // Initialize IDs from params
   useEffect(() => {
     const initializeAttempt = async () => {
       const resolvedParams = await params
+      console.log('Resolved params:', resolvedParams) // Debug log
       setAttemptId(resolvedParams.attemptId)
       setTestId(resolvedParams.testId)
     }
@@ -47,6 +49,7 @@ export function TestAttemptProvider({ params, children }: TestAttemptProviderPro
   // Fetch questions when both IDs are available
   useEffect(() => {
     if (attemptId && testId) {
+      console.log('Fetching questions with:', { attemptId, testId }) // Debug log
       fetchQuestions()
     }
   }, [attemptId, testId, fetchQuestions])
@@ -67,7 +70,6 @@ export function TestAttemptProvider({ params, children }: TestAttemptProviderPro
     isSynced,
   }
 
-  // Only show loading state on initial load
   if (isInitialLoad && isLoading) {
     return <LoadingState />
   }
