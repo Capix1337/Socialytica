@@ -66,6 +66,7 @@ export async function GET(request: Request): Promise<NextResponse<GuestAttemptsR
         id: attempt.id,
         testId: attempt.testId,
         testTitle: attempt.test.title,
+        testSlug: attempt.test.slug, // Add this line
         startedAt: attempt.startedAt.getTime(),
         status: attempt.status as GuestAttemptStatus,
         guestId: attempt.guestId,
@@ -85,6 +86,7 @@ export async function GET(request: Request): Promise<NextResponse<GuestAttemptsR
         id: attempt.id,
         testId: attempt.testId,
         testTitle: attempt.test.title,
+        testSlug: attempt.test.slug, // Add this line
         startedAt: attempt.startedAt.getTime(),
         status: attempt.status as GuestAttemptStatus,
         guestId: attempt.guestId,

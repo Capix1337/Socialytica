@@ -149,7 +149,6 @@ export async function POST(req: Request) {
 
     const { categories, ...testData } = validationResult.data
 
-    // Create test with categories and generate slug in transaction
     const test = await prisma.$transaction(async (tx) => {
       // Generate unique slug
       const slug = await createUniqueSlug(testData.title, tx)
