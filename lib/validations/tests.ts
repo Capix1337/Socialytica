@@ -24,7 +24,25 @@ export const categorySchema = z.object({
 // Add slug validation rules
 const slugRegex = /^[a-z0-9]+(?:-[a-z0-9]+)*$/
 
-// Main update schema
+// Update test creation schema
+export const testSchema = z.object({
+  title: z
+    .string()
+    .min(1, 'Title is required')
+    .max(100, 'Title must be less than 100 characters'),
+  slug: z
+    .string()
+    .regex(slugRegex, "Invalid slug format")
+    .optional(), // Optional because we'll generate it
+  description: z
+    .string()
+    .max(500, 'Description must be less than 500 characters')
+    .optional(),
+  isPublished: z.boolean().default(false),
+  categories: z.array(categorySchema).default([])
+})
+
+// Update test update schema
 export const updateTestSchema = z.object({
   id: z.string().uuid("Invalid test ID"),
   title: z.string().min(1).max(100).optional(),
@@ -42,24 +60,6 @@ export type UpdateTestInput = z.infer<typeof updateTestSchema>
 export type CategoryInput = z.infer<typeof categorySchema>
 export type QuestionInput = z.infer<typeof questionSchema>
 export type OptionInput = z.infer<typeof optionSchema>
-
-// Schema for creating a test
-export const testSchema = z.object({
-  title: z
-    .string()
-    .min(1, 'Title is required')
-    .max(100, 'Title must be less than 100 characters'),
-  slug: z
-    .string()
-    .regex(slugRegex, "Invalid slug format")
-    .optional(), // Optional because we'll generate it
-  description: z
-    .string()
-    .max(500, 'Description must be less than 500 characters')
-    .optional(),
-  isPublished: z.boolean().default(false),
-  categories: z.array(categorySchema).default([])
-})
 
 // For query parameters
 export const testQuerySchema = z.object({
