@@ -6,11 +6,10 @@ import { TestDetails } from "./components/TestDetails"
 import { getPublicTest } from "@/lib/tests"
 
 interface PageProps {
-  params: { slug: string }
+  params: { slug: string }  // Remove Promise type
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
-  // Remove Promise.resolve since params is not a Promise
   const { test } = await getPublicTest(params.slug)
   
   if (!test) {
@@ -31,7 +30,6 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 }
 
 export default async function TestPage({ params }: PageProps) {
-  // Remove Promise.resolve since params is not a Promise
   const user = await currentUser()
   const isAuthenticated = !!user
 
