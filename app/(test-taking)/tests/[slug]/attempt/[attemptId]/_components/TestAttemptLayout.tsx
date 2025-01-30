@@ -1,19 +1,67 @@
 "use client"
 
+import { useEffect } from 'react'
+import { useRouter } from 'next/navigation'
+import { toast } from 'sonner'
 import { useTestAttempt } from "./TestAttemptContext"
 import { TestHeader } from "./TestHeader"
 import { QuestionManager } from "./QuestionManager"
 import { LoadingState } from "./LoadingState"
 import { isGuestQuestion } from "@/lib/utils/question-helpers"
+import { AttemptErrorCodes } from "@/lib/errors/attempt-errors" // Remove AttemptError import
+import { ErrorRecoveryDialog } from './ErrorRecoveryDialog'
 
 export function TestAttemptLayout() {
+  const router = useRouter()
   const {
     isLoading,
     questions,
     currentCategory,
+    error,
+    clearError,
+    retryOperation
+    // Remove unused attemptId
   } = useTestAttempt()
 
+  useEffect(() => {
+    if (error) {
+      if (error.code === AttemptErrorCodes.SESSION_EXPIRED) {
+        toast.error('Your session has expired. Please sign in again.')
+        router.push('/sign-in')
+        return
+      }
+
+      toast.error(error.message, {
+        action: error.recoverable ? {
+          label: 'Retry',
+          onClick: retryOperation
+        } : undefined
+      })
+    }
+  }, [error, router, retryOperation])
+
   if (isLoading) return <LoadingState />
+
+  if (error) {
+    if (!error.recoverable) {
+      return (
+        <div className="min-h-screen flex items-center justify-center bg-gray-50">
+          <div className="text-center">
+            <h2 className="text-xl font-semibold mb-2">Error</h2>
+            <p className="text-gray-600 mb-4">{error.message}</p>
+            <button
+              onClick={() => router.push('/')}
+              className="text-primary hover:underline"
+            >
+              Return to Home
+            </button>
+          </div>
+        </div>
+      )
+    }
+
+    return <ErrorRecoveryDialog error={error} onRetry={retryOperation} onDismiss={clearError} />
+  }
 
   // Calculate total progress
   const totalQuestions = questions.length
@@ -34,7 +82,19 @@ export function TestAttemptLayout() {
         </div>
 
         <div className="container max-w-7xl mx-auto px-4 mt-6">
-          {currentCategory && <QuestionManager currentCategory={currentCategory} />}
+          {currentCategory && (
+            <QuestionManager 
+              currentCategory={currentCategory}
+              onError={(error) => {
+                toast.error(error.message, {
+                  action: {
+                    label: 'Retry',
+                    onClick: retryOperation
+                  }
+                })
+              }}
+            />
+          )}
         </div>
       </div>
     </div>

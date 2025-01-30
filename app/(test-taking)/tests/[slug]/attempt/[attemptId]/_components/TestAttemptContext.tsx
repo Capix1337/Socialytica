@@ -37,6 +37,9 @@ interface TestAttemptContextType {
   moveToNextCategory: () => void
   isCategoryCompleted: boolean
   isLastCategory: boolean
+  error: AttemptError | null
+  clearError: () => void
+  retryOperation: () => void
 }
 
 export const TestAttemptContext = createContext<TestAttemptContextType | undefined>(undefined)
@@ -65,6 +68,23 @@ export function TestAttemptProvider({ children, params }: TestAttemptProviderPro
   const [attemptId, setAttemptId] = useState<string>("")
   const [testId, setTestId] = useState<string>("")
   const [showCompletionDialog, setShowCompletionDialog] = useState(false) // Add this line
+  const [error, setError] = useState<AttemptError | null>(null)
+  const [lastOperation, setLastOperation] = useState<(() => Promise<void>) | null>(null)
+
+  const clearError = useCallback(() => {
+    setError(null)
+  }, [])
+
+  const retryOperation = useCallback(async () => {
+    if (lastOperation) {
+      setError(null)
+      try {
+        await lastOperation()
+      } catch (e) {
+        setError(AttemptErrorBoundary.handleError(e))
+      }
+    }
+  }, [lastOperation])
 
   // Get current category and completion status
   const currentCategory = categories[currentCategoryIndex] || null
@@ -244,47 +264,46 @@ export function TestAttemptProvider({ children, params }: TestAttemptProviderPro
   // Handle answer selection
   const handleAnswerSelect = useCallback(async (questionId: string, optionId: string) => {
     try {
-      const endpoint = isSignedIn 
-        ? `/api/tests/attempt/${attemptId}/questions`
-        : `/api/tests/guest/attempt/${attemptId}/questions`
+      // Store this operation for potential retry
+      const operation = async () => {
+        setQuestions(prev => prev.map(q => {
+          if ('questionId' in q && q.questionId === questionId) {
+            return {
+              ...q,
+              selectedOptionId: optionId,
+              isAnswered: true,
+              _optimistic: true
+            } as TestAttemptQuestion
+          } else if ('id' in q && q.id === questionId) {
+            return {
+              ...q,
+              selectedOptionId: optionId,
+              _optimistic: true
+            } as GuestAttemptQuestion
+          }
+          return q
+        }))
 
-      const response = await fetch(endpoint, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ questionId, selectedOptionId: optionId })
-      })
+        // Cache the answer
+        attemptStorage.cacheAnswer(attemptId, questionId, optionId)
+        setPendingSync(prev => new Set(prev).add(questionId))
 
-      if (!response.ok) throw new Error('Failed to submit answer')
-
-      const data = await response.json()
-
-      // Update guest storage if needed
-      if (!isSignedIn && data.success) {
-        guestStorage.saveGuestResponse(attemptId, questionId, optionId, data.pointsEarned, data.maxPoints)
+        // Queue sync
+        syncManager.queueSync({
+          attemptId,
+          questionId,
+          selectedOptionId: optionId,
+          timestamp: Date.now()
+        })
       }
 
-      // Update questions state
-      setQuestions(prev => prev.map(q => {
-        if (getQuestionId(q) === questionId) {
-          return { ...q, selectedOptionId: optionId, isAnswered: !isGuestQuestion(q) }
-        }
-        return q
-      }))
-
-      // Check if category is completed after answer
-      const updatedCategory = categories[currentCategoryIndex]
-      const categoryComplete = updatedCategory.questions.every(q => 
-        isGuestQuestion(q) ? !!q.selectedOptionId : q.isAnswered
-      )
-
-      if (categoryComplete && !isLastCategory) {
-        handleNextCategory()
-      }
-
+      setLastOperation(() => operation)
+      await operation()
     } catch (error) {
-      console.error("Error saving answer:", error)
+      toast.error('Failed to save answer. Please try again.')
+      console.error('Answer selection error:', error)
     }
-  }, [attemptId, isSignedIn, categories, currentCategoryIndex, isLastCategory, handleNextCategory])
+  }, [attemptId])
 
   // Initialize params
   useEffect(() => {
@@ -328,7 +347,10 @@ export function TestAttemptProvider({ children, params }: TestAttemptProviderPro
     setCurrentQuestionId,
     moveToNextCategory: handleNextCategory,
     isCategoryCompleted,  
-    isLastCategory
+    isLastCategory,
+    error,
+    clearError,
+    retryOperation,
   }
 
   return (
