@@ -7,20 +7,20 @@ import { Category } from './category'
 export interface Test {
   id: string
   title: string
-  slug: string
-  description: string | null // Make description nullable here too
+  slug: string 
+  description: string | null | undefined
   createdAt: Date
   updatedAt: Date
   isPublished: boolean
-  authorId: string
   createdBy: string
+  authorId?: string  // Make optional
+  categories?: Category[]  // Already optional
   user?: User
   questions?: Question[]
-  categories: Category[]
   _count?: {
-    questions: number;
-    categories: number;
-  };
+    questions: number
+    categories: number
+  }
 }
 
 // For creating a new test

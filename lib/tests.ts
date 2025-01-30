@@ -1,5 +1,6 @@
 import type { PublicTestQueryParams } from "@/lib/validations/public-test"
 import type { TestsResponse } from "@/types/tests/test"
+import  prisma  from '@/lib/prisma'  // Make sure this path is correct
 
 const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || ''
 
@@ -34,6 +35,11 @@ export async function getPublicTest(slug: string) {
           }
         }
       },
+      attempts: {
+        where: {
+          status: 'IN_PROGRESS'
+        }
+      },
       _count: {
         select: {
           questions: true,
@@ -45,14 +51,14 @@ export async function getPublicTest(slug: string) {
 
   if (!test) return { test: null, attempts: [] };
 
-  // Transform the data to match the Type definition
   const transformedTest: Test = {
     ...test,
-    categories: test.categories.map(cat => ({
-      ...cat,
-      description: cat.description || null // Ensure null is handled
-    }))
+    createdBy: test.authorId, // Map authorId to createdBy
+    categories: test.categories || [] // Ensure categories is never undefined
   };
 
-  return { test: transformedTest, attempts: [] };
+  return { 
+    test: transformedTest,
+    attempts: test.attempts || []
+  };
 }
