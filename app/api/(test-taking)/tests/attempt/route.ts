@@ -20,6 +20,24 @@ export async function POST(request: Request) {
       }, { status: 400 })
     }
 
+    // Get test by ID or slug
+    const test = await prisma.test.findFirst({
+      where: {
+        OR: [
+          { id: validation.data.testId },
+          { slug: validation.data.testId }
+        ],
+        isPublished: true
+      }
+    })
+
+    if (!test) {
+      return NextResponse.json({ error: "Test not found" }, { status: 404 })
+    }
+
+    // Continue with existing attempt creation logic using test.id
+    validation.data.testId = test.id
+
     // Handle guest attempt
     if (validation.data.guestId) {
       // Guest attempt logic...

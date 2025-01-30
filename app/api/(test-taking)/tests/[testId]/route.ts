@@ -9,21 +9,25 @@ export async function GET(req: Request) {
   try {
     const { userId } = await auth()
 
-    // Extract testId from URL following admin route pattern
-    const testId = req.url.split('/tests/')[1].split('/')[0]
-    if (!testId) {
-      return new NextResponse('Invalid test ID', { status: 400 })
+    // Extract testId or slug from URL
+    const idOrSlug = req.url.split('/tests/')[1].split('/')[0]
+    if (!idOrSlug) {
+      return new NextResponse('Invalid test identifier', { status: 400 })
     }
 
-    // Fetch test details - always visible to guests and users
-    const test = await prisma.test.findUnique({
+    // Fetch test details with slug support
+    const test = await prisma.test.findFirst({
       where: {
-        id: testId,
-        isPublished: true // Only return published tests
+        OR: [
+          { id: idOrSlug },
+          { slug: idOrSlug }
+        ],
+        isPublished: true
       },
       select: {
         id: true,
         title: true,
+        slug: true,
         description: true,
         categories: {
           select: {
@@ -59,7 +63,7 @@ export async function GET(req: Request) {
     if (userId) {
       attempts = await prisma.testAttempt.findMany({
         where: {
-          testId,
+          testId: test.id,
           userId
         },
         select: {
