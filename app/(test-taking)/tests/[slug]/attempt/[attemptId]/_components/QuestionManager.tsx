@@ -8,15 +8,17 @@ import { cn } from "@/lib/utils"
 import { getQuestionData } from "@/lib/utils/question-helpers"
 import type { TestAttemptQuestion } from "@/types/tests/test-attempt-question"
 import type { GuestAttemptQuestion } from "@/types/tests/guest-attempt"
+import { AttemptError } from "@/lib/errors/attempt-errors"
 
 interface QuestionManagerProps {
   currentCategory: {
     questions: (TestAttemptQuestion | GuestAttemptQuestion)[]
     name: string
   }
+  onError?: (error: AttemptError) => void
 }
 
-export function QuestionManager({ currentCategory }: QuestionManagerProps) {
+export function QuestionManager({ currentCategory, onError }: QuestionManagerProps) {
   const {
     testId,
     attemptId,
@@ -99,7 +101,7 @@ export function QuestionManager({ currentCategory }: QuestionManagerProps) {
     const currentIndex = questions.findIndex(q => getQuestionData(q).id === questionId);
     
     // Handle the answer selection
-    await handleAnswerSelect(questionId, optionId);
+    await handleOptionSelect(questionId, optionId);
 
     // Wait a tiny bit for the DOM to update
     setTimeout(() => {
@@ -108,6 +110,15 @@ export function QuestionManager({ currentCategory }: QuestionManagerProps) {
       }
     }, 50);
   };
+
+  const handleOptionSelect = async (questionId: string, optionId: string) => {
+    try {
+      await handleAnswerSelect(questionId, optionId)
+    } catch (error) {
+      // Use the onError prop to handle errors
+      onError(error instanceof Error ? error : new Error('Failed to select answer'))
+    }
+  }
 
   return (
     <>

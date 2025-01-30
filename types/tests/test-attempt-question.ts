@@ -47,3 +47,12 @@ export interface TestAttemptQuestionError {
   message: string
   errors?: Record<string, string[]>
 }
+
+export interface BatchAnswerResponse {
+  success: boolean
+  results: Array<{
+    questionId: string
+    success: boolean
+    error?: string
+  }>
+}

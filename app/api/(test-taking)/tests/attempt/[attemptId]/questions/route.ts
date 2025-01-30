@@ -184,9 +184,14 @@ export async function PATCH(req: Request) {
       }
 
       if (isBatchUpdate) {
-        // Handle batch updates
+        const { answers } = validation.data as { answers: Array<{
+          questionId: string
+          selectedOptionId: string
+          timestamp: number
+        }> }
+
         const results = await Promise.all(
-          validation.data.answers.map(async (answer) => {
+          answers.map(async (answer) => {
             const question = await tx.question.findFirst({
               where: { id: answer.questionId },
               include: { options: true }
@@ -244,7 +249,10 @@ export async function PATCH(req: Request) {
         return batchResponse
       } else {
         // Handle single update (existing logic)
-        const { questionId, selectedOptionId } = validation.data
+        const { questionId, selectedOptionId } = validation.data as {
+          questionId: string
+          selectedOptionId: string
+        }
 
         const question = await tx.question.findFirst({
           where: { id: questionId },

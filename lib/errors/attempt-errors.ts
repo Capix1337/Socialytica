@@ -17,8 +17,6 @@ export class AttemptError extends Error {
     SYNC_FAILED: 'SYNC_FAILED',
     SESSION_EXPIRED: 'SESSION_EXPIRED',
     STATE_CORRUPTED: 'STATE_CORRUPTED',
-    ANSWER_SUBMIT_FAILED: 'ANSWER_SUBMIT_FAILED',
-    CATEGORY_TRANSITION_FAILED: 'CATEGORY_TRANSITION_FAILED'
   } as const
   
   export class AttemptErrorBoundary {
@@ -33,13 +31,6 @@ export class AttemptError extends Error {
             'Network connection lost',
             AttemptErrorCodes.NETWORK_ERROR,
             true
-          )
-        }
-        if (error.message.includes('expired')) {
-          return new AttemptError(
-            'Session expired',
-            AttemptErrorCodes.SESSION_EXPIRED,
-            false
           )
         }
       }

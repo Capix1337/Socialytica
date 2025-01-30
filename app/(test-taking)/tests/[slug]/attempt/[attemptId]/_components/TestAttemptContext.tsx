@@ -9,6 +9,9 @@ import { isGuestQuestion } from "@/lib/utils/question-helpers"
 import type { TestAttemptQuestion } from "@/types/tests/test-attempt-question"
 import type { GuestAttemptQuestion } from "@/types/tests/guest-attempt"
 import type { GuestCategoryProgress } from "@/lib/storage/guest-storage" // Add this import
+import { AttemptError, AttemptErrorBoundary } from "@/lib/errors/attempt-errors"
+import { attemptStorage } from "@/lib/storage/attempt-storage"
+import { syncManager } from "@/lib/sync/sync-manager"
 
 export interface CategoryState {
   id: string
@@ -70,6 +73,7 @@ export function TestAttemptProvider({ children, params }: TestAttemptProviderPro
   const [showCompletionDialog, setShowCompletionDialog] = useState(false) // Add this line
   const [error, setError] = useState<AttemptError | null>(null)
   const [lastOperation, setLastOperation] = useState<(() => Promise<void>) | null>(null)
+  const [pendingSync, setPendingSync] = useState<Set<string>>(new Set())
 
   const clearError = useCallback(() => {
     setError(null)
@@ -273,13 +277,13 @@ export function TestAttemptProvider({ children, params }: TestAttemptProviderPro
               selectedOptionId: optionId,
               isAnswered: true,
               _optimistic: true
-            } as TestAttemptQuestion
+            } as TestAttemptQuestion & { _optimistic: boolean }
           } else if ('id' in q && q.id === questionId) {
             return {
               ...q,
               selectedOptionId: optionId,
               _optimistic: true
-            } as GuestAttemptQuestion
+            } as GuestAttemptQuestion & { _optimistic: boolean }
           }
           return q
         }))
@@ -332,25 +336,27 @@ export function TestAttemptProvider({ children, params }: TestAttemptProviderPro
     }
   }, [attemptId, resumeProgress])
 
+  // Add pendingSync to the context value
   const value = {
     testId,
     attemptId,
     questions,
     currentQuestionId,
     currentCategory,
-    nextCategory, // Add this line
+    nextCategory,
     categories,
     isLoading,
-    showCompletionDialog,        // Now properly declared
-    setShowCompletionDialog,     // Now properly declared
+    showCompletionDialog,
+    setShowCompletionDialog,
     handleAnswerSelect,
     setCurrentQuestionId,
     moveToNextCategory: handleNextCategory,
-    isCategoryCompleted,  
+    isCategoryCompleted,
     isLastCategory,
     error,
     clearError,
     retryOperation,
+    pendingSync, // Add this
   }
 
   return (

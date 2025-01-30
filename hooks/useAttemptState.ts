@@ -10,6 +10,7 @@ import type { GuestAttemptQuestion } from "@/types/tests/guest-attempt"
 interface UseAttemptStateProps {
   isSignedIn: boolean
   attemptId: string
+  testId: string
 }
 
 // Add OptimisticUpdate types
