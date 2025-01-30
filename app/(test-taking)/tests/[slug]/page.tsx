@@ -6,11 +6,12 @@ import { TestDetails } from "./components/TestDetails"
 import { getPublicTest } from "@/lib/tests"
 
 interface PageProps {
-  params: { slug: string }  // Remove Promise type
+  params: Promise<{ slug: string }> // Changed back to Promise type
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
-  const { test } = await getPublicTest(params.slug)
+  const resolvedParams = await params
+  const { test } = await getPublicTest(resolvedParams.slug)
   
   if (!test) {
     return { 
@@ -30,11 +31,12 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 }
 
 export default async function TestPage({ params }: PageProps) {
+  const resolvedParams = await params
   const user = await currentUser()
   const isAuthenticated = !!user
 
   try {
-    const { test, attempts } = await getPublicTest(params.slug)
+    const { test, attempts } = await getPublicTest(resolvedParams.slug)
     if (!test) notFound()
     
     return (

@@ -13,6 +13,7 @@ import type { Test } from "@/types/tests/test"
 import type { TestAttempt } from "@/types/tests/test-attempt"
 import type { GuestAttemptSummary } from "@/types/tests/guest-attempt"
 
+// app/(test-taking)/tests/[slug]/components/TestDetails.tsx
 interface TestDetailsProps {
   test: Test
   attempts?: TestAttempt[]

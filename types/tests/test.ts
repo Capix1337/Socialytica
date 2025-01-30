@@ -7,8 +7,8 @@ import { Category } from './category'
 export interface Test {
   id: string
   title: string
-  slug: string  // Add this field
-  description: string | null | undefined;
+  slug: string
+  description: string | null
   createdAt: Date
   updatedAt: Date
   isPublished: boolean
@@ -28,7 +28,7 @@ export interface CreateTestInput {
   title: string;
   description?: string;
   isPublished: boolean;
-  slug?: string  // Add as optional since it will be generated
+  slug?: string
   categories?: Array<{
     name: string;
     description?: string;
@@ -38,7 +38,7 @@ export interface CreateTestInput {
       categoryId?: string;
       options?: Array<{
         text: string;
-        point: number; // Add point field
+        point: number;
       }>;
     }>;
   }>;
@@ -48,7 +48,7 @@ export interface CreateTestInput {
 export interface UpdateTestInput {
   id: string;
   title?: string;
-  slug?: string  // Add as optional for updates
+  slug?: string
   description?: string | null;
   isPublished?: boolean;
   categories?: Array<{
@@ -63,7 +63,7 @@ export interface UpdateTestInput {
       options?: Array<{
         id?: string;
         text: string;
-        point: number; // Add point field
+        point: number;
       }>;
     }>;
   }>;
@@ -81,7 +81,20 @@ export interface TestsResponse {
 export interface TestError {
   message: string
   errors?: Record<string, string[]>
-  slug?: string  // Add for slug-related errors
+  slug?: string
+}
+
+export interface Category {
+  id: string
+  name: string
+  description: string | null
+  testId: string
+  scale: number
+  createdAt: Date
+  updatedAt: Date
+  _count?: {
+    questions: number
+  }
 }
 
 export type { User }

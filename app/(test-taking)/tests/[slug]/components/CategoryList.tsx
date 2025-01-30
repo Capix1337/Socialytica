@@ -1,4 +1,4 @@
-//app/(test-taking)/tests/[testId]/components/CategoryList.tsx
+//app/(test-taking)/tests/[slug]/components/CategoryList.tsx
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import type { Category } from "@/types/tests/category"
