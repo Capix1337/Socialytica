@@ -11,6 +11,7 @@ import type { TestAttemptQuestion } from "@/types/tests/test-attempt-question"
 import type { GuestAttemptQuestion } from "@/types/tests/guest-attempt"
 import type { AttemptError } from "@/lib/errors/attempt-errors"
 
+// Add this helper function
 const getQuestionId = (question: TestAttemptQuestion | GuestAttemptQuestion): string => {
   return isGuestQuestion(question) ? question.id : question.questionId
 }
@@ -31,9 +32,10 @@ export function TestAttemptProvider({ params, children }: TestAttemptProviderPro
   const [isInitialLoad, setIsInitialLoad] = useState(true)
   const [currentQuestionId, setCurrentQuestionId] = useState<string>("")
   const [currentCategoryIndex, setCurrentCategoryIndex] = useState(0)
-  const [categories, setCategories] = useState<CategoryState[]>([])
+  const [categories, setCategories] = useState<CategoryState[]>([]) // Remove eslint-disable
   const [showCompletionDialog, setShowCompletionDialog] = useState(false)
   const [error, setError] = useState<AttemptError | null>(null)
+  const [lastOperation, setLastOperation] = useState<(() => Promise<void>) | null>(null)
 
   const {
     questions,
@@ -42,28 +44,29 @@ export function TestAttemptProvider({ params, children }: TestAttemptProviderPro
     isSynced,
     fetchQuestions
   } = useAttemptState({ 
-    isSignedIn: isSignedIn ?? false,
+    isSignedIn: isSignedIn ?? false, // Add null check
     attemptId,
     testId 
   })
 
-  // Initialize params
+  // Initialize attemptId from params
   useEffect(() => {
     const initializeAttempt = async () => {
       const resolvedParams = await params
+      console.log('Resolved params:', resolvedParams)
       setAttemptId(resolvedParams.attemptId)
       setTestId(resolvedParams.testId)
     }
     initializeAttempt()
   }, [params])
 
-  // Watch for questions changes
+  // Fetch questions when attemptId is available
   useEffect(() => {
-    if (questions.length > 0) {
-      setIsLoading(false)
-      setIsInitialLoad(false)
+    if (attemptId) {
+      console.log('Fetching questions for attemptId:', attemptId)
+      fetchQuestions()
     }
-  }, [questions])
+  }, [attemptId, fetchQuestions])
 
   // Initialize categories from questions
   const initializeCategories = useCallback((questions: (TestAttemptQuestion | GuestAttemptQuestion)[]) => {
@@ -91,41 +94,46 @@ export function TestAttemptProvider({ params, children }: TestAttemptProviderPro
     const sortedCategories = Object.values(categorizedQuestions)
     setCategories(sortedCategories)
     
+    // Set initial question if needed
     if (sortedCategories.length && !currentQuestionId && sortedCategories[0].questions.length) {
       setCurrentQuestionId(getQuestionId(sortedCategories[0].questions[0]))
     }
   }, [currentQuestionId])
 
-  // Fetch questions when attemptId is available
-  useEffect(() => {
-    if (attemptId && testId) {
-      fetchQuestions()
-    }
-  }, [attemptId, testId, fetchQuestions])
-
-  // Update categories when questions change
+  // Watch for questions changes and initialize categories
   useEffect(() => {
     if (questions.length > 0) {
       initializeCategories(questions)
+      setIsLoading(false)
+      setIsInitialLoad(false)
     }
   }, [questions, initializeCategories])
 
   const currentCategory = categories[currentCategoryIndex] || null
   const nextCategory = categories[currentCategoryIndex + 1] || null
   const isCategoryCompleted = currentCategory?.questions.every(q => 
-    isGuestQuestion(q) ? !!q.selectedOptionId : q.isAnswered
+    'questionId' in q ? q.isAnswered : !!q.selectedOptionId
   ) || false
   const isLastCategory = currentCategoryIndex === categories.length - 1
 
-  const moveToNextCategory = useCallback(() => {
-    if (currentCategoryIndex < categories.length - 1) {
-      setCurrentCategoryIndex(prev => prev + 1)
-      if (categories[currentCategoryIndex + 1]?.questions.length) {
-        const nextQuestion = categories[currentCategoryIndex + 1].questions[0]
-        setCurrentQuestionId(getQuestionId(nextQuestion))
+  const clearError = useCallback(() => setError(null), [])
+
+  // Implement retry operation
+  const retryOperation = useCallback(async () => {
+    if (lastOperation) {
+      setError(null)
+      try {
+        await lastOperation()
+      } catch (e) {
+        setError(AttemptErrorBoundary.handleError(e))
       }
     }
-  }, [categories, currentCategoryIndex])
+  }, [lastOperation])
+
+  // Add store operation utility
+  const storeOperation = useCallback((operation: () => Promise<void>) => {
+    setLastOperation(() => operation)
+  }, [])
 
   const value = {
     testId,
@@ -138,13 +146,28 @@ export function TestAttemptProvider({ params, children }: TestAttemptProviderPro
     isLoading,
     showCompletionDialog,
     setShowCompletionDialog,
-    handleAnswerSelect,
+    handleAnswerSelect: useCallback(async (questionId: string, optionId: string) => {
+      const operation = async () => {
+        await handleAnswerSelect(questionId, optionId)
+      }
+      storeOperation(operation)
+      try {
+        await operation()
+      } catch (e) {
+        setError(AttemptErrorBoundary.handleError(e))
+      }
+    }, [handleAnswerSelect, storeOperation]),
     setCurrentQuestionId,
-    moveToNextCategory,
+    moveToNextCategory: useCallback(() => {
+      if (currentCategoryIndex < categories.length - 1) {
+        setCurrentCategoryIndex(prev => prev + 1)
+      }
+    }, [categories.length, currentCategoryIndex]),
     isCategoryCompleted,
     isLastCategory,
     error,
-    setError,
+    clearError,       // Add this
+    retryOperation,   // Add this
     isPending,
     isSynced
   }
