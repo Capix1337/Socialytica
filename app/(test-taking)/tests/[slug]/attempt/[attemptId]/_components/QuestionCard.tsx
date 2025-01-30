@@ -1,17 +1,16 @@
 "use client"
 
-// import { useState } from "react"
 import { useState } from "react"
 import { Card, CardHeader, CardContent } from "@/components/ui/card"
 import { OptionCircle } from "@/components/ui/option-circle"
 import { cn } from "@/lib/utils"
 import { groupOptions } from "@/lib/utils/option-grouping"
 import { OPTION_COLORS, OPTION_LABELS } from "@/lib/constants/option-labels"
-import { useTestAttempt } from "@/hooks/useTestAttempt"
-import { CheckIcon } from "@/components/icons"
+import { useTestAttempt } from "./TestAttemptContext"
+import { Check } from "lucide-react" // Replace CheckIcon with Check from lucide-react
 
 interface QuestionCardProps {
-  id?: string; // Add this line
+  id?: string;
   question: {
     id: string
     title: string
@@ -22,9 +21,9 @@ interface QuestionCardProps {
   }
   questionNumber: number
   selectedOption?: string
-  isAnswered: boolean
+  isAnswered?: boolean
   onAnswerSelect: (optionId: string) => void
-  className?: string // Add this
+  className?: string
 }
 
 export function QuestionCard({
@@ -73,7 +72,7 @@ export function QuestionCard({
             </span>
           )}
           {isSynced(question.id) && (
-            <CheckIcon className="h-4 w-4 text-green-500" />
+            <Check className="h-4 w-4 text-green-500" />
           )}
         </div>
       </CardHeader>

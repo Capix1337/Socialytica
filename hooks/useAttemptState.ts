@@ -8,7 +8,6 @@ import type { TestAttemptQuestion } from "@/types/tests/test-attempt-question"
 import type { GuestAttemptQuestion } from "@/types/tests/guest-attempt"
 
 interface UseAttemptStateProps {
-  isSignedIn: boolean
   attemptId: string
 }
 
@@ -57,11 +56,23 @@ export function useAttemptState({ attemptId }: UseAttemptStateProps) {
     }
   }, [attemptId])
 
+  const fetchQuestions = useCallback(async () => {
+    try {
+      const response = await fetch(`/api/tests/attempt/${attemptId}/questions`)
+      if (!response.ok) throw new Error('Failed to fetch questions')
+      const data = await response.json()
+      setQuestions(data.questions)
+    } catch (error) {
+      console.error('Error fetching questions:', error)
+    }
+  }, [attemptId])
+
   return {
     questions,
     setQuestions,
     handleAnswerSelect,
     isPending: (questionId: string) => pendingSync.has(questionId),
-    isSynced: (questionId: string) => !pendingSync.has(questionId)
+    isSynced: (questionId: string) => !pendingSync.has(questionId),
+    fetchQuestions // Export this
   }
 }

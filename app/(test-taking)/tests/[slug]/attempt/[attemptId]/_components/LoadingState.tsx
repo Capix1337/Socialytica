@@ -1,4 +1,6 @@
-// app/(test-taking)/tests/[testId]/attempt/[attemptId]/_components/LoadingState.tsx
+// app/(test-taking)/tests/[slug]/attempt/[attemptId]/_components/LoadingState.tsx
+"use client"
+
 import { Skeleton } from "@/components/ui/skeleton"
 
 export function LoadingState() {
