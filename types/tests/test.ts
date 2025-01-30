@@ -8,14 +8,14 @@ export interface Test {
   id: string
   title: string
   slug: string
-  description: string | null
+  description: string | null // Make description nullable here too
   createdAt: Date
   updatedAt: Date
   isPublished: boolean
   createdBy: string
   user?: User
   questions?: Question[]
-  categories?: Category[]
+  categories: Category[]
   _count?: {
     questions: number;
     categories: number;
@@ -87,7 +87,7 @@ export interface TestError {
 export interface Category {
   id: string
   name: string
-  description: string | null
+  description: string | null // Make description nullable
   testId: string
   scale: number
   createdAt: Date

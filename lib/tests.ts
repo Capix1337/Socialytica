@@ -18,15 +18,9 @@ export async function getPublicTests(params: Partial<PublicTestQueryParams>): Pr
   return response.json()
 }
 
-export async function getPublicTest(slugOrId: string) {
-  const test = await prisma.test.findFirst({
-    where: {
-      OR: [
-        { id: slugOrId },
-        { slug: slugOrId }
-      ],
-      isPublished: true
-    },
+export async function getPublicTest(slug: string) {
+  const test = await prisma.test.findUnique({
+    where: { slug },
     include: {
       categories: {
         include: {
@@ -39,11 +33,12 @@ export async function getPublicTest(slugOrId: string) {
       },
       _count: {
         select: {
-          questions: true
+          questions: true,
+          categories: true
         }
       }
     }
-  })
+  });
 
   return { test, attempts: [] }
 }

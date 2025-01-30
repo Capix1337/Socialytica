@@ -15,9 +15,9 @@ import type { GuestAttemptSummary } from "@/types/tests/guest-attempt"
 
 // app/(test-taking)/tests/[slug]/components/TestDetails.tsx
 interface TestDetailsProps {
-  test: Test
-  attempts?: TestAttempt[]
-  isAuthenticated?: boolean
+  test: Test;
+  attempts?: TestAttempt[];
+  isAuthenticated?: boolean;
 }
 
 export function TestDetails({ test, isAuthenticated = false }: TestDetailsProps) {
