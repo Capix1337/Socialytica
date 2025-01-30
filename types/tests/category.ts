@@ -1,17 +1,18 @@
 // types/tests/category.ts
 import { Question } from './question'
+
 export interface Category {
-    id: string
-    name: string
-    description: string // Make this required but possibly empty
-    scale: number
-    testId: string
-    createdAt: Date
-    updatedAt: Date
-    questions?: Question[]  // Optional array of questions in this category
-    _count?: {
-        questions: number
-    }
+  id: string
+  name: string
+  scale: number
+  description: string | null  // Update this to allow null
+  createdAt: Date
+  updatedAt: Date
+  testId: string
+  questions?: Question[]
+  _count?: {
+    questions: number
+  }
 }
 
 export interface CreateCategoryPayload {

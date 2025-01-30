@@ -1,6 +1,6 @@
 import type { PublicTestQueryParams } from "@/lib/validations/public-test"
 import type { TestsResponse } from "@/types/tests/test"
-import type { Test } from '@/types/tests/test'  // Add this import
+import type { Test } from '@/types/tests/test'  // Import both types from the same file
 import prisma from '@/lib/prisma'  // Make sure this path is correct
 
 const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || ''
