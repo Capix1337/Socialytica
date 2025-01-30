@@ -5,13 +5,13 @@ import { NextResponse } from "next/server"
 import prisma from "@/lib/prisma"
 import { 
   testAttemptQuestionsQuerySchema, 
-  submitAnswerSchema 
+  submitAnswerSchema,
+  submitBatchAnswersSchema 
 } from "@/lib/validations/test-attempt-question"
-// Remove unused import if we're not using it directly
-// import { TestAttemptQuestion } from "@/types/tests/test-attempt-question"
 import type { 
   TestAttemptQuestionsResponse,
-  SubmitAnswerResponse 
+  SubmitAnswerResponse,
+  BatchAnswerResponse
 } from "@/types/tests/test-attempt-question"
 
 export async function GET(req: Request) {
@@ -135,22 +135,20 @@ export async function GET(req: Request) {
 
 export async function PATCH(req: Request) {
   try {
-    // 1. Get user authentication
     const { userId: clerkUserId } = await auth()
     if (!clerkUserId) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    // 2. Get attempt ID from URL
     const attemptId = req.url.split('/attempt/')[1].split('/')[0]
-    if (!attemptId) {
-      return NextResponse.json({ error: "Invalid attempt ID" }, { status: 400 })
-    }
-
-    // 3. Parse request body
     const json = await req.json()
-    const validation = submitAnswerSchema.safeParse(json)
-    
+
+    // Check if this is a batch update
+    const isBatchUpdate = req.url.includes('/batch')
+    const validation = isBatchUpdate 
+      ? submitBatchAnswersSchema.safeParse(json)
+      : submitAnswerSchema.safeParse(json)
+
     if (!validation.success) {
       return NextResponse.json({
         success: false,
@@ -159,7 +157,6 @@ export async function PATCH(req: Request) {
       }, { status: 400 })
     }
 
-    // 4. Get user's database ID
     const user = await prisma.user.findUnique({
       where: { clerkUserId },
       select: { id: true }
@@ -172,9 +169,8 @@ export async function PATCH(req: Request) {
       }, { status: 404 })
     }
 
-    // 5. Process answer submission in transaction
+    // Process updates in transaction
     const result = await prisma.$transaction(async (tx) => {
-      // 5.1 Verify test attempt exists and belongs to user
       const attempt = await tx.testAttempt.findFirst({
         where: {
           id: attemptId,
@@ -187,54 +183,111 @@ export async function PATCH(req: Request) {
         throw new Error("Test attempt not found or not in progress")
       }
 
-      // 5.2 Get question details to calculate points
-      const question = await tx.question.findFirst({
-        where: { id: validation.data.questionId },
-        include: {
-          options: true
+      if (isBatchUpdate) {
+        // Handle batch updates
+        const results = await Promise.all(
+          validation.data.answers.map(async (answer) => {
+            const question = await tx.question.findFirst({
+              where: { id: answer.questionId },
+              include: { options: true }
+            })
+
+            if (!question) {
+              return { questionId: answer.questionId, success: false, error: "Question not found" }
+            }
+
+            const selectedOption = question.options.find(
+              opt => opt.id === answer.selectedOptionId
+            )
+
+            if (!selectedOption) {
+              return { questionId: answer.questionId, success: false, error: "Selected option not found" }
+            }
+
+            const maxPoints = Math.max(...question.options.map(opt => opt.point))
+            const pointsEarned = selectedOption.point
+
+            await tx.questionResponse.upsert({
+              where: {
+                testAttemptId_questionId: {
+                  testAttemptId: attemptId,
+                  questionId: answer.questionId
+                }
+              },
+              create: {
+                testAttemptId: attemptId,
+                questionId: answer.questionId,
+                selectedOptionId: answer.selectedOptionId,
+                pointsEarned,
+                maxPoints
+              },
+              update: {
+                selectedOptionId: answer.selectedOptionId,
+                pointsEarned,
+                maxPoints
+              }
+            })
+
+            return { questionId: answer.questionId, success: true }
+          })
+        )
+
+        const batchResponse: BatchAnswerResponse = {
+          success: true,
+          results: results.map(r => ({
+            questionId: r.questionId,
+            success: r.success,
+            error: r.error
+          }))
         }
-      })
 
-      if (!question) {
-        throw new Error("Question not found")
-      }
+        return batchResponse
+      } else {
+        // Handle single update (existing logic)
+        const { questionId, selectedOptionId } = validation.data
 
-      // 5.3 Calculate points
-      const selectedOption = question.options.find(
-        opt => opt.id === validation.data.selectedOptionId
-      )
+        const question = await tx.question.findFirst({
+          where: { id: questionId },
+          include: { options: true }
+        })
 
-      if (!selectedOption) {
-        throw new Error("Selected option not found")
-      }
+        if (!question) {
+          throw new Error("Question not found")
+        }
 
-      const maxPoints = Math.max(...question.options.map(opt => opt.point))
-      const pointsEarned = selectedOption.point
+        const selectedOption = question.options.find(
+          opt => opt.id === selectedOptionId
+        )
 
-      // 5.4 Create or update response
-      await tx.questionResponse.upsert({
-        where: {
-          testAttemptId_questionId: {
+        if (!selectedOption) {
+          throw new Error("Selected option not found")
+        }
+
+        const maxPoints = Math.max(...question.options.map(opt => opt.point))
+        const pointsEarned = selectedOption.point
+
+        await tx.questionResponse.upsert({
+          where: {
+            testAttemptId_questionId: {
+              testAttemptId: attemptId,
+              questionId
+            }
+          },
+          create: {
             testAttemptId: attemptId,
-            questionId: validation.data.questionId
+            questionId,
+            selectedOptionId,
+            pointsEarned,
+            maxPoints
+          },
+          update: {
+            selectedOptionId,
+            pointsEarned,
+            maxPoints
           }
-        },
-        create: {
-          testAttemptId: attemptId,
-          questionId: validation.data.questionId,
-          selectedOptionId: validation.data.selectedOptionId,
-          pointsEarned: pointsEarned,
-          maxPoints: maxPoints
-        },
-        update: {
-          selectedOptionId: validation.data.selectedOptionId,
-          pointsEarned: pointsEarned,
-          maxPoints: maxPoints
-        }
-      })
+        })
 
-      return {
-        success: true
+        return { success: true }
       }
     })
 
