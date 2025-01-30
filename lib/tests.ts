@@ -18,12 +18,32 @@ export async function getPublicTests(params: Partial<PublicTestQueryParams>): Pr
   return response.json()
 }
 
-export async function getPublicTest(testId: string) {
-  const url = new URL(`/api/tests/${testId}`, BASE_URL)
-  const response = await fetch(url)
-  if (!response.ok) {
-    throw new Error('Failed to fetch test')
-  }
+export async function getPublicTest(slugOrId: string) {
+  const test = await prisma.test.findFirst({
+    where: {
+      OR: [
+        { id: slugOrId },
+        { slug: slugOrId }
+      ],
+      isPublished: true
+    },
+    include: {
+      categories: {
+        include: {
+          _count: {
+            select: {
+              questions: true
+            }
+          }
+        }
+      },
+      _count: {
+        select: {
+          questions: true
+        }
+      }
+    }
+  })
 
-  return response.json()
+  return { test, attempts: [] }
 }

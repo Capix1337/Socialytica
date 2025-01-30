@@ -1,7 +1,7 @@
 "use client"
 
 import { useCallback, useEffect, useState } from "react"
-import { useAuth } from "@clerk/nextjs"
+import { useUser } from "@clerk/nextjs"
 import { guestStorage } from "@/lib/storage/guest-storage"
 import { TestsPageHeader } from "./TestsPageHeader"
 import { TestCard } from "./TestCard"
@@ -16,7 +16,7 @@ import type { TestAttempt } from "@/types/tests/test-attempt"
 import type { GuestAttemptSummary } from "@/types/tests/guest-attempt"
 
 export function TestList() {
-  const { isSignedIn } = useAuth()
+  const { isSignedIn } = useUser();
   const [tests, setTests] = useState<Test[]>([])
   const [currentPage, setCurrentPage] = useState(1)
   const [totalPages, setTotalPages] = useState(1)
@@ -61,11 +61,11 @@ export function TestList() {
         const guestId = guestStorage.getGuestId()
         if (!guestId) return
 
-        // Fetch guest attempts from API
+        // Fetch guest attempts from API with proper URL structure
         const response = await fetch(`/api/tests/guest/attempts?guestId=${guestId}`)
         if (!response.ok) throw new Error('Failed to fetch guest attempts')
         const data = await response.json()
-
+        
         setInProgressAttempts(data.inProgress)
         setRecentAttempts(data.completed)
       }
@@ -80,7 +80,7 @@ export function TestList() {
   }, [fetchTests]) // fetchTests now has stable dependencies
 
   useEffect(() => {
-    void fetchUserAttempts()
+    fetchUserAttempts(); // Call once on mount/auth change
   }, [fetchUserAttempts])
 
   const handleSearch = useCallback((query: string) => {

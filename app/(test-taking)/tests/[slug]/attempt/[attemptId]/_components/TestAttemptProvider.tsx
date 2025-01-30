@@ -23,7 +23,7 @@ const isGuestQuestion = (
   return 'title' in question
 }
 
-export function TestAttemptProvider({ children, params }: TestAttemptProviderProps) {
+export function TestAttemptProvider({ params, children }: TestAttemptProviderProps) {
   const { isSignedIn } = useAuth()
   const [questions, setQuestions] = useState<(TestAttemptQuestion | GuestAttemptQuestion)[]>([])
   const [currentQuestionId, setCurrentQuestionId] = useState<string>("")
@@ -127,34 +127,35 @@ export function TestAttemptProvider({ children, params }: TestAttemptProviderPro
   }, [isSignedIn, attemptId])
 
   // Fetch questions and initialize categories
-  const fetchQuestions = useCallback(async () => {
-    try {
-      setIsLoading(true)
-      const endpoint = isSignedIn 
-        ? `/api/tests/attempt/${attemptId}/questions`
-        : `/api/tests/guest/attempt/${attemptId}/questions`
-
-      // Only make the request to the appropriate endpoint based on auth status
-      const res = await fetch(endpoint)
-      
-      if (!res.ok) {
-        throw new Error('Failed to fetch questions')
-      }
-
-      const data = await res.json()
-      setQuestions(data.questions)
-      initializeCategories(data.questions)
-    } catch (error) {
-      console.error('Error fetching questions:', error)
-    } finally {
-      setIsLoading(false)
-    }
-  }, [attemptId, isSignedIn, initializeCategories])
-
-  // Use effect to fetch questions on mount and auth state change
   useEffect(() => {
-    fetchQuestions()
-  }, [fetchQuestions, isSignedIn])
+    async function fetchQuestions() {
+      if (!attemptId) return;
+      
+      try {
+        setIsLoading(true)
+        const endpoint = isSignedIn 
+          ? `/api/tests/attempt/${attemptId}/questions`
+          : `/api/tests/guest/attempt/${attemptId}/questions`
+
+        // Only make the request to the appropriate endpoint based on auth status
+        const res = await fetch(endpoint)
+        
+        if (!res.ok) {
+          throw new Error('Failed to fetch questions')
+        }
+
+        const data = await res.json()
+        setQuestions(data.questions)
+        initializeCategories(data.questions)
+      } catch (error) {
+        console.error('Error fetching questions:', error)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    fetchQuestions();
+  }, [attemptId, isSignedIn, initializeCategories])
 
   // Handle answer selection
   const handleAnswerSelect = useCallback(async (questionId: string, optionId: string) => {
