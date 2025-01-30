@@ -1,4 +1,3 @@
-// app/(test-taking)/tests/[slug]/attempt/[attemptId]/_components/TestAttemptProvider.tsx
 "use client"
 
 import { useState, useEffect } from "react"
@@ -22,28 +21,37 @@ export function TestAttemptProvider({ params, children }: TestAttemptProviderPro
   const [isLoading, setIsLoading] = useState(true)
   const [isInitialLoad, setIsInitialLoad] = useState(true)
 
+  // Get questions and handlers from useAttemptState
   const {
     questions,
     handleAnswerSelect,
     isPending,
     isSynced,
-    fetchQuestions // Make sure this is exposed from useAttemptState
-  } = useAttemptState({ isSignedIn, attemptId })
+    fetchQuestions
+  } = useAttemptState({ 
+    isSignedIn, 
+    attemptId,
+    testId
+  })
 
+  // Initialize IDs from params
   useEffect(() => {
-    params.then(resolvedParams => {
+    const initializeAttempt = async () => {
+      const resolvedParams = await params
       setAttemptId(resolvedParams.attemptId)
       setTestId(resolvedParams.testId)
-    })
+    }
+    initializeAttempt()
   }, [params])
 
-  // Add this effect to fetch questions when attemptId is available
+  // Fetch questions when both IDs are available
   useEffect(() => {
     if (attemptId && testId) {
       fetchQuestions()
     }
   }, [attemptId, testId, fetchQuestions])
 
+  // Update loading states
   useEffect(() => {
     if (questions.length > 0) {
       setIsLoading(false)
