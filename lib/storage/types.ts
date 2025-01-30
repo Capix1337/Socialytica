@@ -11,6 +11,7 @@ export interface GuestStorageData {
     attemptId: string;
     testId: string;
     testTitle?: string;
+    testSlug?: string; // Add this field
     guestId: string;
     responses: {
       questionId: string;

@@ -144,8 +144,14 @@ export class GuestStorage {
     if (!this.isClient) return;
 
     try {
+      // Ensure testSlug exists
+      const dataToSave = {
+        ...attemptData,
+        testSlug: attemptData.testSlug || attemptData.testId // Fallback to testId if slug not provided
+      };
+
       const key = `${STORAGE_KEYS.GUEST_ATTEMPT}_${attemptData.attemptId}`;
-      localStorage.setItem(key, JSON.stringify(attemptData));
+      localStorage.setItem(key, JSON.stringify(dataToSave));
       
       // Update current attempt reference
       const guestData = this.getGuestData();
@@ -334,9 +340,6 @@ export class GuestStorage {
     if (!this.isClient) return [];
 
     try {
-      const guestData = this.getGuestData();
-      if (!guestData) return [];
-
       const attempts: GuestAttemptSummary[] = [];
       
       for (let i = 0; i < localStorage.length; i++) {
@@ -354,9 +357,10 @@ export class GuestStorage {
               id: attemptData.attemptId,
               testId: attemptData.testId,
               testTitle: attemptData.testTitle || 'Untitled Test',
+              testSlug: attemptData.testSlug || attemptData.testId, // Add this line
               startedAt: attemptData.startedAt,
               status: attemptData.status,
-              guestId: attemptData.guestId, // Add this line
+              guestId: attemptData.guestId,
               progress: {
                 answeredQuestions: attemptData.responses.length,
                 totalQuestions: attemptData.totalQuestions || 0,
@@ -400,9 +404,10 @@ export class GuestStorage {
               id: attemptData.attemptId,
               testId: attemptData.testId,
               testTitle: attemptData.testTitle || 'Untitled Test',
+              testSlug: attemptData.testSlug || attemptData.testId, // Add this line
               startedAt: attemptData.startedAt,
               status: attemptData.status,
-              guestId: attemptData.guestId, // Add this line
+              guestId: attemptData.guestId,
               progress: {
                 answeredQuestions: attemptData.responses.length,
                 totalQuestions: attemptData.totalQuestions || 0,
@@ -499,9 +504,10 @@ export class GuestStorage {
               id: attemptData.attemptId,
               testId: attemptData.testId,
               testTitle: attemptData.testTitle || 'Untitled Test',
+              testSlug: attemptData.testSlug || attemptData.testId, // Add this line
               startedAt: attemptData.startedAt,
               status: attemptData.status,
-              guestId: attemptData.guestId, // Add this line
+              guestId: attemptData.guestId,
               progress: {
                 answeredQuestions: attemptData.responses.length,
                 totalQuestions: attemptData.totalQuestions || 0,
