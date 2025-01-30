@@ -14,13 +14,15 @@ interface StartTestButtonProps {
   disabled?: boolean
   isAuthenticated?: boolean
   existingAttempt?: GuestAttemptSummary
+  slug: string // Add this
 }
 
 export function StartTestButton({ 
   testId, 
   disabled,
   isAuthenticated = false,
-  existingAttempt
+  existingAttempt,
+  slug
 }: StartTestButtonProps) {
   const [isLoading, setIsLoading] = useState(false)
   const [showDialog, setShowDialog] = useState(false)
@@ -70,7 +72,7 @@ export function StartTestButton({
       }
 
       const attemptId = isAuthenticated ? data.testAttempt.id : data.guestAttempt.id
-      router.push(`/tests/${data.test.slug}/attempt/${attemptId}`)
+      router.push(`/tests/${slug}/attempt/${attemptId}`)
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Failed to start test")
     } finally {

@@ -140,6 +140,7 @@ export function TestDetails({ test, isAuthenticated = false }: TestDetailsProps)
       {/* Start Test Button */}
       <StartTestButton 
         testId={test.id}
+        slug={test.slug} // Add this
         disabled={false}
         isAuthenticated={isAuthenticated}
         existingAttempt={inProgressAttempt}
