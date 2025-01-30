@@ -20,7 +20,10 @@ export async function getPublicTests(params: Partial<PublicTestQueryParams>): Pr
 
 export async function getPublicTest(slug: string) {
   const test = await prisma.test.findUnique({
-    where: { slug },
+    where: { 
+      slug,
+      isPublished: true 
+    },
     include: {
       categories: {
         include: {
@@ -40,5 +43,16 @@ export async function getPublicTest(slug: string) {
     }
   });
 
-  return { test, attempts: [] }
+  if (!test) return { test: null, attempts: [] };
+
+  // Transform the data to match the Type definition
+  const transformedTest: Test = {
+    ...test,
+    categories: test.categories.map(cat => ({
+      ...cat,
+      description: cat.description || null // Ensure null is handled
+    }))
+  };
+
+  return { test: transformedTest, attempts: [] };
 }

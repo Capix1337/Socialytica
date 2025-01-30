@@ -12,6 +12,7 @@ export interface Test {
   createdAt: Date
   updatedAt: Date
   isPublished: boolean
+  authorId: string
   createdBy: string
   user?: User
   questions?: Question[]
@@ -27,7 +28,7 @@ export interface CreateTestInput {
   id: string;
   title: string;
   description?: string;
-  isPublished: boolean;
+  isPublished: boolean
   slug?: string
   categories?: Array<{
     name: string;
