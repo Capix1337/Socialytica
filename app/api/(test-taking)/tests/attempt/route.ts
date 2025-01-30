@@ -87,7 +87,14 @@ export async function POST(request: Request) {
           testId: true,
           userId: true,
           startedAt: true,
-          status: true
+          status: true,
+          test: {
+            select: {
+              id: true,
+              title: true,
+              slug: true
+            }
+          }
         }
       })
 
@@ -109,7 +116,14 @@ export async function POST(request: Request) {
           testId: true,
           userId: true,
           startedAt: true,
-          status: true
+          status: true,
+          test: {
+            select: {
+              id: true,
+              title: true,
+              slug: true
+            }
+          }
         }
       })
     })
