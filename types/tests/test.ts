@@ -2,7 +2,22 @@
 
 import { User } from '@/types'
 import { Question } from './question'
-import { Category } from './category'
+// Remove the Category import since we'll define it here
+// import { Category } from './category'
+
+export interface Category {
+  id: string
+  name: string
+  scale: number
+  description: string | null  // Allow null
+  createdAt: Date
+  updatedAt: Date
+  testId: string
+  questions?: Question[]
+  _count?: {
+    questions: number
+  }
+}
 
 export interface Test {
   id: string
@@ -83,19 +98,6 @@ export interface TestError {
   message: string
   errors?: Record<string, string[]>
   slug?: string
-}
-
-export interface Category {
-  id: string
-  name: string
-  description: string | null // Make description nullable
-  testId: string
-  scale: number
-  createdAt: Date
-  updatedAt: Date
-  _count?: {
-    questions: number
-  }
 }
 
 export type { User }

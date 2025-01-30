@@ -49,7 +49,10 @@ export async function getPublicTest(slug: string) {
 
   const transformedTest: Test = {
     ...test,
-    categories: test.categories || []
+    categories: test.categories.map(category => ({
+      ...category,
+      description: category.description || null // Ensure null instead of undefined
+    }))
   };
 
   return { 
