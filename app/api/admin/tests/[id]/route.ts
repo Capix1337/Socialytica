@@ -5,6 +5,7 @@ import { NextResponse } from 'next/server'
 import prisma from '@/lib/prisma'
 import { updateTestSchema } from '@/lib/validations/tests'
 import { TestService } from '@/lib/services/test-service'
+import { createUniqueSlug } from '@/lib/utils/slug'
 
 const testService = new TestService(prisma)
 
@@ -15,13 +16,20 @@ export async function GET(req: Request) {
       return new NextResponse('Unauthorized', { status: 401 })
     }
 
-    const id = req.url.split('/tests/')[1].split('/')[0]
-    if (!id) {
-      return new NextResponse('Bad Request: Missing test ID', { status: 400 })
+    // Get ID or slug from URL
+    const idOrSlug = req.url.split('/tests/')[1].split('/')[0]
+    if (!idOrSlug) {
+      return new NextResponse('Bad Request: Missing identifier', { status: 400 })
     }
 
-    const test = await prisma.test.findUnique({
-      where: { id },
+    // Find test by ID or slug
+    const test = await prisma.test.findFirst({
+      where: {
+        OR: [
+          { id: idOrSlug },
+          { slug: idOrSlug }
+        ]
+      },
       include: {
         categories: {
           include: {
@@ -51,13 +59,12 @@ export async function GET(req: Request) {
 
 export async function PATCH(req: Request) {
   try {
-    // Auth check remains the same
     const { userId } = await auth()
     if (!userId) {
-      return NextResponse.json({ message: 'Unauthorized' }, { status: 401 })
+      return new NextResponse('Unauthorized', { status: 401 })
     }
 
-    // Extract and validate input remains the same
+    // Get ID from URL
     const id = req.url.split('/tests/')[1].split('/')[0]
     const json = await req.json()
     
@@ -67,6 +74,16 @@ export async function PATCH(req: Request) {
         message: 'Invalid request data',
         errors: validationResult.error.flatten().fieldErrors
       }, { status: 400 })
+    }
+
+    // If title is being updated, generate new slug
+    if (validationResult.data.title) {
+      const slug = await createUniqueSlug(
+        validationResult.data.title, 
+        prisma,
+        id // Pass existing ID to exclude current test from uniqueness check
+      )
+      validationResult.data.slug = slug
     }
 
     // Process update with retries
