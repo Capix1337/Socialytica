@@ -1,4 +1,4 @@
-// app/(test-taking)/tests/[testId]/attempt/[attemptId]/_components/TestAttemptProvider.tsx
+// app/(test-taking)/tests/[slug]/attempt/[attemptId]/_components/TestAttemptProvider.tsx
 "use client"
 
 import { useState, useEffect } from "react"
@@ -21,18 +21,22 @@ export function TestAttemptProvider({ params, children }: TestAttemptProviderPro
 
   const {
     questions,
-    setQuestions,
     handleAnswerSelect,
     isPending,
     isSynced
   } = useAttemptState({ isSignedIn, attemptId })
 
-  // Initialize attemptId from params
   useEffect(() => {
     params.then(resolvedParams => {
       setAttemptId(resolvedParams.attemptId)
     })
   }, [params])
+
+  useEffect(() => {
+    if (questions.length > 0) {
+      setIsLoading(false)
+    }
+  }, [questions])
 
   const value = {
     questions,
