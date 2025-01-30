@@ -7,6 +7,7 @@ import prisma from '@/lib/prisma'
 import { testQuerySchema, testSchema } from '@/lib/validations/tests'
 import type { TestError } from '@/types/tests/test'
 import { getUserById } from '@/lib/users'
+import { createUniqueSlug } from '@/lib/utils/slug'
 
 // GET - List all tests with pagination and filtering
 export async function GET(req: Request) {
@@ -148,12 +149,16 @@ export async function POST(req: Request) {
 
     const { categories, ...testData } = validationResult.data
 
-    // Create test with categories and their questions in a transaction
+    // Create test with categories and generate slug in transaction
     const test = await prisma.$transaction(async (tx) => {
-      // First create the test
+      // Generate unique slug
+      const slug = await createUniqueSlug(testData.title, tx)
+
+      // Create test with slug
       const newTest = await tx.test.create({
         data: {
           ...testData,
+          slug,
           createdBy: user.id,
         }
       })

@@ -1,4 +1,6 @@
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, Prisma } from '@prisma/client';
+
+type PrismaClientOrTx = PrismaClient | Prisma.TransactionClient
 
 export function generateSlug(title: string): string {
   return title
@@ -22,7 +24,7 @@ export function validateSlug(slug: string): boolean {
  */
 export async function createUniqueSlug(
   title: string,
-  prisma: PrismaClient,
+  prismaClientOrTx: PrismaClientOrTx,
   existingId?: string
 ): Promise<string> {
   const slug = generateSlug(title)
@@ -32,7 +34,7 @@ export async function createUniqueSlug(
     const currentSlug = iteration === 0 ? slug : `${slug}-${iteration}`
     
     // Check if slug exists
-    const existing = await prisma.test.findFirst({
+    const existing = await prismaClientOrTx.test.findFirst({
       where: {
         slug: currentSlug,
         // Exclude current test when updating
@@ -51,7 +53,9 @@ export async function createUniqueSlug(
  */
 export async function populateExistingSlugs(prisma: PrismaClient): Promise<void> {
   const tests = await prisma.test.findMany({
-    where: { slug: null }
+    where: {
+      slug: { equals: '' }  // Only check for empty string now
+    }
   })
 
   for (const test of tests) {
