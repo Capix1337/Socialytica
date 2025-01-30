@@ -20,6 +20,7 @@ export interface GuestAttemptDetails {
   guestId: string
   test: {
     title: string
+    slug: string // Add slug
     description?: string | null
     categories: {
       id: string
@@ -112,6 +113,7 @@ export interface GuestAttemptSummary {
   id: string
   testId: string
   testTitle: string
+  testSlug: string // Add slug
   startedAt: number
   status: GuestAttemptStatus // Use more specific status type
   guestId: string  // Add this field

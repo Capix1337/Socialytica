@@ -34,6 +34,7 @@ export async function GET(
         test: {
           select: {
             title: true,
+            slug: true,     // Add this line to include the slug
             description: true,
             categories: {
               select: {
