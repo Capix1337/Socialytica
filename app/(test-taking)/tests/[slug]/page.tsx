@@ -10,9 +10,8 @@ interface PageProps {
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
-  // Await the resolved params
-  const resolvedParams = await Promise.resolve(params)
-  const { test } = await getPublicTest(resolvedParams.slug)
+  // Remove Promise.resolve since params is not a Promise
+  const { test } = await getPublicTest(params.slug)
   
   if (!test) {
     return { 
@@ -32,13 +31,12 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 }
 
 export default async function TestPage({ params }: PageProps) {
-  // Await the resolved params
-  const resolvedParams = await Promise.resolve(params)
+  // Remove Promise.resolve since params is not a Promise
   const user = await currentUser()
   const isAuthenticated = !!user
 
   try {
-    const { test, attempts } = await getPublicTest(resolvedParams.slug)
+    const { test, attempts } = await getPublicTest(params.slug)
     if (!test) notFound()
     
     return (

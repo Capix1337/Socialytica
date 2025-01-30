@@ -28,7 +28,8 @@ export async function GET() {
         test: {
           select: {
             id: true,
-            title: true
+            title: true,
+            slug: true  // Add this
           }
         }
       },
