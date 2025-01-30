@@ -1,13 +1,9 @@
+// app/(test-taking)/tests/[slug]/page.tsx
 import { Metadata } from "next"
 import { notFound } from "next/navigation"
 import { currentUser } from "@clerk/nextjs/server"
 import { TestDetails } from "./components/TestDetails"
 import { getPublicTest } from "@/lib/tests"
-
-export const metadata: Metadata = {
-  title: "Test Details",
-  description: "View test details and start assessment"
-}
 
 interface PageProps {
   params: Promise<{ slug: string }>
@@ -26,7 +22,11 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
   return { 
     title: test.title,
-    description: test.description || 'Take this assessment test'
+    description: test.description || 'Take this assessment test',
+    openGraph: {
+      title: test.title,
+      description: test.description || 'Take this assessment test'
+    }
   }
 }
 
