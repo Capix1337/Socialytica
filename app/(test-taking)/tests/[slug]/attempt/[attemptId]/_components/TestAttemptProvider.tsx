@@ -1,4 +1,3 @@
-// app/(test-taking)/tests/[slug]/attempt/[attemptId]/_components/TestAttemptProvider.tsx
 "use client"
 
 import { useState, useEffect } from "react"
@@ -18,41 +17,34 @@ interface TestAttemptProviderProps {
 export function TestAttemptProvider({ params, children }: TestAttemptProviderProps) {
   const { isSignedIn } = useAuth()
   const [attemptId, setAttemptId] = useState<string>("")
-  const [testId, setTestId] = useState<string>("")
   const [isLoading, setIsLoading] = useState(true)
   const [isInitialLoad, setIsInitialLoad] = useState(true)
 
-  // Fetch questions using useAttemptState
   const {
     questions,
     handleAnswerSelect,
     isPending,
     isSynced,
     fetchQuestions
-  } = useAttemptState({ 
-    isSignedIn, 
-    attemptId,
-    testId 
-  })
+  } = useAttemptState({ isSignedIn, attemptId })
 
-  // Initialize IDs from params
+  // Initialize attemptId from params
   useEffect(() => {
     const initializeAttempt = async () => {
       const resolvedParams = await params
-      console.log('Resolved params:', resolvedParams) // Debug log
+      console.log('Resolved params:', resolvedParams)
       setAttemptId(resolvedParams.attemptId)
-      setTestId(resolvedParams.testId)
     }
     initializeAttempt()
   }, [params])
 
-  // Fetch questions when both IDs are available
+  // Fetch questions when attemptId is available
   useEffect(() => {
-    if (attemptId && testId) {
-      console.log('Fetching questions with:', { attemptId, testId }) // Debug log
+    if (attemptId) {
+      console.log('Fetching questions for attemptId:', attemptId)
       fetchQuestions()
     }
-  }, [attemptId, testId, fetchQuestions])
+  }, [attemptId, fetchQuestions])
 
   // Update loading states
   useEffect(() => {

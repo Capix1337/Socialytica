@@ -10,18 +10,20 @@ import type { GuestAttemptQuestion } from "@/types/tests/guest-attempt"
 interface UseAttemptStateProps {
   isSignedIn: boolean
   attemptId: string
-  testId: string  // Add testId
 }
 
-type AttemptQuestion = TestAttemptQuestion | GuestAttemptQuestion;
+// Add OptimisticUpdate types
+type OptimisticTestAttemptQuestion = TestAttemptQuestion & { _optimistic?: boolean }
+type OptimisticGuestAttemptQuestion = GuestAttemptQuestion & { _optimistic?: boolean }
+type OptimisticQuestion = OptimisticTestAttemptQuestion | OptimisticGuestAttemptQuestion
 
-export function useAttemptState({ isSignedIn, attemptId, testId }: UseAttemptStateProps) {
-  const [questions, setQuestions] = useState<AttemptQuestion[]>([])
+export function useAttemptState({ isSignedIn, attemptId }: UseAttemptStateProps) {
+  const [questions, setQuestions] = useState<OptimisticQuestion[]>([])
   const [pendingSync, setPendingSync] = useState<Set<string>>(new Set())
 
   const handleAnswerSelect = useCallback(async (questionId: string, optionId: string) => {
     try {
-      // Optimistic update
+      // Optimistic update with proper typing
       setQuestions(prev => prev.map(q => {
         if ('questionId' in q && q.questionId === questionId) {
           return {
@@ -29,22 +31,22 @@ export function useAttemptState({ isSignedIn, attemptId, testId }: UseAttemptSta
             selectedOptionId: optionId,
             isAnswered: true,
             _optimistic: true
-          } as TestAttemptQuestion
+          } as OptimisticTestAttemptQuestion
         } else if ('id' in q && q.id === questionId) {
           return {
             ...q,
             selectedOptionId: optionId,
             _optimistic: true
-          } as GuestAttemptQuestion
+          } as OptimisticGuestAttemptQuestion
         }
         return q
       }))
 
-      // Cache the answer
+      // Cache and queue for sync
       attemptStorage.cacheAnswer(attemptId, questionId, optionId)
       setPendingSync(prev => new Set(prev).add(questionId))
 
-      // Queue sync
+      // Queue for batch sync
       syncManager.queueSync({
         attemptId,
         questionId,
@@ -59,13 +61,14 @@ export function useAttemptState({ isSignedIn, attemptId, testId }: UseAttemptSta
   }, [attemptId])
 
   const fetchQuestions = useCallback(async () => {
-    if (!attemptId || !testId) return
+    if (!attemptId) return
 
     try {
-      // Use the correct API endpoint based on auth status
       const endpoint = isSignedIn
-        ? `/api/tests/${testId}/attempt/${attemptId}/questions`
-        : `/api/tests/guest/${testId}/attempt/${attemptId}/questions`
+        ? `/api/tests/attempt/${attemptId}/questions`
+        : `/api/tests/guest/attempt/${attemptId}/questions`
+
+      console.log('Fetching questions from:', endpoint) // Debug log
 
       const response = await fetch(endpoint)
       if (!response.ok) {
@@ -83,11 +86,10 @@ export function useAttemptState({ isSignedIn, attemptId, testId }: UseAttemptSta
       console.error('Error fetching questions:', error)
       toast.error('Failed to load questions. Please try again.')
     }
-  }, [attemptId, testId, isSignedIn])
+  }, [attemptId, isSignedIn])
 
   return {
     questions,
-    setQuestions,
     handleAnswerSelect,
     isPending: (questionId: string) => pendingSync.has(questionId),
     isSynced: (questionId: string) => !pendingSync.has(questionId),
