@@ -1,6 +1,6 @@
 // lib/utils/category-helpers.ts
 
-import type { CategoryState } from "../../app/(test-taking)/tests/[testId]/attempt/[attemptId]/_components/TestAttemptContext"
+import type { CategoryState } from "@/app/(test-taking)/tests/[slug]/attempt/[attemptId]/_components/TestAttemptContext"
 import { isGuestQuestion } from "./question-helpers"
 
 export function isCategoryCompleted(category: CategoryState): boolean {
