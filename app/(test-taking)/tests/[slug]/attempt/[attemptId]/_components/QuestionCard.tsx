@@ -1,11 +1,14 @@
 "use client"
 
 // import { useState } from "react"
+import { useState } from "react"
 import { Card, CardHeader, CardContent } from "@/components/ui/card"
 import { OptionCircle } from "@/components/ui/option-circle"
 import { cn } from "@/lib/utils"
 import { groupOptions } from "@/lib/utils/option-grouping"
 import { OPTION_COLORS, OPTION_LABELS } from "@/lib/constants/option-labels"
+import { useTestAttempt } from "@/hooks/useTestAttempt"
+import { CheckIcon } from "@/components/icons"
 
 interface QuestionCardProps {
   id?: string; // Add this line
@@ -33,9 +36,13 @@ export function QuestionCard({
   onAnswerSelect,
   className,
 }: QuestionCardProps) {
-  const handleOptionSelect = (optionId: string) => {
-    onAnswerSelect(optionId);
-  };
+  const { isPending, isSynced } = useTestAttempt()
+  const [localSelected, setLocalSelected] = useState<string | undefined>(selectedOption)
+
+  const handleOptionSelect = async (optionId: string) => {
+    setLocalSelected(optionId) // Immediate UI update
+    await onAnswerSelect(optionId)
+  }
 
   const { leftGroup, middleOption, rightGroup } = groupOptions(question.options)
 
@@ -43,6 +50,7 @@ export function QuestionCard({
     <Card
       id={id} // Add this attribute
       className={cn(
+        "relative",
         "transition-all duration-300",
         "will-change-transform",
         isAnswered && "ring-2 ring-primary/10",
@@ -50,13 +58,23 @@ export function QuestionCard({
       )}
     >
       <CardHeader className="border-b bg-muted/40">
-        <div className="flex items-center gap-2">
-          <span className="flex h-6 w-6 items-center justify-center rounded-full bg-primary/10 text-sm font-medium">
-            {questionNumber}
-          </span>
-          <span className="text-sm text-muted-foreground">
-            {isAnswered ? "Answered" : "Not answered"}
-          </span>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <span className="flex h-6 w-6 items-center justify-center rounded-full bg-primary/10 text-sm font-medium">
+              {questionNumber}
+            </span>
+            <span className="text-sm text-muted-foreground">
+              {isAnswered ? "Answered" : "Not answered"}
+            </span>
+          </div>
+          {isPending(question.id) && (
+            <span className="text-sm text-muted-foreground animate-pulse">
+              Saving...
+            </span>
+          )}
+          {isSynced(question.id) && (
+            <CheckIcon className="h-4 w-4 text-green-500" />
+          )}
         </div>
       </CardHeader>
       
@@ -80,9 +98,10 @@ export function QuestionCard({
                   position={index + 1}
                   totalInGroup={leftGroup.length}
                   groupType="left"
-                  selected={selectedOption === option.id}
+                  selected={localSelected === option.id}
                   groupColor={OPTION_COLORS.agree}
                   onClick={() => handleOptionSelect(option.id)}
+                  disabled={isPending(question.id)}
                 />
               ))}
             </div>
@@ -98,9 +117,10 @@ export function QuestionCard({
                   position={1}
                   totalInGroup={1}
                   groupType="middle"
-                  selected={selectedOption === middleOption.id}
+                  selected={localSelected === middleOption.id}
                   groupColor={OPTION_COLORS.neutral}
                   onClick={() => handleOptionSelect(middleOption.id)}
+                  disabled={isPending(question.id)}
                 />
               </div>
             )}
@@ -116,9 +136,10 @@ export function QuestionCard({
                   position={index + 1}
                   totalInGroup={rightGroup.length}
                   groupType="right"
-                  selected={selectedOption === option.id}
+                  selected={localSelected === option.id}
                   groupColor={OPTION_COLORS.disagree}
                   onClick={() => handleOptionSelect(option.id)}
+                  disabled={isPending(question.id)}
                 />
               ))}
             </div>
