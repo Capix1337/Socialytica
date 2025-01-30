@@ -25,11 +25,14 @@ export function UserInProgressTests({ attempts }: UserInProgressTestsProps) {
         {attempts.map((attempt) => {
           const { answeredQuestions, totalQuestions, progress } = getAttemptProgress(attempt)
           
+          // Skip attempts without test data
+          if (!attempt.test?.slug) return null;
+          
           return (
             <div key={attempt.id} className="space-y-3">
               <div className="flex items-center justify-between">
                 <div>
-                  <h4 className="font-medium">{attempt.test?.title}</h4>
+                  <h4 className="font-medium">{attempt.test?.title || 'Untitled Test'}</h4>
                   <p className="text-sm text-muted-foreground">
                     {answeredQuestions} of {totalQuestions} questions completed
                   </p>
