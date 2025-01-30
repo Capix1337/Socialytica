@@ -24,7 +24,10 @@ export async function POST(request: Request) {
       // 3.1 Check test exists and is published
       const test = await tx.test.findFirst({
         where: {
-          id: validation.data.testId,
+          OR: [
+            { id: validation.data.testId },
+            { slug: validation.data.testId }
+          ],
           isPublished: true
         },
         select: { id: true }

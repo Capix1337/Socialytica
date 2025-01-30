@@ -35,6 +35,7 @@ export async function GET(request: Request): Promise<NextResponse<GuestAttemptsR
         test: {
           select: {
             title: true,
+            slug: true, // Add slug
             questions: {
               select: {
                 id: true
