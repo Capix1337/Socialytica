@@ -11,7 +11,7 @@ import type { Test } from "@/types/tests/test"
 import type { TestAttempt } from "@/types/tests/test-attempt"
 import type { GuestAttemptSummary } from "@/types/tests/guest-attempt"
 import { getAttemptProgress } from "../utils/attempt"
-import { isGuestAttempt } from "../utils/type-guards" // Add this import
+import { isGuestAttempt } from "@/lib/utils/type-guards"
 
 interface TestCardProps {
   test: Test;

@@ -7,7 +7,7 @@ import { cn } from "@/lib/utils"
 import Link from "next/link"
 import type { TestAttempt } from "@/types/tests/test-attempt"
 import type { GuestAttemptSummary } from "@/types/tests/guest-attempt"
-import { isTestAttempt } from "../utils/type-guards"
+import { isTestAttempt } from "@/lib/utils/type-guards"
 
 interface RecentlyTakenTestsProps {
   attempts: (TestAttempt | GuestAttemptSummary)[]
