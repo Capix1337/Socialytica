@@ -48,7 +48,7 @@ export function InProgressTests({ attempts }: InProgressTestsProps) {
                     </Badge>
                   )}
                   <Button asChild size="sm">
-                    <Link href={`/tests/${isGuest ? attempt.testId : attempt.test?.id}/attempt/${attempt.id}`}>
+                    <Link href={`/tests/${isGuest ? attempt.testSlug : attempt.test?.slug}/attempt/${attempt.id}`}>
                       Continue <ArrowRight className="ml-2 h-4 w-4" />
                     </Link>
                   </Button>

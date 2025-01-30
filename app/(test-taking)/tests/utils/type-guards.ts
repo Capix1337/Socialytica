@@ -1,11 +1,10 @@
-import type { TestAttempt } from "@/types/tests/test-attempt"
-import type { GuestAttemptSummary } from "@/types/tests/guest-attempt"
+import type { TestAttempt, GuestAttemptSummary } from "@/types/tests/test-attempt"
 
 // lib/utils/type-guards.ts
-export const isGuestAttempt = (
+export function isGuestAttempt(
   attempt: TestAttempt | GuestAttemptSummary
-): attempt is GuestAttemptSummary => {
-  return 'testTitle' in attempt && 'progress' in attempt;
+): attempt is GuestAttemptSummary {
+  return 'testSlug' in attempt
 }
 
 export const isTestAttempt = (

@@ -70,7 +70,7 @@ export function StartTestButton({
       }
 
       const attemptId = isAuthenticated ? data.testAttempt.id : data.guestAttempt.id
-      router.push(`/tests/${testId}/attempt/${attemptId}`)
+      router.push(`/tests/${data.test.slug}/attempt/${attemptId}`)
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Failed to start test")
     } finally {
@@ -109,7 +109,7 @@ export function StartTestButton({
             <Button
               variant="outline"
               onClick={() => {
-                router.push(`/tests/${testId}/attempt/${existingAttempt?.id}`)
+                router.push(`/tests/${existingAttempt?.testSlug}/attempt/${existingAttempt?.id}`)
               }}
             >
               Continue Existing

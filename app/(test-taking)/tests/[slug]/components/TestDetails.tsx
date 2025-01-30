@@ -36,16 +36,16 @@ export function TestDetails({ test, isAuthenticated = false }: TestDetailsProps)
     .slice(0, 3)
 
   const handleContinueTest = (attemptId: string) => {
-    router.push(`/tests/${test.id}/attempt/${attemptId}`)
+    router.push(`/tests/${test.slug}/attempt/${attemptId}`)
   }
 
   const handleViewResults = (attemptId: string) => {
-    router.push(`/tests/${test.id}/attempt/${attemptId}/results`)
+    router.push(`/tests/${test.slug}/attempt/${attemptId}/results`)
   }
 
   const handleSignIn = () => {
     // Store current test ID in session storage for redirect after sign in
-    sessionStorage.setItem('redirectAfterSignIn', `/tests/${test.id}`)
+    sessionStorage.setItem('redirectAfterSignIn', `/tests/${test.slug}`)
     router.push('/sign-in')
   }
 

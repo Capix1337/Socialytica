@@ -36,7 +36,7 @@ export function TestCard({
       viewType === "grid" ? "h-full min-h-[400px]" : "min-h-[200px]",
       isGuest && "border-dashed"
     )}>
-      <Link href={`/tests/${test.id}`} className="flex-1">
+      <Link href={`/tests/${test.slug}`} className="flex-1">
         <CardHeader>
           <div className="flex justify-between items-start">
             <CardTitle className="line-clamp-2 text-xl">
@@ -115,8 +115,8 @@ export function TestCard({
         >
           <Link href={
             attempt 
-              ? `/tests/${test.id}/attempt/${attempt.id}` 
-              : `/tests/${test.id}`
+              ? `/tests/${test.slug}/attempt/${attempt.id}` 
+              : `/tests/${test.slug}`
           }>
             {attempt ? (
               <>

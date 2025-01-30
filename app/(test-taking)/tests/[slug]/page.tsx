@@ -10,40 +10,46 @@ export const metadata: Metadata = {
 }
 
 interface PageProps {
-  params: Promise<{
-    testId: string
-  }>
+  params: Promise<{ slug: string }>
+}
+
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+  const resolvedParams = await params
+  const { test } = await getPublicTest(resolvedParams.slug)
+  
+  if (!test) {
+    return { 
+      title: 'Test Not Found',
+      description: 'The requested test could not be found'
+    }
+  }
+
+  return { 
+    title: test.title,
+    description: test.description || 'Take this assessment test'
+  }
 }
 
 export default async function TestPage({ params }: PageProps) {
+  const resolvedParams = await params
   const user = await currentUser()
   const isAuthenticated = !!user
-  
-  // Await the params first
-  const resolvedParams = await params;
-
-  if (!resolvedParams?.testId) {
-    notFound();
-  }
 
   try {
-    const response = await getPublicTest(resolvedParams.testId);
+    const { test, attempts } = await getPublicTest(resolvedParams.slug)
+    if (!test) notFound()
     
-    if (!response?.test) {
-      notFound();
-    }
-
     return (
       <div className="container py-8 space-y-8">
         <TestDetails 
-          test={response.test} 
-          attempts={response.attempts}
-          isAuthenticated={isAuthenticated} // Passed down to StartTestButton
+          test={test} 
+          attempts={attempts}
+          isAuthenticated={isAuthenticated}
         />
       </div>
-    );
+    )
   } catch (error) {
-    console.error('Error fetching test:', error);
-    notFound();
+    console.error('Error fetching test:', error)
+    notFound()
   }
 }

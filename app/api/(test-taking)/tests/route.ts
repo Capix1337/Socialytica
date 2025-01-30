@@ -48,6 +48,7 @@ export async function GET(req: Request) {
         select: {
           id: true,
           title: true,
+          slug: true, // Add this line to include slug
           description: true,
           categories: {
             select: {

@@ -59,7 +59,7 @@ export function RecentlyTakenTests({ attempts }: RecentlyTakenTestsProps) {
                   </Badge>
                 )}
                 <Link 
-                  href={`/tests/${isTestAttempt(attempt) ? attempt.test?.id : attempt.testId}/attempt/${attempt.id}/results`}
+                  href={`/tests/${isTestAttempt(attempt) ? attempt.test?.slug : attempt.testSlug}/attempt/${attempt.id}/results`}
                   className="text-sm underline"
                 >
                   View Results

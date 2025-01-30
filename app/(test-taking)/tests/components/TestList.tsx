@@ -10,6 +10,7 @@ import { TestsPagination } from "./TestsPagination"
 import { InProgressTests } from "./InProgressTests"
 import { RecentlyTakenTests } from "./RecentlyTakenTests"
 import { getPublicTests } from "@/lib/tests"
+import { isGuestAttempt } from "@/lib/utils/type-guards"
 import type { Test } from "@/types/tests/test"
 import type { TestAttempt } from "@/types/tests/test-attempt"
 import type { GuestAttemptSummary } from "@/types/tests/guest-attempt"
@@ -91,6 +92,15 @@ export function TestList() {
     ? "grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
     : "space-y-4"
 
+  // Helper function to match attempt with test
+  const findMatchingAttempt = (test: Test) => {
+    return inProgressAttempts.find(attempt => 
+      isGuestAttempt(attempt) 
+        ? attempt.testId === test.id || attempt.testSlug === test.slug
+        : attempt.testId === test.id
+    )
+  }
+
   if (isLoading) {
     return (
       <div className={listClassName}>
@@ -130,7 +140,8 @@ export function TestList() {
               key={test.id} 
               test={test}
               viewType={view}
-              attempt={inProgressAttempts.find(a => a.testId === test.id)}
+              attempt={findMatchingAttempt(test)}
+              isAuthenticated={isSignedIn}
             />
           ))
         )}
