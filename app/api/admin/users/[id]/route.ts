@@ -2,17 +2,11 @@
 import { auth } from "@clerk/nextjs/server"
 import { NextResponse } from "next/server"
 import prisma from "@/lib/prisma"
-// import type { UserDetailsResponse } from "@/types/admin/users"
-
-interface RouteParams {
-  params: {
-    id: string
-  }
-}
+import type { UserDetailsResponse } from "@/types/admin/users"
 
 export async function GET(
-  request: Request,
-  { params }: RouteParams
+  req: Request,
+  context: { params: { id: string } }
 ): Promise<NextResponse> {
   try {
     const { userId } = await auth()
@@ -26,7 +20,7 @@ export async function GET(
     }
 
     const user = await prisma.user.findUnique({
-      where: { id: params.id },
+      where: { id: context.params.id },
       include: {
         profile: true,
         testAttempts: {
@@ -55,7 +49,7 @@ export async function GET(
       return new NextResponse('Not Found', { status: 404 })
     }
 
-    return NextResponse.json({
+    const response: UserDetailsResponse = {
       id: user.id,
       email: user.email,
       firstName: user.firstName,
@@ -80,12 +74,14 @@ export async function GET(
       },
       createdAt: user.createdAt,
       updatedAt: user.updatedAt
-    })
+    }
+
+    return NextResponse.json(response)
 
   } catch (error) {
     console.error('[USER_GET]', error)
     return NextResponse.json(
-      { message: 'Internal Server Error' },
+      { error: 'Internal Server Error' },
       { status: 500 }
     )
   }
