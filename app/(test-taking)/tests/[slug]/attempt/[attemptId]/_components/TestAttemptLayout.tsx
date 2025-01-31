@@ -98,6 +98,7 @@ export function TestAttemptLayout() {
               onSave={handleSaveDraft}
               disabled={isSyncingDraft || pendingSyncQuestions.size > 0}
               loading={isSyncingDraft}
+              pendingCount={pendingSyncQuestions.size} // Add the required prop
             />
           </div>
         </div>

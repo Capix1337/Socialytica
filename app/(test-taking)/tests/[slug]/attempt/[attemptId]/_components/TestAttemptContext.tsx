@@ -24,7 +24,8 @@ const getQuestionId = (question: TestAttemptQuestion | GuestAttemptQuestion): st
   return isGuestQuestion(question) ? question.id : question.questionId
 }
 
-interface TestAttemptContextType {
+// Change the interface declaration to export it
+export interface TestAttemptContextType {
   testId: string
   attemptId: string
   questions: (TestAttemptQuestion | GuestAttemptQuestion)[]
@@ -83,6 +84,7 @@ export function TestAttemptProvider({ children, params }: TestAttemptProviderPro
   const [pendingSync, setPendingSync] = useState<Set<string>>(new Set())
   const [pendingChanges, setPendingChanges] = useState(0) // Initialize as number
   const [lastSaved, setLastSaved] = useState<Date | null>(null)
+  const [pendingSyncQuestions, setPendingSyncQuestions] = useState<Set<string>>(new Set())
 
   const clearError = useCallback(() => {
     setError(null)
@@ -274,9 +276,12 @@ export function TestAttemptProvider({ children, params }: TestAttemptProviderPro
     }
   }, [attemptId, testId, isSignedIn, initializeCategories]) // Add testId to dependencies
 
-  // Handle answer selection
+  // Update answer selection to use pendingSyncQuestions
   const handleAnswerSelect = useCallback(async (questionId: string, optionId: string) => {
     try {
+      // Add to pending sync
+      setPendingSyncQuestions(prev => new Set(prev).add(questionId))
+      
       // Store this operation for potential retry
       const operation = async () => {
         setQuestions(prev => prev.map(q => {
@@ -312,6 +317,13 @@ export function TestAttemptProvider({ children, params }: TestAttemptProviderPro
 
       setLastOperation(() => operation)
       await operation()
+
+      // Remove from pending sync after successful operation
+      setPendingSyncQuestions(prev => {
+        const updated = new Set(prev)
+        updated.delete(questionId)
+        return updated
+      })
     } catch (error) {
       toast.error('Failed to save answer. Please try again.')
       console.error('Answer selection error:', error)
@@ -345,16 +357,30 @@ export function TestAttemptProvider({ children, params }: TestAttemptProviderPro
     }
   }, [attemptId, resumeProgress])
 
+  // Add the pendingSyncQuestions state management
   const handleSaveDraft = useCallback(async () => {
     try {
-      // Your save draft logic here
+      // First verify all answers are synced
+      const pendingAnswers = Array.from(pendingSyncQuestions)
+      if (pendingAnswers.length > 0) {
+        // Wait for pending syncs
+        await Promise.all(
+          pendingAnswers.map(async (questionId) => {
+            await syncManager.waitForSync(attemptId, questionId)
+          })
+        )
+      }
+
+      // Save draft after sync is complete
+      await attemptStorage.saveAnswers(attemptId, questions)
       setLastSaved(new Date())
       setPendingChanges(0)
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      toast.success('Draft saved successfully')
     } catch (error) {
       toast.error('Failed to save draft')
+      console.error('Save draft error:', error)
     }
-  }, [])
+  }, [attemptId, questions, pendingSyncQuestions])
 
   const isPending = useCallback((questionId: string) => {
     return pendingSync.has(questionId)
@@ -391,7 +417,7 @@ export function TestAttemptProvider({ children, params }: TestAttemptProviderPro
     isPending, // Add this
     isSynced, // Add this
     isSyncingDraft: false, // Add this
-    pendingSyncQuestions: new Set() // Add this
+    pendingSyncQuestions // Add this
   }
 
   return (

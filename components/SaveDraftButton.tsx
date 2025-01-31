@@ -3,9 +3,9 @@ import { Button } from "@/components/ui/button"
 
 interface SaveDraftButtonProps {
   onSave: () => Promise<void>
-  pendingCount: number
   disabled?: boolean
   loading?: boolean
+  pendingCount: number
 }
 
 export function SaveDraftButton({ 

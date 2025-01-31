@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from "react"
 import { useAuth } from "@clerk/nextjs"
 import { toast } from "sonner"
 import { useAttemptState } from '@/hooks/useAttemptState'
-import { TestAttemptContext } from "./TestAttemptContext"
+import { TestAttemptContext, type TestAttemptContextType } from "./TestAttemptContext" // Add TestAttemptContextType
 import { LoadingState } from "./LoadingState"
 import { isGuestQuestion } from "@/lib/utils/question-helpers"
 import { attemptStorage } from "@/lib/storage/attempt-storage"
@@ -155,7 +155,7 @@ export function TestAttemptProvider({ params, children }: TestAttemptProviderPro
     
     try {
       const questionsToVerify = Array.from(pendingSyncQuestions)
-      const response = await fetch(`/api/tests/attempt/${attemptId}/verify`, {
+      const response = await fetch(`/api/(test-taking)/tests/attempt/${attemptId}/verify`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ questionIds: questionsToVerify })
@@ -199,15 +199,20 @@ export function TestAttemptProvider({ params, children }: TestAttemptProviderPro
 
   const handleAnswerSelect = useCallback(async (questionId: string, optionId: string) => {
     try {
-      setPendingSyncQuestions(prev => new Set(prev).add(questionId))
+      // Add to pending sync before the operation
+      setPendingSyncQuestions(prev => {
+        const newSet = new Set(prev)
+        newSet.add(questionId)
+        return newSet
+      })
       
       await originalHandleAnswerSelect(questionId, optionId)
       
-      // After successful sync
+      // Remove from pending sync after successful operation
       setPendingSyncQuestions(prev => {
-        const updated = new Set(prev)
-        updated.delete(questionId)
-        return updated
+        const newSet = new Set(prev)
+        newSet.delete(questionId)
+        return newSet
       })
     } catch (error) {
       console.error('Answer selection error:', error)
@@ -233,7 +238,7 @@ export function TestAttemptProvider({ params, children }: TestAttemptProviderPro
       storeOperation(operation)
       try {
         await operation()
-        setPendingChanges(prev => prev + 1) // Increment pending changes
+        setPendingChanges(prev => prev + 1)
       } catch (e) {
         setError(AttemptErrorBoundary.handleError(e))
       }
@@ -247,16 +252,16 @@ export function TestAttemptProvider({ params, children }: TestAttemptProviderPro
     isCategoryCompleted,
     isLastCategory,
     error,
-    clearError,       
-    retryOperation,   
+    clearError,
+    retryOperation,
     isPending,
     isSynced,
-    pendingChanges, 
-    lastSaved,      
+    pendingChanges,
+    lastSaved,
     handleSaveDraft,
     isSyncingDraft,
     pendingSyncQuestions
-  }
+  } satisfies TestAttemptContextType
 
   if (isInitialLoad && isLoading) {
     return <LoadingState />
