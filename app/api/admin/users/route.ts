@@ -1,6 +1,7 @@
 // app/api/admin/users/route.ts
 import { auth } from "@clerk/nextjs/server"
 import { NextResponse } from "next/server"
+import { Prisma } from "@prisma/client"
 import prisma from "@/lib/prisma"
 import { userQuerySchema } from "@/lib/validations/users"
 import type { UserListResponse } from "@/types/admin/users"
@@ -81,6 +82,7 @@ export async function GET(req: Request): Promise<NextResponse<UserListResponse |
       })
     ])
 
+    // 7. Format and return response
     return NextResponse.json({
       users: users.map(user => ({
         id: user.id,
