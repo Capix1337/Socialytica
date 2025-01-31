@@ -1,26 +1,26 @@
 // app/api/admin/users/[id]/route.ts
 import { auth } from "@clerk/nextjs/server"
-import { NextResponse } from "next/server"
+import { NextRequest, NextResponse } from "next/server"
 import prisma from "@/lib/prisma"
 import type { UserDetailsResponse } from "@/types/admin/users"
 
-export async function GET(
-  req: Request,
-  context: { params: { id: string } }
-): Promise<NextResponse> {
+export async function GET(req: NextRequest): Promise<NextResponse> {
   try {
     const { userId } = await auth()
     if (!userId) {
-      return new NextResponse('Unauthorized', { status: 401 })
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
     const { sessionClaims } = await auth()
     if (sessionClaims?.metadata?.role !== "admin") {
-      return new NextResponse('Forbidden', { status: 403 })
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
     }
 
+    // Manually parse user ID from URL instead of using a second parameter
+    const id = req.url.split("/users/")[1].split("/")[0]
+
     const user = await prisma.user.findUnique({
-      where: { id: context.params.id },
+      where: { id: id },
       include: {
         profile: true,
         testAttempts: {
@@ -46,7 +46,7 @@ export async function GET(
     })
 
     if (!user) {
-      return new NextResponse('Not Found', { status: 404 })
+      return NextResponse.json({ error: 'Not Found' }, { status: 404 })
     }
 
     const response: UserDetailsResponse = {
@@ -80,9 +80,6 @@ export async function GET(
 
   } catch (error) {
     console.error('[USER_GET]', error)
-    return NextResponse.json(
-      { error: 'Internal Server Error' },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 })
   }
 }

@@ -6,6 +6,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import type { UserListItem } from "@/types/admin/users"
 import Link from "next/link"
+import { DataTablePagination } from "./DataTablePagination"
 
 interface UsersTableProps {
   users: UserListItem[]
@@ -79,16 +80,18 @@ export function UsersTable({
   onPageChange 
 }: UsersTableProps) {
   return (
-    <DataTable
-      columns={columns}
-      data={users}
-      loading={loading}
-      searchKey="name"
-      pagination={{
-        currentPage,
-        totalPages,
-        onPageChange
-      }}
-    />
+    <div className="space-y-4">
+      <DataTable
+        columns={columns}
+        data={users}
+        loading={loading}
+        searchKey="name"
+      />
+      <DataTablePagination
+        currentPage={currentPage}
+        totalPages={totalPages}
+        onPageChange={onPageChange}
+      />
+    </div>
   )
 }
