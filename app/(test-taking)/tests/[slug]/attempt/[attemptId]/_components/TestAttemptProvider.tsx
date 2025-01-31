@@ -40,10 +40,12 @@ export function TestAttemptProvider({ params, children }: TestAttemptProviderPro
   const [lastOperation, setLastOperation] = useState<(() => Promise<void>) | null>(null)
   const [pendingChanges, setPendingChanges] = useState(0)
   const [lastSaved, setLastSaved] = useState<Date | null>(null)
+  const [pendingSyncQuestions, setPendingSyncQuestions] = useState<Set<string>>(new Set())
+  const [isSyncingDraft, setIsSyncingDraft] = useState(false)
 
   const {
     questions,
-    handleAnswerSelect,
+    handleAnswerSelect: originalHandleAnswerSelect,
     isPending: checkPending,    // Rename to avoid conflict
     isSynced: checkSynced,     // Rename to avoid conflict
     fetchQuestions
@@ -148,17 +150,70 @@ export function TestAttemptProvider({ params, children }: TestAttemptProviderPro
     return checkSynced(questionId)
   }, [checkSynced]) // Only depend on the function from useAttemptState
 
-  const handleSaveDraft = useCallback(async () => {
+  const verifySync = useCallback(async () => {
+    if (pendingSyncQuestions.size === 0) return true
+    
     try {
+      const questionsToVerify = Array.from(pendingSyncQuestions)
+      const response = await fetch(`/api/(test-taking)/tests/attempt/${attemptId}/verify`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ questionIds: questionsToVerify })
+      })
+  
+      if (!response.ok) throw new Error('Sync verification failed')
+      
+      const { synced } = await response.json()
+      return synced
+    } catch (error) {
+      console.error('Sync verification error:', error)
+      return false
+    }
+  }, [attemptId, pendingSyncQuestions])
+
+  const handleSaveDraft = useCallback(async () => {
+    if (isSyncingDraft) return
+    
+    try {
+      setIsSyncingDraft(true)
+      
+      // Wait for any pending syncs to complete
+      const isSynced = await verifySync()
+      if (!isSynced) {
+        toast.error('Some answers are still syncing. Please try again.')
+        return
+      }
+  
+      // Save to storage and update state
       await attemptStorage.saveAnswers(attemptId, questions)
       setLastSaved(new Date())
       setPendingChanges(0)
       toast.success('Draft saved successfully')
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : 'Failed to save draft')
-      console.error('Failed to save draft:', error) // Log error for debugging
+      toast.error('Failed to save draft')
+      console.error('Save draft error:', error)
+    } finally {
+      setIsSyncingDraft(false)
     }
-  }, [attemptId, questions])
+  }, [attemptId, questions, verifySync, isSyncingDraft])
+
+  const handleAnswerSelect = useCallback(async (questionId: string, optionId: string) => {
+    try {
+      setPendingSyncQuestions(prev => new Set(prev).add(questionId))
+      
+      await originalHandleAnswerSelect(questionId, optionId)
+      
+      // After successful sync
+      setPendingSyncQuestions(prev => {
+        const updated = new Set(prev)
+        updated.delete(questionId)
+        return updated
+      })
+    } catch (error) {
+      console.error('Answer selection error:', error)
+      throw error
+    }
+  }, [originalHandleAnswerSelect])
 
   const value = {
     testId,
@@ -198,7 +253,9 @@ export function TestAttemptProvider({ params, children }: TestAttemptProviderPro
     isSynced,
     pendingChanges, 
     lastSaved,      
-    handleSaveDraft 
+    handleSaveDraft,
+    isSyncingDraft,
+    pendingSyncQuestions
   }
 
   if (isInitialLoad && isLoading) {

@@ -11,7 +11,7 @@ import { isGuestQuestion } from "@/lib/utils/question-helpers"
 import { AttemptErrorCodes } from "@/lib/errors/attempt-errors" // Remove AttemptError import
 import { ErrorRecoveryDialog } from './ErrorRecoveryDialog'
 import { SaveDraftButton } from "@/components/SaveDraftButton"
-import { SyncStatus } from "@/components/SyncStatus"
+// import { SyncStatus } from "@/components/SyncStatus"
 
 export function TestAttemptLayout() {
   const router = useRouter()
@@ -22,10 +22,11 @@ export function TestAttemptLayout() {
     error,
     clearError,
     retryOperation,
-    pendingChanges,
-    lastSaved,
-    handleSaveDraft
-    // Remove unused attemptId
+    // pendingChanges,
+    // lastSaved,
+    handleSaveDraft,
+    isSyncingDraft,
+    pendingSyncQuestions
   } = useTestAttempt()
 
   useEffect(() => {
@@ -74,6 +75,11 @@ export function TestAttemptLayout() {
     isGuestQuestion(q) ? !!q.selectedOptionId : q.isAnswered
   ).length
 
+  // Add this to show sync status
+  const syncStatus = pendingSyncQuestions.size > 0 
+    ? `Syncing ${pendingSyncQuestions.size} answers...`
+    : 'All changes synced'
+
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="pb-24">
@@ -85,13 +91,13 @@ export function TestAttemptLayout() {
             answeredQuestions={answeredQuestions}
           />
           <div className="container max-w-7xl mx-auto px-4 flex items-center justify-between">
-            <SyncStatus 
-              lastSaved={lastSaved} 
-              pendingChanges={pendingChanges} 
-            />
+            <div className="text-sm text-muted-foreground">
+              {syncStatus}
+            </div>
             <SaveDraftButton 
               onSave={handleSaveDraft}
-              pendingCount={pendingChanges} // Remove .length
+              disabled={isSyncingDraft || pendingSyncQuestions.size > 0}
+              loading={isSyncingDraft}
             />
           </div>
         </div>

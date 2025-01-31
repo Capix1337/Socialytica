@@ -48,6 +48,8 @@ interface TestAttemptContextType {
   handleSaveDraft: () => Promise<void>
   isPending: (questionId: string) => boolean  // Add this
   isSynced: (questionId: string) => boolean   // Add this
+  isSyncingDraft: boolean; // Add this
+  pendingSyncQuestions: Set<string>; // Add this
 }
 
 export const TestAttemptContext = createContext<TestAttemptContextType | undefined>(undefined)
@@ -387,7 +389,9 @@ export function TestAttemptProvider({ children, params }: TestAttemptProviderPro
     lastSaved,
     handleSaveDraft,
     isPending, // Add this
-    isSynced // Add this
+    isSynced, // Add this
+    isSyncingDraft: false, // Add this
+    pendingSyncQuestions: new Set() // Add this
   }
 
   return (
