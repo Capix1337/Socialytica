@@ -9,7 +9,7 @@ import { isGuestQuestion } from "@/lib/utils/question-helpers"
 import type { CategoryState } from "./TestAttemptContext"
 import type { TestAttemptQuestion } from "@/types/tests/test-attempt-question"
 import type { GuestAttemptQuestion } from "@/types/tests/guest-attempt"
-import type { AttemptError } from "@/lib/errors/attempt-errors"
+import { AttemptError, AttemptErrorBoundary } from "@/lib/errors/attempt-errors" // Update this line
 
 // Add this helper function
 const getQuestionId = (question: TestAttemptQuestion | GuestAttemptQuestion): string => {
@@ -36,6 +36,8 @@ export function TestAttemptProvider({ params, children }: TestAttemptProviderPro
   const [showCompletionDialog, setShowCompletionDialog] = useState(false)
   const [error, setError] = useState<AttemptError | null>(null)
   const [lastOperation, setLastOperation] = useState<(() => Promise<void>) | null>(null)
+  const [pendingChanges, setPendingChanges] = useState(0)
+  const [lastSaved, setLastSaved] = useState<Date | null>(null)
 
   const {
     questions,
@@ -144,6 +146,18 @@ export function TestAttemptProvider({ params, children }: TestAttemptProviderPro
     return checkSynced(questionId)
   }, [checkSynced]) // Only depend on the function from useAttemptState
 
+  const handleSaveDraft = useCallback(async () => {
+    try {
+      // Save draft logic
+      await attemptStorage.saveAnswers(attemptId, questions)
+      setLastSaved(new Date())
+      setPendingChanges(0)
+      toast.success('Draft saved successfully')
+    } catch (error) {
+      toast.error('Failed to save draft')
+    }
+  }, [attemptId, questions])
+
   const value = {
     testId,
     attemptId,
@@ -162,6 +176,7 @@ export function TestAttemptProvider({ params, children }: TestAttemptProviderPro
       storeOperation(operation)
       try {
         await operation()
+        setPendingChanges(prev => prev + 1) // Increment pending changes
       } catch (e) {
         setError(AttemptErrorBoundary.handleError(e))
       }
@@ -175,10 +190,13 @@ export function TestAttemptProvider({ params, children }: TestAttemptProviderPro
     isCategoryCompleted,
     isLastCategory,
     error,
-    clearError,       // Add this
-    retryOperation,   // Add this
+    clearError,       
+    retryOperation,   
     isPending,
-    isSynced
+    isSynced,
+    pendingChanges, 
+    lastSaved,      
+    handleSaveDraft 
   }
 
   if (isInitialLoad && isLoading) {
