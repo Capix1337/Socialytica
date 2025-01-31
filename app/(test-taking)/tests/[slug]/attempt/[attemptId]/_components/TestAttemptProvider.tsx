@@ -40,7 +40,7 @@ export function TestAttemptProvider({ params, children }: TestAttemptProviderPro
   const [lastOperation, setLastOperation] = useState<(() => Promise<void>) | null>(null)
   const [pendingChanges, setPendingChanges] = useState(0)
   const [lastSaved, setLastSaved] = useState<Date | null>(null)
-  const [pendingSyncQuestions, setPendingSyncQuestions] = useState<Set<string>>(new Set())
+  const [pendingSyncQuestions, setPendingSyncQuestions] = useState<Set<string>>(new Set<string>())
   const [isSyncingDraft, setIsSyncingDraft] = useState(false)
 
   const {
@@ -155,7 +155,7 @@ export function TestAttemptProvider({ params, children }: TestAttemptProviderPro
     
     try {
       const questionsToVerify = Array.from(pendingSyncQuestions)
-      const response = await fetch(`/api/(test-taking)/tests/attempt/${attemptId}/verify`, {
+      const response = await fetch(`/api/tests/attempt/${attemptId}/verify`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ questionIds: questionsToVerify })
