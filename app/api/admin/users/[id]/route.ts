@@ -2,12 +2,18 @@
 import { auth } from "@clerk/nextjs/server"
 import { NextResponse } from "next/server"
 import prisma from "@/lib/prisma"
-import type { UserDetailsResponse } from "@/types/admin/users"
+// import type { UserDetailsResponse } from "@/types/admin/users"
+
+interface RouteParams {
+  params: {
+    id: string
+  }
+}
 
 export async function GET(
-  req: Request,
-  { params }: { params: { id: string } }
-) {
+  request: Request,
+  { params }: RouteParams
+): Promise<NextResponse> {
   try {
     const { userId } = await auth()
     if (!userId) {
@@ -49,7 +55,7 @@ export async function GET(
       return new NextResponse('Not Found', { status: 404 })
     }
 
-    const response: UserDetailsResponse = {
+    return NextResponse.json({
       id: user.id,
       email: user.email,
       firstName: user.firstName,
@@ -74,9 +80,7 @@ export async function GET(
       },
       createdAt: user.createdAt,
       updatedAt: user.updatedAt
-    }
-
-    return NextResponse.json(response)
+    })
 
   } catch (error) {
     console.error('[USER_GET]', error)

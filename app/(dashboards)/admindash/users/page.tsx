@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { UsersHeader } from "./components/UsersHeader"
 import { UsersTable } from "./components/UsersTable"
 import { UsersTableToolbar } from "./components/UsersTableToolbar"
@@ -21,7 +21,7 @@ export default function UsersPage() {
   const [countryFilter, setCountryFilter] = useState<string>("")
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc")
 
-  const fetchUsers = async () => {
+  const fetchUsers = useCallback(async () => {
     try {
       setLoading(true)
       setError(null)
@@ -45,11 +45,11 @@ export default function UsersPage() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [currentPage, searchValue, countryFilter, sortOrder, itemsPerPage])
 
   useEffect(() => {
     fetchUsers()
-  }, [currentPage, searchValue, countryFilter, sortOrder])
+  }, [fetchUsers])
 
   const handleSearch = (value: string) => {
     setSearchValue(value)
