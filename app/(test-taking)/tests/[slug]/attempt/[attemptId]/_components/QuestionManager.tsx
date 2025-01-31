@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect } from "react" // Add this import
+import { useEffect } from "react"
 import { useTestAttempt } from "./TestAttemptContext"
 import { QuestionCard } from "./QuestionCard"
 import { NavigationControls } from "./NavigationControls"
@@ -8,14 +8,13 @@ import { cn } from "@/lib/utils"
 import { getQuestionData } from "@/lib/utils/question-helpers"
 import type { TestAttemptQuestion } from "@/types/tests/test-attempt-question"
 import type { GuestAttemptQuestion } from "@/types/tests/guest-attempt"
-import { AttemptError } from "@/lib/errors/attempt-errors"
 
 interface QuestionManagerProps {
   currentCategory: {
     questions: (TestAttemptQuestion | GuestAttemptQuestion)[]
     name: string
   }
-  onError?: (error: AttemptError) => void
+  onError?: (error: Error) => void
 }
 
 export function QuestionManager({ currentCategory, onError }: QuestionManagerProps) {
@@ -115,8 +114,8 @@ export function QuestionManager({ currentCategory, onError }: QuestionManagerPro
     try {
       await handleAnswerSelect(questionId, optionId)
     } catch (error) {
-      // Use the onError prop to handle errors
-      onError(error instanceof Error ? error : new Error('Failed to select answer'))
+      // Call onError only if it's defined
+      onError?.(error instanceof Error ? error : new Error('Failed to select answer'))
     }
   }
 
