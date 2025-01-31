@@ -2,6 +2,7 @@
 
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import countries from "world-countries"
 
 interface UsersTableToolbarProps {
   searchValue: string
@@ -11,6 +12,11 @@ interface UsersTableToolbarProps {
   sortOrder: "asc" | "desc"
   onSortChange: (value: "asc" | "desc") => void
 }
+
+// Sort countries by name
+const sortedCountries = countries.sort((a, b) => 
+  a.name.common.localeCompare(b.name.common)
+)
 
 export function UsersTableToolbar({
   searchValue,
@@ -38,11 +44,15 @@ export function UsersTableToolbar({
             <SelectValue placeholder="Filter by country" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">All Countries</SelectItem>
-            <SelectItem value="USA">United States</SelectItem>
-            <SelectItem value="UK">United Kingdom</SelectItem>
-            <SelectItem value="CA">Canada</SelectItem>
-            {/* Add more countries as needed */}
+            <SelectItem value="all">All Countries</SelectItem>
+            {sortedCountries.map((country) => (
+              <SelectItem 
+                key={country.cca2} 
+                value={country.cca2}
+              >
+                {country.name.common}
+              </SelectItem>
+            ))}
           </SelectContent>
         </Select>
       </div>
