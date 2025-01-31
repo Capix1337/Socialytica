@@ -14,6 +14,7 @@ export class SyncManager {
   private isSyncing = false
   private readonly BATCH_SIZE = 5
   private readonly SYNC_INTERVAL = 5000 // 5 seconds
+  private syncPromises: Map<string, Promise<void>> = new Map() // Add this line
 
   constructor() {
     if (typeof window !== 'undefined') {
@@ -50,6 +51,37 @@ export class SyncManager {
     }
   }
 
+  // Add this new method
+  public async waitForSync(attemptId: string, questionId: string): Promise<void> {
+    const key = `${attemptId}-${questionId}`
+    const existingPromise = this.syncPromises.get(key)
+    
+    if (existingPromise) {
+      return existingPromise
+    }
+
+    const promise = new Promise<void>((resolve) => {
+      const checkSync = () => {
+        const task = this.syncQueue.find(t => 
+          t.attemptId === attemptId && t.questionId === questionId
+        )
+
+        if (!task) {
+          this.syncPromises.delete(key)
+          resolve()
+        } else {
+          setTimeout(checkSync, 500) // Check every 500ms
+        }
+      }
+
+      checkSync()
+    })
+
+    this.syncPromises.set(key, promise)
+    return promise
+  }
+
+  // Modify the existing syncBatch method to clean up promises
   private async syncBatch(attemptId: string, tasks: SyncTask[]): Promise<void> {
     try {
       const endpoint = `/api/tests/attempt/${attemptId}/questions/batch`
@@ -61,9 +93,11 @@ export class SyncManager {
 
       if (!response.ok) throw new Error('Sync failed')
 
-      // Mark synced in storage
+      // Mark synced in storage and clean up promises
       tasks.forEach(task => {
         attemptStorage.markAnswerSynced(attemptId, task.questionId)
+        const key = `${attemptId}-${task.questionId}`
+        this.syncPromises.delete(key)
       })
     } catch (error) {
       console.error('Batch sync failed:', error)
