@@ -148,13 +148,13 @@ export function TestAttemptProvider({ params, children }: TestAttemptProviderPro
 
   const handleSaveDraft = useCallback(async () => {
     try {
-      // Save draft logic
       await attemptStorage.saveAnswers(attemptId, questions)
       setLastSaved(new Date())
       setPendingChanges(0)
       toast.success('Draft saved successfully')
     } catch (error) {
-      toast.error('Failed to save draft')
+      toast.error(error instanceof Error ? error.message : 'Failed to save draft')
+      console.error('Failed to save draft:', error) // Log error for debugging
     }
   }, [attemptId, questions])
 
