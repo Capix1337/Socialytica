@@ -10,13 +10,11 @@ import { Footer } from "@/components/footer"
 import { AuthGuestHandler } from '@/components/auth/AuthGuestHandler'
 import "./globals.css"
 import { Inter } from "next/font/google"
+import { metadata } from './metadata'
 
 const inter = Inter({ subsets: ["latin"] })
 
-export const metadata = {
-  title: "Socialytica | Relationship Psychology Tests & Analysis",
-  description: "Discover insights about your relationships through scientifically-designed psychological tests. Get personalized analysis and improve your connections with others.",
-}
+export { metadata }
 
 export default function RootLayout({
   children,
@@ -26,6 +24,25 @@ export default function RootLayout({
   return (
     <ClerkProvider>
       <html lang="en" suppressHydrationWarning>
+        <head>
+          <script
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{
+              __html: JSON.stringify({
+                "@context": "https://schema.org",
+                "@type": "WebSite", 
+                "name": "Socialytica",
+                "url": "https://socialytica.net",
+                "description": "Discover what truly drives your relationship and move forward with clarity",
+                "potentialAction": {
+                  "@type": "SearchAction",
+                  "target": "https://socialytica.net/search?q={search_term_string}",
+                  "query-input": "required name=search_term_string"
+                }
+              })
+            }}
+          />
+        </head>
         <body className={`${inter.className} min-h-screen flex flex-col`}>
           <ThemeProvider
             attribute="class"

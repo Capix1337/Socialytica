@@ -1,7 +1,5 @@
-import type { NextConfig } from "next";
-
-const nextConfig: NextConfig = {
-  /* config options here */
+/** @type {import('next').NextConfig} */
+const nextConfig = {
   images: {
     remotePatterns: [
       {
@@ -10,9 +8,10 @@ const nextConfig: NextConfig = {
         pathname: '/images/**',
       },
     ],
+    formats: ['image/avif', 'image/webp'],
   },
-  // // Add this section for fonts
-  // optimizeFonts: true,
-};
+  compress: true,
+  poweredByHeader: false
+}
 
 export default nextConfig;
