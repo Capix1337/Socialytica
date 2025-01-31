@@ -10,6 +10,8 @@ import { LoadingState } from "./LoadingState"
 import { isGuestQuestion } from "@/lib/utils/question-helpers"
 import { AttemptErrorCodes } from "@/lib/errors/attempt-errors" // Remove AttemptError import
 import { ErrorRecoveryDialog } from './ErrorRecoveryDialog'
+import { SaveDraftButton } from "@/components/SaveDraftButton"
+import { SyncStatus } from "@/components/SyncStatus"
 
 export function TestAttemptLayout() {
   const router = useRouter()
@@ -19,7 +21,10 @@ export function TestAttemptLayout() {
     currentCategory,
     error,
     clearError,
-    retryOperation
+    retryOperation,
+    pendingChanges,
+    lastSaved,
+    handleSaveDraft
     // Remove unused attemptId
   } = useTestAttempt()
 
@@ -79,6 +84,16 @@ export function TestAttemptLayout() {
             totalQuestions={totalQuestions}
             answeredQuestions={answeredQuestions}
           />
+          <div className="container max-w-7xl mx-auto px-4 flex items-center justify-between">
+            <SyncStatus 
+              lastSaved={lastSaved} 
+              pendingChanges={pendingChanges} 
+            />
+            <SaveDraftButton 
+              onSave={handleSaveDraft}
+              pendingCount={pendingChanges} // Remove .length
+            />
+          </div>
         </div>
 
         <div className="container max-w-7xl mx-auto px-4 mt-6">

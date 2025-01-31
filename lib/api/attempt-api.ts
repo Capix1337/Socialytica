@@ -27,22 +27,36 @@ class AttemptApi {
         answers: answers.sort((a, b) => a.timestamp - b.timestamp)
       }
 
-      const response = await fetch(`/api/tests/attempt/${attemptId}/questions/batch`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      })
+      // Only send batch request when we have enough answers or timeout occurs
+      if (answers.length >= this.maxBatchSize || this.shouldProcessBatch) {
+        const response = await fetch(`/api/tests/attempt/${attemptId}/questions/batch`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        })
 
-      if (!response.ok) {
-        throw new Error('Failed to submit batch answers')
+        if (!response.ok) {
+          throw new Error('Failed to submit batch answers')
+        }
+
+        // Clear processed answers only on success
+        this.pendingAnswers.delete(attemptId)
       }
-
-      // Clear processed answers
-      this.pendingAnswers.delete(attemptId)
     } catch (error) {
       console.error('Batch update failed:', error)
       // Keep answers in queue for retry
     }
+  }
+
+  // Add property to track last batch process time
+  private lastBatchTime: number = Date.now()
+  private get shouldProcessBatch(): boolean {
+    const now = Date.now()
+    if (now - this.lastBatchTime >= this.batchTimeout) {
+      this.lastBatchTime = now
+      return true
+    }
+    return false
   }
 
   private debouncedProcess = debounce(this.processBatch, this.batchTimeout)
@@ -90,11 +104,9 @@ class AttemptApi {
     // Update pending answers
     this.pendingAnswers.set(attemptId, answers)
 
-    // Process batch if size threshold reached
-    if (answers.length >= this.maxBatchSize) {
+    // Only process if we hit batch size or timeout
+    if (answers.length >= this.maxBatchSize || this.shouldProcessBatch) {
       this.processBatch(attemptId)
-    } else {
-      this.debouncedProcess(attemptId)
     }
   }
 }

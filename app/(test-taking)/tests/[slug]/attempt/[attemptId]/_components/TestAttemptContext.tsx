@@ -43,6 +43,9 @@ interface TestAttemptContextType {
   error: AttemptError | null
   clearError: () => void
   retryOperation: () => void
+  pendingChanges: number // Change from array to number
+  lastSaved: Date | null
+  handleSaveDraft: () => Promise<void>
 }
 
 export const TestAttemptContext = createContext<TestAttemptContextType | undefined>(undefined)
@@ -74,6 +77,8 @@ export function TestAttemptProvider({ children, params }: TestAttemptProviderPro
   const [error, setError] = useState<AttemptError | null>(null)
   const [lastOperation, setLastOperation] = useState<(() => Promise<void>) | null>(null)
   const [pendingSync, setPendingSync] = useState<Set<string>>(new Set())
+  const [pendingChanges, setPendingChanges] = useState(0) // Initialize as number
+  const [lastSaved, setLastSaved] = useState<Date | null>(null)
 
   const clearError = useCallback(() => {
     setError(null)
@@ -336,6 +341,17 @@ export function TestAttemptProvider({ children, params }: TestAttemptProviderPro
     }
   }, [attemptId, resumeProgress])
 
+  const handleSaveDraft = useCallback(async () => {
+    try {
+      // Your save draft logic here
+      setLastSaved(new Date())
+      setPendingChanges(0)
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    } catch (error) {
+      toast.error('Failed to save draft')
+    }
+  }, [])
+
   // Add pendingSync to the context value
   const value = {
     testId,
@@ -357,6 +373,9 @@ export function TestAttemptProvider({ children, params }: TestAttemptProviderPro
     clearError,
     retryOperation,
     pendingSync, // Add this
+    pendingChanges,
+    lastSaved,
+    handleSaveDraft
   }
 
   return (
