@@ -57,7 +57,8 @@ export default function UsersPage() {
   }
 
   const handleCountryFilter = (value: string) => {
-    setCountryFilter(value)
+    // If "all" is selected, set empty string to remove the filter
+    setCountryFilter(value === "all" ? "" : value)
     setCurrentPage(1)
   }
 
