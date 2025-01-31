@@ -55,4 +55,5 @@ export interface BatchAnswerResponse {
     success: boolean
     error?: string
   }>
+  error?: string
 }

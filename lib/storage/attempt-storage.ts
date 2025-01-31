@@ -1,6 +1,9 @@
 // lib/storage/attempt-storage.ts
 
-interface CachedAnswer {
+import type { TestAttemptQuestion } from "@/types/tests/test-attempt-question"
+import type { GuestAttemptQuestion } from "@/types/tests/guest-attempt"
+
+interface StoredAnswer {
   questionId: string
   selectedOptionId: string
   timestamp: number
@@ -10,7 +13,7 @@ interface CachedAnswer {
 
 interface AttemptCache {
   attemptId: string
-  answers: CachedAnswer[]
+  answers: StoredAnswer[]
   lastUpdated: number
   version: number
 }
@@ -22,6 +25,38 @@ export class AttemptStorage {
 
   private isClient = typeof window !== 'undefined'
 
+  public async saveAnswers(
+    attemptId: string, 
+    questions: (TestAttemptQuestion | GuestAttemptQuestion)[]
+  ): Promise<void> {
+    if (!this.isClient) return
+
+    try {
+      const cache = this.getCache(attemptId)
+      const answers: StoredAnswer[] = questions
+        .filter(q => {
+          if ('questionId' in q) {
+            return q.selectedOptionId && q.isAnswered
+          }
+          return q.selectedOptionId
+        })
+        .map(q => ({
+          questionId: 'questionId' in q ? q.questionId : q.id,
+          selectedOptionId: q.selectedOptionId!,
+          timestamp: Date.now(),
+          synced: false,
+          retryCount: 0
+        }))
+
+      cache.answers = answers
+      cache.lastUpdated = Date.now()
+      this.saveCache(attemptId, cache)
+    } catch (error) {
+      console.error('Failed to save answers:', error)
+      throw new Error('Failed to save answers to local storage')
+    }
+  }
+
   public cacheAnswer(
     attemptId: string, 
     questionId: string, 
@@ -31,7 +66,7 @@ export class AttemptStorage {
 
     try {
       const cache = this.getCache(attemptId)
-      const answer: CachedAnswer = {
+      const answer: StoredAnswer = {
         questionId,
         selectedOptionId,
         timestamp: Date.now(),
@@ -69,7 +104,7 @@ export class AttemptStorage {
     }
   }
 
-  public getUnsynced(attemptId: string): CachedAnswer[] {
+  public getUnsynced(attemptId: string): StoredAnswer[] {
     if (!this.isClient) return []
 
     try {

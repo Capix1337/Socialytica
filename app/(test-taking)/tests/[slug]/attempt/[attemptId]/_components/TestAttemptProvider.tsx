@@ -2,14 +2,16 @@
 
 import { useState, useEffect, useCallback } from "react"
 import { useAuth } from "@clerk/nextjs"
+import { toast } from "sonner"
 import { useAttemptState } from '@/hooks/useAttemptState'
 import { TestAttemptContext } from "./TestAttemptContext"
 import { LoadingState } from "./LoadingState"
 import { isGuestQuestion } from "@/lib/utils/question-helpers"
+import { attemptStorage } from "@/lib/storage/attempt-storage"
 import type { CategoryState } from "./TestAttemptContext"
 import type { TestAttemptQuestion } from "@/types/tests/test-attempt-question"
 import type { GuestAttemptQuestion } from "@/types/tests/guest-attempt"
-import { AttemptError, AttemptErrorBoundary } from "@/lib/errors/attempt-errors" // Update this line
+import { AttemptError, AttemptErrorBoundary } from "@/lib/errors/attempt-errors"
 
 // Add this helper function
 const getQuestionId = (question: TestAttemptQuestion | GuestAttemptQuestion): string => {
