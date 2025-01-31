@@ -27,7 +27,7 @@ interface QuestionCardProps {
 }
 
 export function QuestionCard({
-  id, // Add this to props
+  id,
   question,
   questionNumber,
   selectedOption,

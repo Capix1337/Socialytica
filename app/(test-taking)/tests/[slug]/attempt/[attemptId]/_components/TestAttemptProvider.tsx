@@ -40,8 +40,8 @@ export function TestAttemptProvider({ params, children }: TestAttemptProviderPro
   const {
     questions,
     handleAnswerSelect,
-    isPending,
-    isSynced,
+    isPending: checkPending,    // Rename to avoid conflict
+    isSynced: checkSynced,     // Rename to avoid conflict
     fetchQuestions
   } = useAttemptState({ 
     isSignedIn: isSignedIn ?? false, // Add null check
@@ -134,6 +134,15 @@ export function TestAttemptProvider({ params, children }: TestAttemptProviderPro
   const storeOperation = useCallback((operation: () => Promise<void>) => {
     setLastOperation(() => operation)
   }, [])
+
+  // Remove unnecessary dependencies from callbacks
+  const isPending = useCallback((questionId: string) => {
+    return checkPending(questionId)
+  }, [checkPending]) // Only depend on the function from useAttemptState
+
+  const isSynced = useCallback((questionId: string) => {
+    return checkSynced(questionId)
+  }, [checkSynced]) // Only depend on the function from useAttemptState
 
   const value = {
     testId,

@@ -46,6 +46,8 @@ interface TestAttemptContextType {
   pendingChanges: number // Change from array to number
   lastSaved: Date | null
   handleSaveDraft: () => Promise<void>
+  isPending: (questionId: string) => boolean  // Add this
+  isSynced: (questionId: string) => boolean   // Add this
 }
 
 export const TestAttemptContext = createContext<TestAttemptContextType | undefined>(undefined)
@@ -352,6 +354,14 @@ export function TestAttemptProvider({ children, params }: TestAttemptProviderPro
     }
   }, [])
 
+  const isPending = useCallback((questionId: string) => {
+    return pendingSync.has(questionId)
+  }, [pendingSync])
+
+  const isSynced = useCallback((questionId: string) => {
+    return !pendingSync.has(questionId)
+  }, [pendingSync])
+
   // Add pendingSync to the context value
   const value = {
     testId,
@@ -375,7 +385,9 @@ export function TestAttemptProvider({ children, params }: TestAttemptProviderPro
     pendingSync, // Add this
     pendingChanges,
     lastSaved,
-    handleSaveDraft
+    handleSaveDraft,
+    isPending, // Add this
+    isSynced // Add this
   }
 
   return (
