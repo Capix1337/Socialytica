@@ -1,10 +1,12 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { createTestAnalysisPrompt } from '../prompts/test-analysis-prompt';
+import type { UserProfileForAnalysis, TestResults, AIResponse } from '@/types/test-analysis';
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
 const model = genAI.getGenerativeModel({ model: 'gemini-pro' });
 
-export async function generateGeneralContent(prompt: string) {
+// Add this function for general content generation
+export async function generateGeneralContent(prompt: string): Promise<string> {
   try {
     const result = await model.generateContent(prompt);
     const text = result.response.text();
@@ -19,18 +21,16 @@ export async function generateTestAnalysis({
   userProfile, 
   testResults 
 }: {
-  userProfile: any;
-  testResults: any;
-}) {
+  userProfile: UserProfileForAnalysis;
+  testResults: TestResults;
+}): Promise<AIResponse> {
   try {
     const prompt = createTestAnalysisPrompt(userProfile, testResults);
     const result = await model.generateContent(prompt);
     const response = result.response.text();
     
-    // Parse the JSON response
     const parsedResponse = JSON.parse(response);
     
-    // Validate response structure
     if (!parsedResponse.analysis || !parsedResponse.advice) {
       throw new Error('Invalid AI response structure');
     }

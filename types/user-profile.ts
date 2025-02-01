@@ -1,7 +1,7 @@
 //types/user-profile.ts
 
 export interface UserProfile {
-  id: string;
+  id: string;  // Required field
   dateOfBirth: Date | null;
   gender: 'male' | 'female' | null;
   relationshipStatus: 'Single' | 'Married'  | "In a relationship" | "It's Complicated" | null;

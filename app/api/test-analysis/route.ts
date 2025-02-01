@@ -7,6 +7,7 @@ import { generateTestAnalysis } from "@/lib/services/ai-service";
 import type { TestAnalysisResponse } from "@/types/tests/test-analysis";
 import { generateAnalysisSchema } from "@/lib/validations/test-analysis";
 import { verifyTestAccess } from "@/lib/permissions/test-access";
+import { type GenerateAnalysisInput, UserProfileForAnalysis } from '@/types/test-analysis';
 
 // GET - Retrieve existing analysis
 export async function GET(
@@ -93,7 +94,7 @@ export async function POST(
       }, { status: 400 });
     }
 
-    const { testAttemptId, userProfile, testResults } = validation.data;
+    const { testAttemptId, userProfile, testResults } = validation.data as GenerateAnalysisInput;
 
     const hasAccess = await verifyTestAccess(clerkUserId, testAttemptId);
     if (!hasAccess) {
@@ -103,6 +104,27 @@ export async function POST(
       }, { status: 403 });
     }
 
+    const metadata = {
+      userProfile: {
+        dateOfBirth: userProfile.dateOfBirth || null,
+        gender: userProfile.gender || null,
+        relationshipStatus: userProfile.relationshipStatus || null,
+        countryOfOrigin: userProfile.countryOfOrigin || null
+      } as Record<string, string | null>,
+      testResults: {
+        totalScore: testResults.totalScore,
+        percentageScore: testResults.percentageScore,
+        categoryScores: testResults.categoryScores.map(score => ({
+          ...score,
+          category: {
+            name: score.category.name,
+            description: score.category.description || null
+          }
+        }))
+      },
+      generatedAt: new Date().toISOString()
+    } as const;
+
     const analysis = await prisma.testAnalysis.upsert({
       where: { testAttemptId },
       create: {
@@ -110,26 +132,28 @@ export async function POST(
         analysis: "Generating analysis...",
         advice: "Generating advice...",
         isGenerated: false,
-        metadata: {
-          userProfile,
-          testResults,
-          generatedAt: new Date().toISOString()
-        }
+        metadata
       },
       update: {
         analysis: "Generating analysis...",
         advice: "Generating advice...",
         isGenerated: false,
-        metadata: {
-          userProfile,
-          testResults,
-          generatedAt: new Date().toISOString()
-        }
+        metadata
       }
     });
 
-    // Generate AI analysis
-    const aiResponse = await generateTestAnalysis({ userProfile, testResults });
+    const userProfileForAnalysis: UserProfileForAnalysis = {
+      dateOfBirth: userProfile.dateOfBirth,
+      gender: userProfile.gender,
+      relationshipStatus: userProfile.relationshipStatus,
+      countryOfOrigin: userProfile.countryOfOrigin
+    };
+
+    // Generate AI analysis with properly typed data
+    const aiResponse = await generateTestAnalysis({ 
+      userProfile: userProfileForAnalysis,
+      testResults 
+    });
 
     // Update with AI response
     const updatedAnalysis = await prisma.testAnalysis.update({

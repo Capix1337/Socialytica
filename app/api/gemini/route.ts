@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { generateGeneralContent, generateTestAnalysis } from '@/lib/services/ai-service';
+import type { UserProfileForAnalysis, TestResults } from '@/types/test-analysis';
 
 export async function POST(req: Request) {
   try {
@@ -11,7 +12,10 @@ export async function POST(req: Request) {
       return NextResponse.json({ response: text });
     } else {
       // Handle test analysis using the service
-      const { userProfile, testResults } = body;
+      const { userProfile, testResults } = body as {
+        userProfile: UserProfileForAnalysis;
+        testResults: TestResults;
+      };
       const analysis = await generateTestAnalysis({ userProfile, testResults });
       return NextResponse.json(analysis);
     }
