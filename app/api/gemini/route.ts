@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { generateTestAnalysis } from '@/lib/services/ai-service';
+import { generateGeneralContent, generateTestAnalysis } from '@/lib/services/ai-service';
 
 export async function POST(req: Request) {
   try {
@@ -7,9 +7,7 @@ export async function POST(req: Request) {
     
     if ('prompt' in body) {
       // Handle general prompts using existing logic
-      const result = await model.generateContent(body.prompt);
-      const response = await result.response;
-      const text = response.text();
+      const text = await generateGeneralContent(body.prompt);
       return NextResponse.json({ response: text });
     } else {
       // Handle test analysis using the service

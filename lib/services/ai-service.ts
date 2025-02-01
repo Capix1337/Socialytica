@@ -55,3 +55,10 @@ export async function generateTestAnalysis({
     throw new Error('Failed to generate analysis');
   }
 }
+
+// Add this for general prompts
+export async function generateGeneralContent(prompt: string): Promise<string> {
+  const result = await model.generateContent(prompt);
+  const response = await result.response;
+  return response.text();
+}

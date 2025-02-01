@@ -3,7 +3,7 @@
 import { auth } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
-import { generateAnalysis } from "@/app/api/gemini/route";
+import { generateTestAnalysis } from "@/lib/services/ai-service";
 import type { TestAnalysisResponse } from "@/types/tests/test-analysis";
 import { generateAnalysisSchema } from "@/lib/validations/test-analysis";
 import { verifyTestAccess } from "@/lib/permissions/test-access";
@@ -118,8 +118,8 @@ export async function POST(
       });
     }
 
-    // Generate analysis using Gemini AI
-    const aiResponse = await generateAnalysis({
+    // Generate analysis using the service
+    const aiResponse = await generateTestAnalysis({
       userProfile,
       testResults
     });
