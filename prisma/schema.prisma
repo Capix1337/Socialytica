@@ -248,10 +248,10 @@ model TestAnalysis {
   id            String      @id @default(cuid())
   testAttemptId String      @unique
   testAttempt   TestAttempt @relation(fields: [testAttemptId], references: [id], onDelete: Cascade)
-  
   analysis      String      @db.String(65535)
   advice        String      @db.String(65535)
-
+  isGenerated   Boolean     @default(false)
+  metadata      Json?
   createdAt     DateTime    @default(now())
   updatedAt     DateTime    @updatedAt
 

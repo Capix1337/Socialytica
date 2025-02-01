@@ -55,7 +55,7 @@ export async function GET(
       data: {
         analysis: analysis.analysis,
         advice: analysis.advice,
-        metadata: analysis.metadata as Record<string, unknown>
+        metadata: analysis.metadata
       }
     });
 
@@ -102,36 +102,13 @@ export async function POST(
       }, { status: 403 });
     }
 
-    // Check for existing analysis
-    const existingAnalysis = await prisma.testAnalysis.findUnique({
-      where: { testAttemptId }
-    });
-
-    if (existingAnalysis?.isGenerated) {
-      return NextResponse.json({
-        success: true,
-        data: {
-          analysis: existingAnalysis.analysis,
-          advice: existingAnalysis.advice,
-          metadata: existingAnalysis.metadata as Record<string, unknown>
-        }
-      });
-    }
-
-    // Generate analysis using the service
-    const aiResponse = await generateTestAnalysis({
-      userProfile,
-      testResults
-    });
-
-    // Save the generated analysis
     const analysis = await prisma.testAnalysis.upsert({
       where: { testAttemptId },
       create: {
         testAttemptId,
-        analysis: aiResponse.analysis,
-        advice: aiResponse.advice,
-        isGenerated: true,
+        analysis: "Generating analysis...",
+        advice: "Generating advice...",
+        isGenerated: false,
         metadata: {
           userProfile,
           testResults,
@@ -139,9 +116,9 @@ export async function POST(
         }
       },
       update: {
-        analysis: aiResponse.analysis,
-        advice: aiResponse.advice,
-        isGenerated: true,
+        analysis: "Generating analysis...",
+        advice: "Generating advice...",
+        isGenerated: false,
         metadata: {
           userProfile,
           testResults,
@@ -150,12 +127,25 @@ export async function POST(
       }
     });
 
+    // Generate AI analysis
+    const aiResponse = await generateTestAnalysis({ userProfile, testResults });
+
+    // Update with AI response
+    const updatedAnalysis = await prisma.testAnalysis.update({
+      where: { id: analysis.id },
+      data: {
+        analysis: aiResponse.analysis,
+        advice: aiResponse.advice,
+        isGenerated: true
+      }
+    });
+
     return NextResponse.json({
       success: true,
       data: {
-        analysis: analysis.analysis,
-        advice: analysis.advice,
-        metadata: analysis.metadata as Record<string, unknown>
+        analysis: updatedAnalysis.analysis,
+        advice: updatedAnalysis.advice,
+        metadata: updatedAnalysis.metadata
       }
     });
 
