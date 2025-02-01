@@ -73,3 +73,18 @@ export interface TestAnalysisMetadata {
   testResults: TestResults;
   generatedAt: string;
 }
+
+export interface TestAnalysis {
+  id: string;
+  testAttemptId: string;
+  analysis: string;
+  advice: string;
+  isGenerated: boolean;
+  metadata: {
+    userProfile: UserProfileForAnalysis;
+    testResults: TestResults;
+    generatedAt: string;
+  };
+  createdAt: Date;
+  updatedAt: Date;
+}
