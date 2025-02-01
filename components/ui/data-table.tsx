@@ -26,14 +26,14 @@ interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[]
   data: TData[]
   searchKey: string
-  loading?: boolean
+  isLoading?: boolean
 }
 
 export function DataTable<TData, TValue>({
   columns,
   data,
   searchKey,
-  loading = false,
+  isLoading = false,
 }: DataTableProps<TData, TValue>) {
   const [filtering, setFiltering] = useState("")
 
@@ -49,7 +49,7 @@ export function DataTable<TData, TValue>({
     onGlobalFilterChange: setFiltering,
   })
 
-  if (loading) {
+  if (isLoading) {
     return <div>Loading...</div>
   }
 

@@ -17,11 +17,13 @@ model User {
   clerkUserId  String        @unique
   createdAt    DateTime      @default(now())
   updatedAt    DateTime      @updatedAt
+  
   Test         Test[]
   testAttempts TestAttempt[]
-  profile      UserProfile?  // Keep only this one
+  profile      UserProfile?
 
   @@index([clerkUserId])
+  @@index([email])
 }
 
 model Test {
@@ -166,6 +168,10 @@ model UserProfile {
   // Relation fields
   userId           String    @unique  // Foreign key
   user             User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([gender])
+  @@index([countryOfOrigin])
+  @@index([createdAt])
 }
 
 enum TestStatus {
