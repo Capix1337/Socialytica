@@ -50,12 +50,13 @@ export async function GET(
       }, { status: 404 });
     }
 
+    // Cast metadata to correct type
     return NextResponse.json({
       success: true,
       data: {
         analysis: analysis.analysis,
         advice: analysis.advice,
-        metadata: analysis.metadata
+        metadata: analysis.metadata as Record<string, unknown>
       }
     });
 
@@ -112,7 +113,7 @@ export async function POST(
         metadata: {
           userProfile,
           testResults,
-          generatedAt: new Date()
+          generatedAt: new Date().toISOString()
         }
       },
       update: {
@@ -122,7 +123,7 @@ export async function POST(
         metadata: {
           userProfile,
           testResults,
-          generatedAt: new Date()
+          generatedAt: new Date().toISOString()
         }
       }
     });
@@ -140,12 +141,13 @@ export async function POST(
       }
     });
 
+    // Cast metadata to correct type
     return NextResponse.json({
       success: true,
       data: {
         analysis: updatedAnalysis.analysis,
         advice: updatedAnalysis.advice,
-        metadata: updatedAnalysis.metadata
+        metadata: updatedAnalysis.metadata as Record<string, unknown>
       }
     });
 
