@@ -16,7 +16,9 @@ interface UsersTableProps {
   onPageChange: (page: number) => void
 }
 
-const columns: ColumnDef<UserListItem>[] = [
+type UserTableValue = string | number | null | undefined
+
+const columns: ColumnDef<UserListItem, UserTableValue>[] = [
   {
     accessorKey: "name",
     header: "Name",
@@ -49,7 +51,7 @@ const columns: ColumnDef<UserListItem>[] = [
     accessorKey: "country",
     header: "Country",
     cell: ({ row }) => {
-      const country = row.getValue("country") as string
+      const country = row.getValue("country") as string | null
       return country ? (
         <Badge variant="secondary">{country}</Badge>
       ) : (
@@ -59,14 +61,13 @@ const columns: ColumnDef<UserListItem>[] = [
   },
   {
     accessorKey: "totalTests",
-    header: "Tests Taken",
-    cell: ({ row }) => row.getValue("totalTests")
+    header: "Tests Taken"
   },
   {
     accessorKey: "createdAt",
     header: "Joined",
     cell: ({ row }) => {
-      const date = new Date(row.getValue("createdAt"))
+      const date = new Date(row.getValue("createdAt") as string)
       return date.toLocaleDateString()
     }
   }
@@ -81,11 +82,11 @@ export function UsersTable({
 }: UsersTableProps) {
   return (
     <div className="space-y-4">
-      <DataTable
+      <DataTable<UserListItem, UserTableValue>
         columns={columns}
         data={users}
-        loading={loading}
-        searchKey="name"
+        isLoading={loading}
+        searchKey="email" // Add this line - specify which field to search by
       />
       <DataTablePagination
         currentPage={currentPage}

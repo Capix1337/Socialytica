@@ -4,20 +4,20 @@ import { NextResponse } from "next/server"
 import { Prisma } from "@prisma/client"
 import prisma from "@/lib/prisma"
 import { userQuerySchema } from "@/lib/validations/users"
-import type { UserListResponse } from "@/types/admin/users"
+// import type { UserListResponse } from "@/types/admin/users"
 
-export async function GET(req: Request): Promise<NextResponse<UserListResponse | { error: string }>> {
+export async function GET(req: Request) {
   try {
     // 1. Auth check
     const { userId } = await auth()
     if (!userId) {
-      return new NextResponse('Unauthorized', { status: 401 })
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
     // 2. Admin role check
     const { sessionClaims } = await auth()
     if (sessionClaims?.metadata?.role !== "admin") {
-      return new NextResponse('Forbidden', { status: 403 })
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 })
     }
 
     // 3. Parse and validate query parameters
@@ -31,13 +31,9 @@ export async function GET(req: Request): Promise<NextResponse<UserListResponse |
     })
 
     if (!queryResult.success) {
-      return NextResponse.json(
-        { 
-          message: 'Invalid query parameters',
-          errors: queryResult.error.flatten()
-        },
-        { status: 400 }
-      )
+      return NextResponse.json({ 
+        error: "Invalid query parameters" 
+      }, { status: 400 })
     }
 
     // 4. Set up pagination
@@ -82,7 +78,6 @@ export async function GET(req: Request): Promise<NextResponse<UserListResponse |
       })
     ])
 
-    // 7. Format and return response
     return NextResponse.json({
       users: users.map(user => ({
         id: user.id,
@@ -101,9 +96,6 @@ export async function GET(req: Request): Promise<NextResponse<UserListResponse |
 
   } catch (error) {
     console.error('[USERS_GET]', error)
-    return NextResponse.json(
-      { message: 'Internal Server Error' },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 })
   }
 }
