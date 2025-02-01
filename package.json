@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@clerk/nextjs": "^6.9.5",
+    "@google/generative-ai": "^0.21.0",
     "@hello-pangea/dnd": "^17.0.0",
     "@nextui-org/calendar": "^2.2.9",
     "@portabletext/react": "^3.2.0",
