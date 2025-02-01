@@ -110,11 +110,10 @@ model TestAttempt {
   test            Test              @relation(fields: [testId], references: [id], onDelete: Cascade)
   responses       QuestionResponse[]
   categoryScores  CategoryScore[]
+  analysis        TestAnalysis?     // New one-to-one relationship
+
   createdAt       DateTime          @default(now())
   updatedAt       DateTime          @default(now())
-  
-  // New relation
-  analysis TestAnalysis?
 
   @@index([userId])
   @@index([testId])
@@ -246,17 +245,15 @@ model GuestCategoryScore {
 }
 
 model TestAnalysis {
-  id          String      @id @default(cuid())
-  testAttempt TestAttempt @relation(fields: [testAttemptId], references: [id], onDelete: Cascade)
-  testAttemptId String    @unique // One-to-one relation
+  id            String      @id @default(cuid())
+  testAttemptId String      @unique
+  testAttempt   TestAttempt @relation(fields: [testAttemptId], references: [id], onDelete: Cascade)
   
-  // Analysis Content
-  analysis    String      @db.String(65535) // Using String with max length for longer content
-  advice      String      @db.String(65535)
-  
-  // Metadata
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
+  analysis      String      @db.String(65535)
+  advice        String      @db.String(65535)
+
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
 
   @@index([testAttemptId])
 }
