@@ -29,18 +29,23 @@ export async function generateTestAnalysis({
     const result = await model.generateContent(prompt);
     const response = result.response.text();
     
-    const parsedResponse = JSON.parse(response);
-    
-    if (!parsedResponse.analysis || !parsedResponse.advice) {
-      throw new Error('Invalid AI response structure');
-    }
+    try {
+      const parsedResponse = JSON.parse(response);
+      
+      if (!parsedResponse.analysis || !parsedResponse.advice) {
+        throw new Error('Invalid AI response structure');
+      }
 
-    return {
-      analysis: parsedResponse.analysis,
-      advice: parsedResponse.advice
-    };
+      return {
+        analysis: parsedResponse.analysis,
+        advice: parsedResponse.advice
+      };
+    } catch (parseError) {
+      console.error('Failed to parse AI response:', parseError);
+      throw new Error('Invalid AI response format');
+    }
   } catch (error) {
     console.error('Test Analysis Generation Error:', error);
-    throw new Error('Failed to generate test analysis');
+    throw new Error(error instanceof Error ? error.message : 'Failed to generate test analysis');
   }
 }

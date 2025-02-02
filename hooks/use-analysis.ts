@@ -38,6 +38,14 @@ export function useAnalysis(attemptId: string, initialData?: TestAnalysisRespons
       setIsLoading(true);
       setError(null);
 
+      // First get the test results to include in analysis request
+      const resultsResponse = await fetch(`/api/tests/attempt/${attemptId}/results`);
+      if (!resultsResponse.ok) {
+        throw new Error("Failed to fetch test results");
+      }
+      const testResults = await resultsResponse.json();
+
+      // Make the analysis generation request
       const response = await fetch('/api/test-analysis', {
         method: 'POST',
         headers: {
@@ -45,11 +53,23 @@ export function useAnalysis(attemptId: string, initialData?: TestAnalysisRespons
         },
         body: JSON.stringify({
           testAttemptId: attemptId,
+          userProfile: {
+            dateOfBirth: null,
+            gender: null,
+            relationshipStatus: null,
+            countryOfOrigin: null
+          },
+          testResults: {
+            totalScore: testResults.totalScore,
+            percentageScore: testResults.percentageScore,
+            categoryScores: testResults.categoryScores
+          }
         }),
       });
       
       if (!response.ok) {
-        throw new Error("Failed to generate analysis");
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to generate analysis");
       }
 
       const data = await response.json();

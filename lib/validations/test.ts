@@ -23,5 +23,3 @@ export const generateAnalysisSchema = z.object({
     }))
   })
 });
-
-export type GenerateAnalysisInput = z.infer<typeof generateAnalysisSchema>;
