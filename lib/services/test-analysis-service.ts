@@ -164,7 +164,8 @@ export class TestAnalysisService {
       data: {
         analysis: analysis.analysis,
         advice: analysis.advice,
-        metadata: this.serializeMetadata(analysis.metadata) // Convert to Record<string, unknown>
+        metadata: this.serializeMetadata(analysis.metadata),
+        isGenerated: analysis.isGenerated // Include this field
       }
     };
   }

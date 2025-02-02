@@ -64,6 +64,7 @@ export interface TestAnalysisResponse {
     analysis: string;
     advice: string;
     metadata: Record<string, unknown>;
+    isGenerated: boolean; // Add this field
   };
   error?: string;
 }
