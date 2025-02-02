@@ -23,8 +23,8 @@ export default function AdminDashboard() {
 
         // Fetch both stats and activity data in parallel
         const [statsResponse, activityResponse] = await Promise.all([
-          fetch("/api/admin/dashboard/stats"),
-          fetch("/api/admin/dashboard/activity")
+          fetch("/api/admin/stats"),
+          fetch("/api/admin/activity")
         ])
 
         // Handle stats response

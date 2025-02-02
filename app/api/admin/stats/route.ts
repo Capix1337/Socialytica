@@ -4,9 +4,8 @@ import prisma from "@/lib/prisma"
 
 export async function GET() {
   try {
-    // Admin authorization check
-    const { userId, sessionClaims } = await auth()
-    if (!userId || sessionClaims?.metadata?.role !== "admin") {
+    const { userId } = await auth()
+    if (!userId) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
