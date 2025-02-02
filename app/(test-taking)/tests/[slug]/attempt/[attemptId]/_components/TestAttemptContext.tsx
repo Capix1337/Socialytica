@@ -153,10 +153,10 @@ export function TestAttemptProvider({ children, params }: TestAttemptProviderPro
   // Modified handleNextCategory function
   const handleNextCategory = useCallback(() => {
     if (isCategoryCompleted && !isLastCategory) {
-      // Record transition and update state
       if (currentCategory) {
         const nextCat = categories[currentCategoryIndex + 1];
         if (nextCat) {
+          // Record transition for guest users if needed
           if (!isSignedIn) {
             guestStorage.recordCategoryTransition(
               attemptId,
@@ -168,7 +168,7 @@ export function TestAttemptProvider({ children, params }: TestAttemptProviderPro
           // First scroll to top
           window.scrollTo(0, 0);
           
-          // Then update state
+          // Update state
           setCurrentCategoryIndex(prev => prev + 1);
           
           // Set first question of next category
@@ -177,7 +177,7 @@ export function TestAttemptProvider({ children, params }: TestAttemptProviderPro
             const questionId = getQuestionId(firstQuestion);
             setCurrentQuestionId(questionId);
             
-            // Scroll to first question after state update
+            // Call scrollToFirstQuestion after state updates
             setTimeout(scrollToFirstQuestion, 100);
           }
         }
@@ -185,13 +185,13 @@ export function TestAttemptProvider({ children, params }: TestAttemptProviderPro
     }
   }, [
     isCategoryCompleted,
-    isLastCategory,
+    isLastCategory, 
+    currentCategory,
     categories,
     currentCategoryIndex,
-    currentCategory,
     isSignedIn,
     attemptId,
-    scrollToFirstQuestion
+    scrollToFirstQuestion  // Add to dependencies
   ]);
 
   // Resume functionality
