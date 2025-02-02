@@ -80,11 +80,7 @@ export interface TestAnalysis {
   analysis: string;
   advice: string;
   isGenerated: boolean;
-  metadata: {
-    userProfile: UserProfileForAnalysis;
-    testResults: TestResults;
-    generatedAt: string;
-  };
+  metadata: TestAnalysisMetadata;
   createdAt: Date;
   updatedAt: Date;
 }
