@@ -138,22 +138,35 @@ export class TestAnalysisService {
         metadata: this.validateMetadata(analysis.metadata)
       };
     } catch (error) {
-      // Update the record to show generation failed and include it in the error
+      // Create metadata for failed state
+      const failedMetadata: TestAnalysisMetadata = {
+        userProfile,
+        testResults,
+        generatedAt: new Date().toISOString()
+      };
+
+      // Update the record to show generation failed
       const failedAnalysis = await prisma.testAnalysis.update({
         where: { testAttemptId },
         data: {
           analysis: "Analysis generation failed. Please try again.",
           advice: "Advice generation failed. Please try again.",
-          isGenerated: false
+          isGenerated: false,
+          metadata: this.serializeMetadata(failedMetadata)
         }
       });
 
-      // Create custom error with the failed analysis state
+      // Create custom error with properly typed failed analysis
       const enhancedError = new Error(
         error instanceof Error ? error.message : 'Failed to generate test analysis'
       ) as AnalysisError;
       
-      enhancedError.failedAnalysis = failedAnalysis;
+      // Convert the failed analysis to proper type with validated metadata
+      enhancedError.failedAnalysis = {
+        ...failedAnalysis,
+        metadata: failedMetadata
+      };
+
       throw enhancedError;
     }
   }

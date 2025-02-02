@@ -85,3 +85,8 @@ export interface TestAnalysis {
   createdAt: Date;
   updatedAt: Date;
 }
+
+// Add AnalysisError interface
+export interface AnalysisError extends Error {
+  failedAnalysis: TestAnalysis;
+}
