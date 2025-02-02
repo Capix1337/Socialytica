@@ -7,7 +7,8 @@ import type {
   UserProfileForAnalysis, 
   TestResults,
   TestAnalysisResponse,
-  GenerateAnalysisInput 
+  GenerateAnalysisInput,
+  AnalysisError
 } from '@/types/test-analysis';
 import { Prisma } from '@prisma/client';
 
@@ -108,33 +109,53 @@ export class TestAnalysisService {
     userProfile: UserProfileForAnalysis,
     testResults: TestResults
   ): Promise<TestAnalysis> {
-    // Generate AI analysis
-    const aiResponse = await generateTestAnalysis({
-      userProfile,
-      testResults
-    });
+    try {
+      // Generate AI analysis
+      const aiResponse = await generateTestAnalysis({
+        userProfile,
+        testResults
+      });
 
-    const metadata: TestAnalysisMetadata = {
-      userProfile,
-      testResults,
-      generatedAt: new Date().toISOString()
-    };
+      const metadata: TestAnalysisMetadata = {
+        userProfile,
+        testResults,
+        generatedAt: new Date().toISOString()
+      };
 
-    // Update analysis with AI response
-    const analysis = await prisma.testAnalysis.update({
-      where: { testAttemptId },
-      data: {
-        analysis: aiResponse.analysis,
-        advice: aiResponse.advice,
-        isGenerated: true,
-        metadata: this.serializeMetadata(metadata)
-      }
-    });
+      // Update analysis with AI response
+      const analysis = await prisma.testAnalysis.update({
+        where: { testAttemptId },
+        data: {
+          analysis: aiResponse.analysis,
+          advice: aiResponse.advice,
+          isGenerated: true,
+          metadata: this.serializeMetadata(metadata)
+        }
+      });
 
-    return {
-      ...analysis,
-      metadata: this.validateMetadata(analysis.metadata)
-    };
+      return {
+        ...analysis,
+        metadata: this.validateMetadata(analysis.metadata)
+      };
+    } catch (error) {
+      // Update the record to show generation failed and include it in the error
+      const failedAnalysis = await prisma.testAnalysis.update({
+        where: { testAttemptId },
+        data: {
+          analysis: "Analysis generation failed. Please try again.",
+          advice: "Advice generation failed. Please try again.",
+          isGenerated: false
+        }
+      });
+
+      // Create custom error with the failed analysis state
+      const enhancedError = new Error(
+        error instanceof Error ? error.message : 'Failed to generate test analysis'
+      ) as AnalysisError;
+      
+      enhancedError.failedAnalysis = failedAnalysis;
+      throw enhancedError;
+    }
   }
 
   formatResponse(analysis: TestAnalysis): TestAnalysisResponse {

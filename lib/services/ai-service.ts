@@ -27,10 +27,12 @@ export async function generateTestAnalysis({
   try {
     const prompt = createTestAnalysisPrompt(userProfile, testResults);
     const result = await model.generateContent(prompt);
-    const response = result.response.text();
+    const rawResponse = result.response.text();
     
     try {
-      const parsedResponse = JSON.parse(response);
+      // Clean the response string before parsing
+      const cleanedResponse = rawResponse.replace(/[\u0000-\u001F\u007F-\u009F]/g, "");
+      const parsedResponse = JSON.parse(cleanedResponse);
       
       if (!parsedResponse.analysis || !parsedResponse.advice) {
         throw new Error('Invalid AI response structure');
@@ -42,6 +44,7 @@ export async function generateTestAnalysis({
       };
     } catch (parseError) {
       console.error('Failed to parse AI response:', parseError);
+      console.error('Raw response:', rawResponse);
       throw new Error('Invalid AI response format');
     }
   } catch (error) {

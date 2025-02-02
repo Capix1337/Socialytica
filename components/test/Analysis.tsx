@@ -26,7 +26,7 @@ export function Analysis({ attemptId, className, initialData }: AnalysisProps) {
       <div className="space-y-4">
         <div className="flex items-center justify-between">
           <h2 className="text-xl font-semibold">AI Analysis</h2>
-          {!analysis && (
+          {(!analysis || !analysis.data?.isGenerated) && (
             <Button 
               onClick={generateAnalysis}
               disabled={isLoading}
@@ -62,11 +62,15 @@ export function Analysis({ attemptId, className, initialData }: AnalysisProps) {
           <div className="space-y-6">
             <div className="space-y-2">
               <h3 className="font-medium">Analysis</h3>
-              <p className="text-muted-foreground">{analysis.data.analysis}</p>
+              <p className="text-muted-foreground">
+                {analysis.data.analysis}
+              </p>
             </div>
             <div className="space-y-2">
               <h3 className="font-medium">Advice</h3>
-              <p className="text-muted-foreground">{analysis.data.advice}</p>
+              <p className="text-muted-foreground">
+                {analysis.data.advice}
+              </p>
             </div>
           </div>
         )}
