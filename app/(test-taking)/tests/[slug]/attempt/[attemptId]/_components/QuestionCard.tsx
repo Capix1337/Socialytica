@@ -23,6 +23,7 @@ interface QuestionCardProps {
   selectedOption?: string
   isAnswered?: boolean
   onAnswerSelect: (optionId: string) => void
+  onClick?: () => void // Add this prop
   className?: string
 }
 
@@ -33,6 +34,7 @@ export function QuestionCard({
   selectedOption,
   isAnswered,
   onAnswerSelect,
+  onClick, // Add this prop
   className,
 }: QuestionCardProps) {
   const { isPending, isSynced } = useTestAttempt()
@@ -55,6 +57,8 @@ export function QuestionCard({
         isAnswered && "ring-2 ring-primary/10",
         className
       )}
+      onClick={onClick} // Add click handler
+      style={{ cursor: 'pointer' }} // Optional: add pointer cursor
     >
       <CardHeader className="border-b bg-muted/40">
         <div className="flex items-center justify-between">

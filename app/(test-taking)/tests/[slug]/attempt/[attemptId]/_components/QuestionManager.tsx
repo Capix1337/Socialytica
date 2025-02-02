@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect } from "react"
+import { useEffect, useState } from "react"
 import { useTestAttempt } from "./TestAttemptContext"
 import { QuestionCard } from "./QuestionCard"
 import { NavigationControls } from "./NavigationControls"
@@ -21,9 +21,7 @@ export function QuestionManager({ currentCategory, onError }: QuestionManagerPro
   const {
     testId,
     attemptId,
-    currentQuestionId,
     handleAnswerSelect,
-    setCurrentQuestionId,
     isCategoryCompleted,
     isLastCategory,
     moveToNextCategory,
@@ -34,6 +32,10 @@ export function QuestionManager({ currentCategory, onError }: QuestionManagerPro
   const answeredQuestions = questions.filter(q => 
     getQuestionData(q).isAnswered
   ).length
+
+  const [currentQuestionId, setCurrentQuestionId] = useState<string>(() => 
+    questions[0] ? getQuestionData(questions[0]).id : ''
+  );
 
   const currentQuestionIndex = questions.findIndex(q => 
     getQuestionData(q).id === currentQuestionId
@@ -119,9 +121,26 @@ export function QuestionManager({ currentCategory, onError }: QuestionManagerPro
     }
   }
 
+  // Add handler for card clicks
+  const handleCardClick = (questionId: string) => {
+    setCurrentQuestionId(questionId);
+    // Smooth scroll to the clicked question
+    const questionElement = document.getElementById(`question-${questionId}`);
+    if (questionElement) {
+      const headerOffset = 140;
+      const elementPosition = questionElement.getBoundingClientRect().top;
+      const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+      
+      window.scrollTo({
+        top: offsetPosition,
+        behavior: 'smooth'
+      });
+    }
+  };
+
   return (
     <>
-      <main className="space-y-6 mb-20">
+      <main className="container max-w-3xl mx-auto py-6 space-y-6">
         {questions.map((question, index) => {
           const questionData = getQuestionData(question)
           const isCurrentQuestion = normalizeQuestionId(questionData.id) === normalizeQuestionId(currentQuestionId)
@@ -146,6 +165,7 @@ export function QuestionManager({ currentCategory, onError }: QuestionManagerPro
               selectedOption={question.selectedOptionId || undefined}
               isAnswered={questionData.isAnswered}
               onAnswerSelect={(optionId) => handleQuestionAnswer(questionData.id, optionId)}
+              onClick={() => handleCardClick(questionData.id)} // Add click handler
               className={cn(
                 "transition-all duration-300",
                 isCurrentQuestion 
@@ -159,11 +179,14 @@ export function QuestionManager({ currentCategory, onError }: QuestionManagerPro
                     "scale-[1.02]"
                   ] 
                   : [
-                    "bg-white",
+                   "bg-white",
                     "opacity-60",
                     "blur-[2px]",
                     "filter",
-                    "saturate-50"
+                    "saturate-50",
+                    "hover:opacity-80", // Add hover effect
+                    "hover:blur-[1px]", // Reduce blur on hover
+                    "cursor-pointer"    // Show pointer cursor
                   ]
               )}
             />
