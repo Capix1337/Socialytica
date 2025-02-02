@@ -1,7 +1,7 @@
 // app/(dashboards)/admindash/layout.tsx
-import { AdminHeader } from "./components/AdminHeader"
+import { AdminHeader } from "./analytics/components/AdminHeader"
 import { AdminSidebar } from "./components/AdminSidebar"
-import { AdminBreadcrumbs } from "./components/AdminBreadcrumbs"
+import { AdminBreadcrumbs } from "./analytics/components/AdminBreadcrumbs"
 
 export default function AdminDashboardLayout({
   children,
