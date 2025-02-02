@@ -1,3 +1,4 @@
+// app/(test-taking)/tests/[slug]/attempt/[attemptId]/results/page.tsx
 "use client"
 
 import { useEffect, useState, useCallback } from "react"
@@ -16,6 +17,13 @@ interface ResultsPageProps {
   }>
 }
 
+// Add type guard
+function isGuestResult(
+  result: TestAttemptResult | GuestAttemptResult
+): result is GuestAttemptResult {
+  return 'isBlurred' in result && 'needsAuth' in result;
+}
+
 export default function ResultsPage({ params }: ResultsPageProps) {
   const { isSignedIn } = useAuth()
   const [results, setResults] = useState<TestAttemptResult | GuestAttemptResult | null>(null)
@@ -23,7 +31,6 @@ export default function ResultsPage({ params }: ResultsPageProps) {
   const [error, setError] = useState<string | null>(null)
   const [attemptId, setAttemptId] = useState<string>("")
 
-  // Move fetch results to useCallback to fix dependency warning
   const fetchResults = useCallback(async () => {
     if (!attemptId) return
     
@@ -104,10 +111,16 @@ export default function ResultsPage({ params }: ResultsPageProps) {
           <Analysis attemptId={attemptId} />
         </div>
       ) : (
-        <>
-          <BlurredResults results={results} />
-          <AuthOverlay testName={results.test.name} />
-        </>
+        isGuestResult(results) ? (
+          <>
+            <BlurredResults results={results} />
+            <AuthOverlay testName={results.test.name} />
+          </>
+        ) : (
+          <div className="text-center">
+            <p className="text-destructive">Invalid result type</p>
+          </div>
+        )
       )}
     </div>
   )
