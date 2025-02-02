@@ -16,7 +16,8 @@ const isGuestEnabledRoute = createRouteMatcher([
 
 // Admin only routes
 const isAdminRoute = createRouteMatcher([
-  '/admindash(.*)'  // All admin dashboard routes
+  '/admindash(.*)',  // All admin dashboard routes
+  '/api/admin/(.*)'  // All admin API routes
 ])
 
 export default clerkMiddleware(async (auth, req) => {
