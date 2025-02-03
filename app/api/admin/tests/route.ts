@@ -153,12 +153,15 @@ export async function POST(req: Request) {
       // Generate unique slug
       const slug = await createUniqueSlug(testData.title, tx)
 
-      // Create test with slug
+      // Create test with new fields
       const newTest = await tx.test.create({
         data: {
           ...testData,
           slug,
           createdBy: user.id,
+          description: testData.description || null,       // Short description
+          richDescription: testData.richDescription || null, // Rich content
+          expectedTime: testData.expectedTime || null      // Duration
         }
       })
 

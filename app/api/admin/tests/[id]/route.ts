@@ -39,6 +39,13 @@ export async function GET(req: Request) {
               }
             }
           }
+        },
+        user: {
+          select: {
+            firstName: true,
+            lastName: true,
+            imageUrl: true
+          }
         }
       }
     })
@@ -64,7 +71,6 @@ export async function PATCH(req: Request) {
       return new NextResponse('Unauthorized', { status: 401 })
     }
 
-    // Get ID from URL
     const id = req.url.split('/tests/')[1].split('/')[0]
     const json = await req.json()
     
@@ -76,12 +82,12 @@ export async function PATCH(req: Request) {
       }, { status: 400 })
     }
 
-    // If title is being updated, generate new slug
+    // Generate new slug if title is updated
     if (validationResult.data.title) {
       const slug = await createUniqueSlug(
         validationResult.data.title, 
         prisma,
-        id // Pass existing ID to exclude current test from uniqueness check
+        id
       )
       validationResult.data.slug = slug
     }
@@ -92,7 +98,13 @@ export async function PATCH(req: Request) {
 
     for (let attempt = 0; attempt < maxRetries; attempt++) {
       try {
-        const updatedTest = await testService.updateTest(validationResult.data)
+        // Update test with new fields
+        const updatedTest = await testService.updateTest({
+          ...validationResult.data,
+          description: validationResult.data.description,
+          richDescription: validationResult.data.richDescription,
+          expectedTime: validationResult.data.expectedTime
+        })
         return NextResponse.json(updatedTest)
       } catch (err) {
         lastError = err instanceof Error ? err : new Error('Unknown error');
