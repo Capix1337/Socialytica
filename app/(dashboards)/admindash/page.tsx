@@ -1,13 +1,15 @@
 "use client"
 
+import { motion, AnimatePresence } from "framer-motion"
 import { useEffect, useState } from "react"
-import { OverviewStats } from "./components/OverviewStats"
-import { QuickActions } from "./components/QuickActions"
-import { ActivityFeed } from "./components/ActivityFeed"
-import { PerformanceMetrics } from "./components/PerformanceMetrics"
-import { DashboardLayout } from "./components/DashboardLayout"
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
-import { AlertCircle } from "lucide-react"
+import { OverviewStats } from "./_components/OverviewStats"
+import { QuickActions } from "./_components/QuickActions"
+import { ActivityFeed } from "./_components/ActivityFeed"
+import { PerformanceMetrics } from "./_components/PerformanceMetrics"
+import { DashboardLayout } from "./_components/DashboardLayout"
+import { StatsLoadingSkeleton, ActivityLoadingSkeleton } from "./_components/LoadingStates"
+import { ErrorState } from "./_components/ErrorStates"
+import { fadeIn, slideIn, staggerChildren } from "./_components/transitions"
 
 interface TestCompletion {
   id: string
@@ -101,33 +103,61 @@ export default function AdminDashboard() {
     fetchDashboardData()
   }, [])
 
+  if (error) {
+    return (
+      <DashboardLayout>
+        <ErrorState
+          title="Dashboard Error"
+          message={error}
+          onRetry={() => fetchDashboardData()}
+        />
+      </DashboardLayout>
+    )
+  }
+
   return (
     <DashboardLayout>
-      {error ? (
-        <Alert variant="destructive">
-          <AlertCircle className="h-4 w-4" />
-          <AlertTitle>Error</AlertTitle>
-          <AlertDescription>{error}</AlertDescription>
-        </Alert>
-      ) : (
-        <div className="space-y-6">
-          <OverviewStats 
-            data={statsData?.overview} 
-            isLoading={isLoading} 
-          />
-          <QuickActions />
+      <AnimatePresence mode="wait">
+        <motion.div 
+          className="space-y-6"
+          {...staggerChildren}
+        >
+          <motion.div {...fadeIn}>
+            {isLoading ? (
+              <StatsLoadingSkeleton />
+            ) : (
+              <OverviewStats 
+                data={statsData?.overview} 
+                isLoading={isLoading} 
+              />
+            )}
+          </motion.div>
+
+          <motion.div {...slideIn}>
+            <QuickActions />
+          </motion.div>
+
           <div className="grid gap-6 md:grid-cols-2">
-            <ActivityFeed 
-              data={activityData} 
-              isLoading={isLoading} 
-            />
-            <PerformanceMetrics 
-              data={statsData?.overview} 
-              isLoading={isLoading} 
-            />
+            <motion.div {...fadeIn}>
+              {isLoading ? (
+                <ActivityLoadingSkeleton />
+              ) : (
+                <ActivityFeed 
+                  data={activityData} 
+                  isLoading={isLoading}
+                />
+              )}
+            </motion.div>
+
+            <motion.div {...fadeIn}>
+              <PerformanceMetrics 
+                data={statsData?.overview}
+                isLoading={isLoading}
+              />
+            </motion.div>
           </div>
-        </div>
-      )}
+        </motion.div>
+      </AnimatePresence>
     </DashboardLayout>
   )
 }
