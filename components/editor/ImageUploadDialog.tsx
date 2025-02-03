@@ -19,32 +19,41 @@ interface ImageUploadDialogProps {
 export function ImageUploadDialog({ editor, open, onClose }: ImageUploadDialogProps) {
   const [file, setFile] = useState<File | null>(null)
   const [uploading, setUploading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
-  const handleUpload = async (e: React.FormEvent) => {
-    e.preventDefault(); // Prevent form submission
-    if (!file) return;
+  const handleUpload = async (e: React.MouseEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    
+    if (!file) return
 
     try {
-      setUploading(true);
-      const formData = new FormData();
-      formData.append('file', file);
+      setUploading(true)
+      setError(null)
+      const formData = new FormData()
+      formData.append('file', file)
 
       const response = await fetch('/api/upload', {
         method: 'POST',
         body: formData
-      });
+      })
 
-      if (!response.ok) throw new Error('Upload failed');
-      const { url } = await response.json();
+      if (!response.ok) {
+        const error = await response.text()
+        throw new Error(error)
+      }
 
-      editor.chain().focus().setImage({ src: url }).run();
-      onClose();
+      const { url } = await response.json()
+      editor.chain().focus().setImage({ src: url }).run()
+      onClose()
+      setFile(null)
     } catch (error) {
-      console.error('Upload error:', error);
+      console.error('Upload error:', error)
+      setError(error instanceof Error ? error.message : 'Upload failed')
     } finally {
-      setUploading(false);
+      setUploading(false)
     }
-  };
+  }
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
@@ -59,14 +68,25 @@ export function ImageUploadDialog({ editor, open, onClose }: ImageUploadDialogPr
               id="image"
               type="file"
               accept="image/*"
-              onChange={(e) => setFile(e.target.files?.[0] ?? null)}
+              onChange={(e) => {
+                setFile(e.target.files?.[0] ?? null)
+                setError(null)
+              }}
             />
+            {error && (
+              <p className="text-sm text-destructive">{error}</p>
+            )}
           </div>
           <div className="flex justify-end gap-2">
-            <Button variant="outline" onClick={onClose}>
+            <Button 
+              type="button"
+              variant="outline" 
+              onClick={onClose}
+            >
               Cancel
             </Button>
             <Button 
+              type="button"
               onClick={handleUpload} 
               disabled={!file || uploading}
             >
