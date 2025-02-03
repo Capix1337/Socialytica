@@ -1,5 +1,5 @@
-import { Section } from "./Section"
 import { Card } from "@/components/ui/card"
+import { Section } from "./Section"
 import { Skeleton } from "@/components/ui/skeleton"
 
 interface ActivityFeedProps {
@@ -26,7 +26,7 @@ interface ActivityFeedProps {
       email: string
       createdAt: string
     }[]
-    newTests: {
+    newTests: Array<{
       id: string
       title: string
       isPublished: boolean
@@ -35,7 +35,7 @@ interface ActivityFeedProps {
         firstName: string
         lastName: string
       }
-    }[]
+    }>
   } | null
   isLoading: boolean
 }
@@ -44,7 +44,7 @@ export function ActivityFeed({ data, isLoading }: ActivityFeedProps) {
   if (isLoading) {
     return (
       <Section title="Recent Activity" description="Latest platform activities">
-        <div className="space-y-4">
+        <div className="overflow-auto max-h-[400px] pr-2 space-y-4 custom-scrollbar">
           {[...Array(5)].map((_, i) => (
             <Card key={i} className="p-4">
               <div className="space-y-2">
@@ -70,10 +70,13 @@ export function ActivityFeed({ data, isLoading }: ActivityFeedProps) {
 
   return (
     <Section title="Recent Activity" description="Latest platform activities">
-      <div className="space-y-4">
+      <div className="overflow-auto max-h-[400px] pr-2 space-y-4 custom-scrollbar">
         {/* Test Completions */}
         {data.testCompletions.map((completion) => (
-          <Card key={completion.id} className="p-4">
+          <Card 
+            key={completion.id} 
+            className="p-4 hover:bg-muted/50 transition-colors"
+          >
             <div className="space-y-1">
               <div className="flex justify-between">
                 <p className="font-medium">{completion.test.title}</p>
@@ -121,6 +124,30 @@ export function ActivityFeed({ data, isLoading }: ActivityFeedProps) {
           </Card>
         ))}
       </div>
+
+      <style jsx global>{`
+        .custom-scrollbar {
+          scrollbar-width: thin;
+          scrollbar-color: hsl(var(--muted)) transparent;
+        }
+        
+        .custom-scrollbar::-webkit-scrollbar {
+          width: 8px;
+        }
+        
+        .custom-scrollbar::-webkit-scrollbar-track {
+          background: transparent;
+        }
+        
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+          background-color: hsl(var(--muted));
+          border-radius: 20px;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+          background-color: hsl(var(--muted-foreground));
+        }
+      `}</style>
     </Section>
   )
 }
