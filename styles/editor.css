@@ -74,6 +74,28 @@
   margin: 1rem 0;
 }
 
+.youtube-wrapper {
+  position: relative;
+  width: 100%;
+  padding-top: 56.25%; /* 16:9 Aspect Ratio */
+  margin: 1.5rem 0;
+}
+
+.youtube-wrapper iframe {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 0.5rem;
+  border: none;
+}
+
+/* Dark mode adjustments */
+.dark .youtube-wrapper iframe {
+  border: 1px solid hsl(var(--border));
+}
+
 /* Separator Styles */
 .tiptap hr {
   border: none;
