@@ -3,16 +3,9 @@ import { Toggle } from '@/components/ui/toggle'
 import { Separator } from '@/components/ui/separator'
 import { Button } from '@/components/ui/button'
 import {
-  Bold,
-  Italic,
-  List,
-  ListOrdered,
-  Image as ImageIcon,
-  Link,
-  Youtube,
-  Heading1,
-  Heading2,
-  Heading3,
+  Bold, Italic, List, ListOrdered, Image as ImageIcon, Link, Youtube,
+  Heading1, Heading2, Heading3, Table, AlignLeft, AlignCenter, AlignRight,
+  TableRow, TableColumn
 } from 'lucide-react'
 import { ImageUploadDialog } from './ImageUploadDialog'
 import { LinkDialog } from './LinkDialog'
@@ -29,6 +22,34 @@ export function EditorToolbar({ editor }: EditorToolbarProps) {
   const [showYoutubeDialog, setShowYoutubeDialog] = useState(false)
 
   if (!editor) return null
+
+  const addTable = () => {
+    editor.chain().focus().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run()
+  }
+
+  const addColumnBefore = () => {
+    editor.chain().focus().addColumnBefore().run()
+  }
+
+  const addColumnAfter = () => {
+    editor.chain().focus().addColumnAfter().run()
+  }
+
+  const deleteColumn = () => {
+    editor.chain().focus().deleteColumn().run()
+  }
+
+  const addRowBefore = () => {
+    editor.chain().focus().addRowBefore().run()
+  }
+
+  const addRowAfter = () => {
+    editor.chain().focus().addRowAfter().run()
+  }
+
+  const deleteRow = () => {
+    editor.chain().focus().deleteRow().run()
+  }
 
   return (
     <div className="flex flex-wrap gap-2 items-center border rounded-lg p-2">
@@ -132,6 +153,103 @@ export function EditorToolbar({ editor }: EditorToolbarProps) {
       >
         <Youtube className="h-4 w-4" />
       </Button>
+
+      <Separator orientation="vertical" className="h-6" />
+
+      {/* Text Alignment Controls */}
+      <Toggle
+        size="sm"
+        pressed={editor.isActive({ textAlign: 'left' })}
+        onPressedChange={() => editor.chain().focus().setTextAlign('left').run()}
+      >
+        <AlignLeft className="h-4 w-4" />
+      </Toggle>
+
+      <Toggle
+        size="sm"
+        pressed={editor.isActive({ textAlign: 'center' })}
+        onPressedChange={() => editor.chain().focus().setTextAlign('center').run()}
+      >
+        <AlignCenter className="h-4 w-4" />
+      </Toggle>
+
+      <Toggle
+        size="sm"
+        pressed={editor.isActive({ textAlign: 'right' })}
+        onPressedChange={() => editor.chain().focus().setTextAlign('right').run()}
+      >
+        <AlignRight className="h-4 w-4" />
+      </Toggle>
+
+      <Separator orientation="vertical" className="h-6" />
+      
+      {/* Table Controls */}
+      <Button 
+        type="button"
+        size="sm" 
+        variant="ghost" 
+        onClick={addTable}
+      >
+        <Table className="h-4 w-4" />
+      </Button>
+
+      {editor.isActive('table') && (
+        <>
+          <Button
+            type="button"
+            size="sm"
+            variant="ghost"
+            onClick={addColumnBefore}
+          >
+            <TableColumn className="h-4 w-4 rotate-180" />
+          </Button>
+          
+          <Button
+            type="button"
+            size="sm"
+            variant="ghost"
+            onClick={addColumnAfter}
+          >
+            <TableColumn className="h-4 w-4" />
+          </Button>
+
+          <Button
+            type="button"
+            size="sm"
+            variant="ghost"
+            onClick={deleteColumn}
+          >
+            <TableColumn className="h-4 w-4 text-destructive" />
+          </Button>
+
+          <Button
+            type="button"
+            size="sm"
+            variant="ghost"
+            onClick={addRowBefore}
+          >
+            <TableRow className="h-4 w-4 rotate-180" />
+          </Button>
+
+          <Button
+            type="button"
+            size="sm"
+            variant="ghost"
+            onClick={addRowAfter}
+          >
+            <TableRow className="h-4 w-4" />
+          </Button>
+
+          <Button
+            type="button"
+            size="sm"
+            variant="ghost"
+            onClick={deleteRow}
+          >
+            <TableRow className="h-4 w-4 text-destructive" />
+          </Button>
+        </>
+      )}
 
       <ImageUploadDialog
         open={showImageDialog}
