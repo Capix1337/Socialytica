@@ -24,6 +24,7 @@ interface TestFormFieldsProps {
 export function TestFormFields({ form }: TestFormFieldsProps) {
   return (
     <div className="space-y-8">
+      {/* Title Field */}
       <FormField
         control={form.control}
         name="title"
@@ -45,52 +46,83 @@ export function TestFormFields({ form }: TestFormFieldsProps) {
         )}
       />
 
+      {/* Short Description Field */}
       <FormField
         control={form.control}
         name="description"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Description</FormLabel>
+            <FormLabel>Short Description</FormLabel>
             <FormControl>
               <Textarea
-                placeholder="Enter test description (optional)"
+                placeholder="Brief overview of the test"
                 {...field}
                 value={field.value || ''}
-                rows={4}
+                rows={3}
               />
             </FormControl>
             <FormDescription>
-              Provide additional details about the test.
+              A brief summary that appears in test listings (max 500 characters)
             </FormDescription>
             <FormMessage />
           </FormItem>
         )}
       />
-      
+
+      {/* Rich Description Field */}
+      <FormField
+        control={form.control}
+        name="richDescription"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Detailed Description</FormLabel>
+            <FormControl>
+              <TipTapEditor 
+                content={field.value || ''} 
+                onChange={field.onChange}
+                className="min-h-[300px]"
+              />
+            </FormControl>
+            <FormDescription>
+              Provide comprehensive test details with formatting and media
+            </FormDescription>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+
+      {/* Expected Time Field */}
+      <FormField
+        control={form.control}
+        name="expectedTime"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Expected Duration (minutes)</FormLabel>
+            <FormControl>
+              <Input
+                type="number"
+                min={1}
+                max={480}
+                placeholder="e.g. 30"
+                {...field}
+                onChange={e => field.onChange(parseInt(e.target.value) || null)}
+                value={field.value || ''}
+              />
+            </FormControl>
+            <FormDescription>
+              Estimated time to complete the test (1-480 minutes)
+            </FormDescription>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+
+      {/* Categories Section */}
       <div className="border-t pt-6">
         <CategoryList form={form} />
       </div>
 
-      <FormField
-        control={form.control}
-        name="isPublished"
-        render={({ field }) => (
-          <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
-            <div className="space-y-0.5">
-              <FormLabel className="text-base">Published</FormLabel>
-              <FormDescription>
-                Make this test available to users
-              </FormDescription>
-            </div>
-            <FormControl>
-              <Switch
-                checked={field.value || false}
-                onCheckedChange={field.onChange}
-              />
-            </FormControl>
-          </FormItem>
-        )}
-      />
+      {/* Rest of the form fields... */}
     </div>
   )
 }

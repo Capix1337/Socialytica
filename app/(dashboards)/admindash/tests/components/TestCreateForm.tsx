@@ -12,7 +12,9 @@ import { TestFormFields } from "./TestFormFields"
 
 const defaultValues: Partial<TestFormValues> = {
   title: "",
-  description: "",
+  description: "",        // Short description
+  richDescription: "",    // Rich formatted content
+  expectedTime: 30,       // Default 30 minutes
   isPublished: false,
   categories: [], // Each category will contain its own questions array
 }
