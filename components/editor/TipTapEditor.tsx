@@ -23,9 +23,6 @@ export function TipTapEditor({ content, onChange, className }: TipTapEditorProps
       }),
       Link.configure({
         openOnClick: false,
-        HTMLAttributes: {
-          class: 'text-primary underline hover:text-primary/80',
-        },
       }),
       Youtube.configure({
         HTMLAttributes: {
@@ -37,8 +34,7 @@ export function TipTapEditor({ content, onChange, className }: TipTapEditorProps
     editorProps: {
       attributes: {
         class: cn(
-          'prose prose-sm sm:prose-base dark:prose-invert prose-headings:font-bold prose-p:leading-relaxed',
-          'focus:outline-none max-w-full',
+          'prose prose-sm sm:prose-base dark:prose-invert focus:outline-none',
           className
         ),
       },
@@ -46,6 +42,8 @@ export function TipTapEditor({ content, onChange, className }: TipTapEditorProps
     onUpdate: ({ editor }) => {
       onChange(editor.getHTML())
     },
+    // Add this line to fix the warning
+    immediatelyRender: false
   })
 
   return (
