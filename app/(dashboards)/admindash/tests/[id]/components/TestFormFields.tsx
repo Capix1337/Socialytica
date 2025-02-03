@@ -3,9 +3,10 @@
 
 import * as React from "react"
 import { UseFormReturn } from "react-hook-form"
+import { TipTapEditor } from "@/components/editor/TipTapEditor"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
-import { Switch } from "@/components/ui/switch"
+// import { Switch } from "@/components/ui/switch"
 import { CategoryList } from "./CategoryList" // We'll create this next
 import {
   FormControl,

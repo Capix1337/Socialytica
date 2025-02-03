@@ -24,7 +24,9 @@ export function TestEditForm({ test }: TestEditFormProps) {
     defaultValues: {
       id: test.id,
       title: test.title || "",
-      description: test.description || "",
+      description: test.description || "",        // Short description
+      richDescription: test.richDescription || "", // Rich content
+      expectedTime: test.expectedTime || 30,      // Duration
       isPublished: test.isPublished || false,
       categories: (test.categories || []).map(category => ({
         id: category.id,
