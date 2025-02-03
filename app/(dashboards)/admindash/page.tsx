@@ -2,14 +2,14 @@
 
 import { motion, AnimatePresence } from "framer-motion"
 import { useEffect, useState } from "react"
-import { OverviewStats } from "./_components/OverviewStats"
-import { QuickActions } from "./_components/QuickActions"
-import { ActivityFeed } from "./_components/ActivityFeed"
-import { PerformanceMetrics } from "./_components/PerformanceMetrics"
-import { DashboardLayout } from "./_components/DashboardLayout"
-import { StatsLoadingSkeleton, ActivityLoadingSkeleton } from "./_components/LoadingStates"
-import { ErrorState } from "./_components/ErrorStates"
-import { fadeIn, slideIn, staggerChildren } from "./_components/transitions"
+import { OverviewStats } from "./components/OverviewStats"
+import { QuickActions } from "./components/QuickActions"
+import { ActivityFeed } from "./components/ActivityFeed"
+import { PerformanceMetrics } from "./components/PerformanceMetrics"
+import { DashboardLayout } from "./components/DashboardLayout"
+import { StatsLoadingSkeleton, ActivityLoadingSkeleton } from "./components/LoadingStates"
+import { ErrorState } from "./components/ErrorStates"
+import { fadeIn, slideIn, staggerChildren } from "./components/transitions"
 
 interface TestCompletion {
   id: string
