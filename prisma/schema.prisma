@@ -27,19 +27,21 @@ model User {
 }
 
 model Test {
-  id           String        @id @default(uuid())
-  title        String
-  slug         String        @unique @default("")
-  description  String?
-  isPublished  Boolean       @default(false)
-  createdAt    DateTime      @default(now())
-  updatedAt    DateTime      @default(now())
-  createdBy    String
-  user         User          @relation(fields: [createdBy], references: [id])
-  questions    Question[]
-  categories   Category[]
-  testAttempts TestAttempt[]
-  guestAttempts GuestAttempt[]
+  id              String        @id @default(uuid())
+  title           String
+  slug            String        @unique @default("")
+  description     String?       // Keep this for short description
+  richDescription String?       @db.String(65535) // Add this for formatted content
+  expectedTime    Int?          // Add this for duration in minutes
+  isPublished     Boolean       @default(false)
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @default(now())
+  createdBy       String
+  user            User          @relation(fields: [createdBy], references: [id])
+  questions       Question[]
+  categories      Category[]
+  testAttempts    TestAttempt[]
+  guestAttempts   GuestAttempt[]
 
   @@index([createdBy])
 }

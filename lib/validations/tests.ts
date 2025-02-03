@@ -36,8 +36,19 @@ export const testSchema = z.object({
     .optional(), // Optional because we'll generate it
   description: z
     .string()
-    .max(500, 'Description must be less than 500 characters')
+    .max(500, 'Short description must be less than 500 characters')
     .optional(),
+  richDescription: z
+    .string()
+    .max(65535, 'Test details is too long')
+    .optional(),
+  expectedTime: z
+    .number()
+    .int('Expected time must be a whole number')
+    .min(1, 'Expected time must be at least 1 minute')
+    .max(480, 'Expected time cannot exceed 8 hours')
+    .optional()
+    .nullable(),
   isPublished: z.boolean().default(false),
   categories: z.array(categorySchema).default([])
 })
@@ -51,6 +62,18 @@ export const updateTestSchema = z.object({
     .regex(slugRegex, "Invalid slug format")
     .optional(),
   description: z.string().max(500).nullable().optional(),
+  richDescription: z
+    .string()
+    .max(65535)
+    .nullable()
+    .optional(),
+  expectedTime: z
+    .number()
+    .int('Expected time must be a whole number')
+    .min(1, 'Expected time must be at least 1 minute')
+    .max(480, 'Expected time cannot exceed 8 hours')
+    .nullable()
+    .optional(),
   isPublished: z.boolean().optional(),
   categories: z.array(categorySchema).default([])
 })

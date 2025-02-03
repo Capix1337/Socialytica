@@ -23,7 +23,9 @@ export interface Test {
   id: string
   title: string
   slug: string 
-  description: string | null | undefined
+  description: string | null      // Short description
+  richDescription: string | null  // Rich formatted content
+  expectedTime: number | null     // Expected duration in minutes
   createdAt: Date
   updatedAt: Date
   isPublished: boolean
@@ -40,49 +42,53 @@ export interface Test {
 
 // For creating a new test
 export interface CreateTestInput {
-  id: string;
-  title: string;
-  description?: string;
+  id: string
+  title: string
+  description?: string         // Short description
+  richDescription?: string    // Rich formatted content
+  expectedTime?: number       // Expected duration in minutes
   isPublished: boolean
   slug?: string
   categories?: Array<{
-    name: string;
-    description?: string;
-    scale: number;
+    name: string
+    description?: string
+    scale: number
     questions?: Array<{
-      title: string;
-      categoryId?: string;
+      title: string
+      categoryId?: string
       options?: Array<{
-        text: string;
-        point: number;
-      }>;
-    }>;
-  }>;
+        text: string
+        point: number
+      }>
+    }>
+  }>
 }
 
 // For updating an existing test
 export interface UpdateTestInput {
-  id: string;
-  title?: string;
+  id: string
+  title?: string
   slug?: string
-  description?: string | null;
-  isPublished?: boolean;
+  description?: string | null        // Short description
+  richDescription?: string | null   // Rich formatted content
+  expectedTime?: number | null      // Expected duration in minutes
+  isPublished?: boolean
   categories?: Array<{
-    id?: string;
-    name: string;
-    description?: string | null;
-    scale: number;
+    id?: string
+    name: string
+    description?: string | null
+    scale: number
     questions?: Array<{
-      id?: string;
-      title: string;
-      categoryId?: string;
+      id?: string
+      title: string
+      categoryId?: string
       options?: Array<{
-        id?: string;
-        text: string;
-        point: number;
-      }>;
-    }>;
-  }>;
+        id?: string
+        text: string
+        point: number
+      }>
+    }>
+  }>
 }
 
 // For API responses
