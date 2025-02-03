@@ -2,6 +2,7 @@
 
 import { motion } from "framer-motion"
 import { HelpHeader } from "./components/HelpHeader"
+import { ContactSection } from "./components/ContactSection"
 import { fadeIn } from "../components/transitions"
 
 const HelpPage = () => {
@@ -22,6 +23,8 @@ const HelpPage = () => {
             out.
           </p>
         </section>
+
+        <ContactSection />
       </motion.div>
     </div>
   )
