@@ -17,8 +17,8 @@ import {
   AlignLeft, 
   AlignCenter, 
   AlignRight,
-  RowsIcon, // Use this instead of TableRow
-  Column // Use this instead of TableColumn
+  RowsIcon, 
+  Columns // Changed from Column to Columns
 } from 'lucide-react'
 import { ImageUploadDialog } from './ImageUploadDialog'
 import { LinkDialog } from './LinkDialog'
@@ -214,7 +214,7 @@ export function EditorToolbar({ editor }: EditorToolbarProps) {
             variant="ghost"
             onClick={addColumnBefore}
           >
-            <Column className="h-4 w-4 rotate-180" />
+            <Columns className="h-4 w-4 rotate-180" />
           </Button>
           
           <Button
@@ -223,7 +223,7 @@ export function EditorToolbar({ editor }: EditorToolbarProps) {
             variant="ghost"
             onClick={addColumnAfter}
           >
-            <Column className="h-4 w-4" />
+            <Columns className="h-4 w-4" />
           </Button>
 
           <Button
@@ -232,7 +232,7 @@ export function EditorToolbar({ editor }: EditorToolbarProps) {
             variant="ghost"
             onClick={deleteColumn}
           >
-            <Column className="h-4 w-4 text-destructive" />
+            <Columns className="h-4 w-4 text-destructive" />
           </Button>
 
           <Button
