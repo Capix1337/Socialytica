@@ -1,13 +1,14 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { useRouter } from "next/navigation" // Add this
+import { useRouter } from "next/navigation"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { UserX } from "lucide-react"
+import { UserX, Clock } from "lucide-react"
 import { CategoryList } from "./CategoryList"
 import { StartTestButton } from "./StartTestButton"
+import { RichContentRenderer } from "@/components/RichContentRenderer"
 import { guestStorage } from "@/lib/storage/guest-storage"
 import type { Test } from "@/types/tests/test"
 import type { TestAttempt } from "@/types/tests/test-attempt"
@@ -51,12 +52,22 @@ export function TestDetails({ test, isAuthenticated = false }: TestDetailsProps)
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       {/* Test Header */}
-      <div className="space-y-2">
+      <div className="space-y-4">
         <h1 className="text-3xl font-bold tracking-tight">{test.title}</h1>
+        
+        {/* Short Description */}
         {test.description && (
-          <p className="text-muted-foreground">{test.description}</p>
+          <p className="text-lg text-muted-foreground">{test.description}</p>
+        )}
+
+        {/* Expected Time */}
+        {test.expectedTime && (
+          <div className="flex items-center gap-2 text-muted-foreground">
+            <Clock className="h-4 w-4" />
+            <span>Expected duration: {test.expectedTime} minutes</span>
+          </div>
         )}
       </div>
 
@@ -71,6 +82,21 @@ export function TestDetails({ test, isAuthenticated = false }: TestDetailsProps)
             </Button>
           </AlertDescription>
         </Alert>
+      )}
+
+      {/* Rich Description */}
+      {test.richDescription && (
+        <Card>
+          <CardHeader>
+            <CardTitle>About This Test</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <RichContentRenderer 
+              content={test.richDescription}
+              className="[&>iframe]:aspect-video [&>iframe]:w-full [&>img]:rounded-lg"
+            />
+          </CardContent>
+        </Card>
       )}
 
       {/* Categories Overview */}
@@ -141,7 +167,7 @@ export function TestDetails({ test, isAuthenticated = false }: TestDetailsProps)
       {/* Start Test Button */}
       <StartTestButton 
         testId={test.id}
-        slug={test.slug} // Add this
+        slug={test.slug}
         disabled={false}
         isAuthenticated={isAuthenticated}
         existingAttempt={inProgressAttempt}
