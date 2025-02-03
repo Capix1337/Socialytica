@@ -69,37 +69,39 @@ export default function AdminDashboard() {
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
-  useEffect(() => {
-    async function fetchDashboardData() {
-      try {
-        setIsLoading(true)
-        setError(null)
+  // Move fetchDashboardData outside useEffect
+  const fetchDashboardData = async () => {
+    try {
+      setIsLoading(true)
+      setError(null)
 
-        const [statsResponse, activityResponse] = await Promise.all([
-          fetch("/api/admin/stats"),
-          fetch("/api/admin/activity")
-        ])
+      const [statsResponse, activityResponse] = await Promise.all([
+        fetch("/api/admin/stats"),
+        fetch("/api/admin/activity")
+      ])
 
-        if (!statsResponse.ok) {
-          throw new Error("Failed to fetch dashboard stats")
-        }
-        const stats = (await statsResponse.json()) as StatsData
-        setStatsData(stats)
-
-        if (!activityResponse.ok) {
-          throw new Error("Failed to fetch activity data")
-        }
-        const activity = (await activityResponse.json()) as ActivityData 
-        setActivityData(activity)
-
-      } catch (err) {
-        setError(err instanceof Error ? err.message : "An error occurred")
-        console.error("Dashboard data fetch error:", err)
-      } finally {
-        setIsLoading(false)
+      if (!statsResponse.ok) {
+        throw new Error("Failed to fetch dashboard stats")
       }
-    }
+      const stats = (await statsResponse.json()) as StatsData
+      setStatsData(stats)
 
+      if (!activityResponse.ok) {
+        throw new Error("Failed to fetch activity data")
+      }
+      const activity = (await activityResponse.json()) as ActivityData 
+      setActivityData(activity)
+
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "An error occurred")
+      console.error("Dashboard data fetch error:", err)
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  // Use fetchDashboardData in useEffect
+  useEffect(() => {
     fetchDashboardData()
   }, [])
 
@@ -109,7 +111,7 @@ export default function AdminDashboard() {
         <ErrorState
           title="Dashboard Error"
           message={error}
-          onRetry={() => fetchDashboardData()}
+          onRetry={fetchDashboardData} // Now this will work
         />
       </DashboardLayout>
     )
