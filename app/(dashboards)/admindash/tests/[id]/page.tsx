@@ -31,10 +31,10 @@ async function getTest(id: string): Promise<Test | null> {
 
   return {
     ...test,
-    description: test.description || undefined,    // Short description
-    richDescription: test.richDescription || undefined,  // Rich content
-    expectedTime: test.expectedTime || undefined   // Duration
-  }
+    description: test.description || null,         // Short description
+    richDescription: test.richDescription || null, // Rich content
+    expectedTime: test.expectedTime || null        // Duration
+  } as Test
 }
 
 // Remove all custom type definitions and use the component directly
