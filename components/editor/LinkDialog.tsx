@@ -19,21 +19,42 @@ interface LinkDialogProps {
 export function LinkDialog({ editor, open, onClose }: LinkDialogProps) {
   const [url, setUrl] = useState('')
 
-  const handleSubmit = () => {
+  const handleLink = (e: React.MouseEvent<HTMLButtonElement> | React.KeyboardEvent<HTMLInputElement>) => {
+    e.preventDefault()
+    e.stopPropagation()
+    
     if (url) {
-      editor
-        .chain()
-        .focus()
-        .setLink({ href: url })
-        .run()
+      const { from, to } = editor.state.selection
+      const isTextSelected = from !== to
+      
+      if (isTextSelected) {
+        // If text is selected, turn it into a link
+        editor
+          .chain()
+          .focus()
+          .setLink({ href: url })
+          .run()
+      } else {
+        // If no text is selected, insert the URL as both text and link
+        editor
+          .chain()
+          .focus()
+          .insertContent(`<a href="${url}">${url}</a>`)
+          .run()
+      }
     }
     onClose()
     setUrl('')
   }
 
   return (
-    <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent>
+    <Dialog 
+      open={open} 
+      onOpenChange={onClose}
+    >
+      <DialogContent 
+        onPointerDownCapture={(e) => e.stopPropagation()}
+      >
         <DialogHeader>
           <DialogTitle>Add Link</DialogTitle>
         </DialogHeader>
@@ -46,13 +67,34 @@ export function LinkDialog({ editor, open, onClose }: LinkDialogProps) {
               value={url}
               onChange={(e) => setUrl(e.target.value)}
               placeholder="https://example.com"
+              autoFocus
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  e.preventDefault()
+                  e.stopPropagation()
+                  handleLink(e)
+                }
+              }}
             />
           </div>
           <div className="flex justify-end gap-2">
-            <Button variant="outline" onClick={onClose}>
+            <Button 
+              type="button"
+              variant="outline" 
+              onClick={(e) => {
+                e.preventDefault()
+                e.stopPropagation()
+                onClose()
+              }}
+            >
               Cancel
             </Button>
-            <Button onClick={handleSubmit}>Add Link</Button>
+            <Button 
+              type="button"
+              onClick={handleLink}
+            >
+              Add Link
+            </Button>
           </div>
         </div>
       </DialogContent>

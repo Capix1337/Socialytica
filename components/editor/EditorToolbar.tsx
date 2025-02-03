@@ -95,25 +95,40 @@ export function EditorToolbar({ editor }: EditorToolbarProps) {
       <Separator orientation="vertical" className="h-6" />
 
       <Button 
+        type="button"
         size="sm" 
         variant="ghost" 
-        onClick={() => setShowImageDialog(true)}
+        onClick={(e) => {
+          e.preventDefault()
+          e.stopPropagation()
+          setShowImageDialog(true)
+        }}
       >
         <ImageIcon className="h-4 w-4" />
       </Button>
 
       <Button 
+        type="button"
         size="sm" 
         variant="ghost" 
-        onClick={() => setShowLinkDialog(true)}
+        onClick={(e) => {
+          e.preventDefault()
+          e.stopPropagation()
+          setShowLinkDialog(true)
+        }}
       >
         <Link className="h-4 w-4" />
       </Button>
 
       <Button 
+        type="button"
         size="sm" 
         variant="ghost" 
-        onClick={() => setShowYoutubeDialog(true)}
+        onClick={(e) => {
+          e.preventDefault()
+          e.stopPropagation()
+          setShowYoutubeDialog(true)
+        }}
       >
         <Youtube className="h-4 w-4" />
       </Button>
