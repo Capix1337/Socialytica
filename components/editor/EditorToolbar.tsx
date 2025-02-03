@@ -3,9 +3,22 @@ import { Toggle } from '@/components/ui/toggle'
 import { Separator } from '@/components/ui/separator'
 import { Button } from '@/components/ui/button'
 import {
-  Bold, Italic, List, ListOrdered, Image as ImageIcon, Link, Youtube,
-  Heading1, Heading2, Heading3, Table, AlignLeft, AlignCenter, AlignRight,
-  TableRow, TableColumn
+  Bold, 
+  Italic, 
+  List, 
+  ListOrdered, 
+  Image as ImageIcon, 
+  Link, 
+  Youtube,
+  Heading1, 
+  Heading2, 
+  Heading3, 
+  Table, 
+  AlignLeft, 
+  AlignCenter, 
+  AlignRight,
+  RowsIcon, // Use this instead of TableRow
+  Column // Use this instead of TableColumn
 } from 'lucide-react'
 import { ImageUploadDialog } from './ImageUploadDialog'
 import { LinkDialog } from './LinkDialog'
@@ -201,7 +214,7 @@ export function EditorToolbar({ editor }: EditorToolbarProps) {
             variant="ghost"
             onClick={addColumnBefore}
           >
-            <TableColumn className="h-4 w-4 rotate-180" />
+            <Column className="h-4 w-4 rotate-180" />
           </Button>
           
           <Button
@@ -210,7 +223,7 @@ export function EditorToolbar({ editor }: EditorToolbarProps) {
             variant="ghost"
             onClick={addColumnAfter}
           >
-            <TableColumn className="h-4 w-4" />
+            <Column className="h-4 w-4" />
           </Button>
 
           <Button
@@ -219,7 +232,7 @@ export function EditorToolbar({ editor }: EditorToolbarProps) {
             variant="ghost"
             onClick={deleteColumn}
           >
-            <TableColumn className="h-4 w-4 text-destructive" />
+            <Column className="h-4 w-4 text-destructive" />
           </Button>
 
           <Button
@@ -228,7 +241,7 @@ export function EditorToolbar({ editor }: EditorToolbarProps) {
             variant="ghost"
             onClick={addRowBefore}
           >
-            <TableRow className="h-4 w-4 rotate-180" />
+            <RowsIcon className="h-4 w-4 rotate-180" />
           </Button>
 
           <Button
@@ -237,7 +250,7 @@ export function EditorToolbar({ editor }: EditorToolbarProps) {
             variant="ghost"
             onClick={addRowAfter}
           >
-            <TableRow className="h-4 w-4" />
+            <RowsIcon className="h-4 w-4" />
           </Button>
 
           <Button
@@ -246,7 +259,7 @@ export function EditorToolbar({ editor }: EditorToolbarProps) {
             variant="ghost"
             onClick={deleteRow}
           >
-            <TableRow className="h-4 w-4 text-destructive" />
+            <RowsIcon className="h-4 w-4 text-destructive" />
           </Button>
         </>
       )}
