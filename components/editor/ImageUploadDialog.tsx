@@ -20,30 +20,31 @@ export function ImageUploadDialog({ editor, open, onClose }: ImageUploadDialogPr
   const [file, setFile] = useState<File | null>(null)
   const [uploading, setUploading] = useState(false)
 
-  const handleUpload = async () => {
-    if (!file) return
+  const handleUpload = async (e: React.FormEvent) => {
+    e.preventDefault(); // Prevent form submission
+    if (!file) return;
 
     try {
-      setUploading(true)
-      const formData = new FormData()
-      formData.append('file', file)
+      setUploading(true);
+      const formData = new FormData();
+      formData.append('file', file);
 
       const response = await fetch('/api/upload', {
         method: 'POST',
-        body: formData,
-      })
+        body: formData
+      });
 
-      if (!response.ok) throw new Error('Upload failed')
+      if (!response.ok) throw new Error('Upload failed');
+      const { url } = await response.json();
 
-      const { url } = await response.json()
-      editor.chain().focus().setImage({ src: url }).run()
-      onClose()
+      editor.chain().focus().setImage({ src: url }).run();
+      onClose();
     } catch (error) {
-      console.error('Upload error:', error)
+      console.error('Upload error:', error);
     } finally {
-      setUploading(false)
+      setUploading(false);
     }
-  }
+  };
 
   return (
     <Dialog open={open} onOpenChange={onClose}>

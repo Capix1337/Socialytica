@@ -78,11 +78,13 @@ export function TestFormFields({ form }: TestFormFieldsProps) {
           <FormItem>
             <FormLabel>Detailed Description</FormLabel>
             <FormControl>
-              <TipTapEditor 
-                content={field.value || ''} 
-                onChange={field.onChange}
-                className="min-h-[300px]"
-              />
+              <div onSubmit={e => e.preventDefault()}>
+                <TipTapEditor 
+                  content={field.value || ''} 
+                  onChange={field.onChange}
+                  className="min-h-[300px]"
+                />
+              </div>
             </FormControl>
             <FormDescription>
               Provide comprehensive test details with formatting and media

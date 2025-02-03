@@ -41,9 +41,7 @@ export function TipTapEditor({ content, onChange, className }: TipTapEditorProps
     },
     onUpdate: ({ editor }) => {
       onChange(editor.getHTML())
-    },
-    // Add this line to fix the warning
-    immediatelyRender: false
+    }
   })
 
   return (

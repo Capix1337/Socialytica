@@ -19,18 +19,15 @@ interface YoutubeDialogProps {
 export function YoutubeDialog({ editor, open, onClose }: YoutubeDialogProps) {
   const [url, setUrl] = useState('')
 
-  const handleSubmit = () => {
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault(); // Prevent form submission
     if (url) {
-      editor
-        .chain()
-        .focus()
-        .setYoutubeVideo({
-          src: url,
-        })
-        .run()
+      editor.chain().focus().setYoutubeVideo({
+        src: url
+      }).run();
     }
-    onClose()
-    setUrl('')
+    onClose();
+    setUrl('');
   }
 
   return (
