@@ -1,6 +1,6 @@
 // prisma/schema.prisma
 datasource db {
-  provider = "cockroachdb"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
@@ -31,7 +31,7 @@ model Test {
   title           String
   slug            String        @unique @default("")
   description     String?       // Keep this for short description
-  richDescription String?       @db.String(65535) // Add this for formatted content
+  richDescription String?       @db.Text // Changed from @db.String(65535)
   expectedTime    Int?          // Add this for duration in minutes
   isPublished     Boolean       @default(false)
   createdAt       DateTime      @default(now())
@@ -165,7 +165,7 @@ model UserProfile {
   gender            String?    // "male" or "female"
   relationshipStatus String?  // "Single", "Married", "In a relationship" , "It's Complicated"
   countryOfOrigin   String?
-  bio               String?   @db.String(500)
+  bio               String?   @db.VarChar(500) // Changed from @db.String(500)
   createdAt         DateTime  @default(now())
   updatedAt         DateTime  @updatedAt
   
@@ -250,8 +250,8 @@ model TestAnalysis {
   id            String      @id @default(cuid())
   testAttemptId String      @unique
   testAttempt   TestAttempt @relation(fields: [testAttemptId], references: [id], onDelete: Cascade)
-  analysis      String      @db.String(65535)
-  advice        String      @db.String(65535)
+  analysis      String      @db.Text // Changed from @db.String(65535)
+  advice        String      @db.Text // Changed from @db.String(65535)
   isGenerated   Boolean     @default(false)
   metadata      Json?
   createdAt     DateTime    @default(now())
