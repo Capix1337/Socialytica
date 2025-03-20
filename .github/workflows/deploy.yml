@@ -28,7 +28,7 @@ jobs:
         with:
           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
-      - name: Deploy to Hostinger
+      - name: Deploy to Contabo
         env:
           HOST: 167.86.67.15
           USERNAME: root
