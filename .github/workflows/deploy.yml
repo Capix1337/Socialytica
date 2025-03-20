@@ -32,7 +32,7 @@ jobs:
         env:
           HOST: 167.86.67.15
           USERNAME: root
-          TARGET_DIR: /var/www/Socialytica
+          TARGET_DIR: /var/www/socialytica
           APP_NAME: socialytica
           PORT: 3000
         run: |
