@@ -37,7 +37,7 @@ jobs:
           PORT: 3000
         run: |
           ssh -o StrictHostKeyChecking=no $USERNAME@$HOST << EOF
-            export PATH=/root/.nvm/versions/node/v22.14.0/bin:$PATH 
+            export PATH=/root/.nvm/versions/node/v23.10.0/bin:$PATH 
             cd $TARGET_DIR
             
             # Store current commit hash before pulling
