@@ -18,7 +18,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          node-version: "20" 
 
       - name: Check Node.js version
         run: node -v
@@ -30,7 +30,7 @@ jobs:
 
       - name: Deploy to Hostinger
         env:
-          HOST: 37.44.244.94
+          HOST: 167.86.67.15
           USERNAME: root
           TARGET_DIR: /var/www/socialytica
           APP_NAME: socialytica
