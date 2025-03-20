@@ -55,7 +55,7 @@ export default async function RecentBlogPosts() {
         <div className="text-center mb-12">
           <h2 className="text-3xl font-bold mb-4">Recent Blog Posts</h2>
           <p className="text-muted-foreground max-w-2xl mx-auto">
-            Exploring the intersection of web Science ,and human relation ships through detailed articles and tutorials
+            Exploring the intersection of web Science ,and human relation ships through detailed articles and tutorials.
           </p>
           
           {/* Categories Filter */}
