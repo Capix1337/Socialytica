@@ -18,7 +18,7 @@ export default function HomePage() {
       <FeaturesGrid />
       <HowItWorks />
       <CallToAction />
-      {/* <RecentBlogPosts /> */}
+      {/* <RecentBlogPosts /> */} 
       <Newsletter />
     </main>
   )
