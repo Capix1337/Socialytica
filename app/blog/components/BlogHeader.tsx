@@ -43,7 +43,7 @@ export default function BlogHeader({ totalPosts, onSearchChange, searchValue }: 
               Exploring the Science of Relationships
             </h1>
             <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-              Dive into {totalPosts} articles where code meets science, featuring tutorials, insights, and discoveries.
+              Get into {totalPosts} articles where code meets science, featuring tutorials, insights, and discoveries.
             </p>
 
             {/* Search Bar */}
