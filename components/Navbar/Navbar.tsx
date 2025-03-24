@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Logo from "../ui/Logo";
 import NavDropdown from "./NavDropdown";
+import { Menu, X } from "lucide-react"; // Import icons for mobile menu
 
 const navItems = [
   { label: "Relationship Tests", hasDropdown: true },
@@ -22,23 +23,44 @@ const relationshipTests = [
 
 export default function Navbar() {
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  
+  // Close mobile menu when screen size changes beyond mobile breakpoint
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth >= 768) {
+        setMobileMenuOpen(false);
+      }
+    };
+    
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   return (
-    <nav className="flex flex-col items-center w-full bg-white">
-      {/* Top Bar */}
-      <div className="w-full max-w-screen-2xl mx-auto px-4">
-        <div className="flex justify-end py-2">
-          <div className="flex items-center bg-[#243757] rounded-lg overflow-hidden shadow-sm">
-            <button className="text-[#737373] font-geologica text-sm leading-5 tracking-[-0.14px] bg-white px-4 py-2.5 hover:bg-gray-50 transition-colors">
+    <nav className="flex flex-col items-center w-full bg-white sticky top-0 z-50 shadow-sm">
+      {/* Top Bar - right-aligned with no right padding */}
+      <div className="w-full pr-0">
+        <div className="flex justify-between ml-4">
+          {/* Mobile menu button - visible only on small screens */}
+          <button 
+            className="md:hidden flex items-center py-2"
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+          >
+            {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+          </button>
+          
+          <div className="flex items-center bg-[#243757] rounded-bl-lg overflow-hidden shadow-sm ml-auto">
+            <button className="text-[#737373] font-geologica text-sm leading-5 tracking-[-0.14px] bg-white px-4 py-2 hover:bg-gray-50 transition-colors hidden sm:block">
               Dashboard
             </button>
-            <button className="text-white font-geologica text-sm leading-5 tracking-[-0.14px] bg-[#FC8E77] px-4 py-2.5 hover:bg-[#e57e68] transition-colors">
+            <button className="text-white font-geologica text-sm leading-5 tracking-[-0.14px] bg-[#FC8E77] px-4 py-2 hover:bg-[#e57e68] transition-colors">
               Sign in
             </button>
-            <button className="text-white font-geologica text-sm leading-5 tracking-[-0.14px] bg-[#243757] px-4 py-2.5 hover:bg-[#2f4a75] transition-colors">
+            <button className="text-white font-geologica text-sm leading-5 tracking-[-0.14px] bg-[#243757] px-4 py-2 hover:bg-[#2f4a75] transition-colors hidden sm:block">
               Create Account
             </button>
-            <button className="flex justify-center items-center bg-[#78D0DB] px-4 py-2.5 hover:bg-[#69c1cc] transition-colors">
+            <button className="flex justify-center items-center bg-[#78D0DB] px-4 py-2 hover:bg-[#69c1cc] transition-colors">
               <svg
                 width="16"
                 height="20"
@@ -77,14 +99,18 @@ export default function Navbar() {
       {/* Main Navigation */}
       <div className="w-full border-b">
         <div className="max-w-screen-2xl mx-auto px-4">
-          <div className="flex justify-between items-center py-4">
-            <Logo />
+          <div className="flex items-center py-2">
+            {/* Logo with minimum width to prevent squeezing */}
+            <div className="flex-shrink-0 min-w-[120px] md:min-w-[140px] mr-4">
+              <Logo />
+            </div>
 
-            <div className="flex items-center gap-2">
+            {/* Desktop/Tablet Navigation - hidden on mobile, with overflow handling */}
+            <div className="hidden md:flex md:flex-wrap md:flex-grow items-center gap-1 lg:gap-2 overflow-x-auto">
               {navItems.map((item) => (
-                <div key={item.label} className="relative">
+                <div key={item.label} className="relative flex-shrink-0">
                   <button
-                    className={`flex items-center gap-2 px-4 py-2.5 rounded-lg transition-colors
+                    className={`flex items-center gap-1 lg:gap-2 px-2 md:px-3 lg:px-4 py-2 md:py-2.5 rounded-lg transition-colors text-[#171717] font-geologica text-sm md:text-base leading-[26px] tracking-[-0.36px] whitespace-nowrap
                       ${
                         item.label === "Relationship Tests"
                           ? "bg-[rgba(36,55,87,0.10)]"
@@ -98,7 +124,7 @@ export default function Navbar() {
                       )
                     }
                   >
-                    <span className="text-[#171717] font-geologica text-base leading-[26px] tracking-[-0.36px] whitespace-nowrap">
+                    <span>
                       {item.label}
                     </span>
                     {item.hasDropdown && (
@@ -133,6 +159,85 @@ export default function Navbar() {
           </div>
         </div>
       </div>
+
+      {/* Mobile Navigation Menu */}
+      {mobileMenuOpen && (
+        <div className="md:hidden w-full bg-white border-b shadow-md">
+          <div className="max-w-screen-2xl mx-auto px-4 py-4">
+            <div className="flex flex-col space-y-4">
+              {navItems.map((item) => (
+                <div key={item.label} className="w-full">
+                  <button
+                    className="flex items-center justify-between w-full px-4 py-3 rounded-lg hover:bg-gray-50 transition-colors"
+                    onClick={() => {
+                      if (item.hasDropdown) {
+                        setActiveDropdown(
+                          activeDropdown === item.label ? null : item.label
+                        );
+                      } else {
+                        // Handle navigation for items without dropdowns
+                        setMobileMenuOpen(false);
+                      }
+                    }}
+                  >
+                    <span className="text-[#171717] font-geologica text-base">
+                      {item.label}
+                    </span>
+                    {item.hasDropdown && (
+                      <svg
+                        width="12"
+                        height="13"
+                        viewBox="0 0 12 13"
+                        fill="none"
+                        xmlns="http://www.w3.org/2000/svg"
+                        className={`transition-transform duration-200 ${
+                          activeDropdown === item.label ? "rotate-180" : ""
+                        }`}
+                      >
+                        <path
+                          d="M2 5.46944L6 9.46944L10 5.46944"
+                          stroke="black"
+                          strokeOpacity="0.3"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                      </svg>
+                    )}
+                  </button>
+                  
+                  {/* Mobile Dropdown Content */}
+                  {activeDropdown === item.label && item.hasDropdown && (
+                    <div className="bg-gray-50 rounded-lg mt-1 py-2 px-2">
+                      {item.label === "Relationship Tests" && 
+                        relationshipTests.map((test) => (
+                          <button 
+                            key={test}
+                            className="w-full text-left px-6 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 rounded-md transition-colors"
+                            onClick={() => setMobileMenuOpen(false)}
+                          >
+                            {test}
+                          </button>
+                        ))
+                      }
+                    </div>
+                  )}
+                </div>
+              ))}
+              
+              {/* Mobile-only menu items */}
+              <div className="pt-4 border-t border-gray-200 mt-4">
+                <button className="w-full text-left px-4 py-3 rounded-lg hover:bg-gray-50 transition-colors text-primary font-medium">
+                  Dashboard
+                </button>
+                <button className="w-full text-left px-4 py-3 rounded-lg hover:bg-gray-50 transition-colors text-primary font-medium">
+                  Create Account
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </nav>
   );
 }
