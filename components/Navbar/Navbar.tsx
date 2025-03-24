@@ -25,10 +25,10 @@ export default function Navbar() {
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   
-  // Close mobile menu when screen size changes beyond mobile breakpoint
+  // Close mobile menu when screen size changes beyond desktop breakpoint
   useEffect(() => {
     const handleResize = () => {
-      if (window.innerWidth >= 768) {
+      if (window.innerWidth >= 1024) { // Changed from 768px to 1024px (lg breakpoint)
         setMobileMenuOpen(false);
       }
     };
@@ -41,16 +41,8 @@ export default function Navbar() {
     <nav className="flex flex-col items-center w-full bg-white sticky top-0 z-50 shadow-sm">
       {/* Top Bar - right-aligned with no right padding */}
       <div className="w-full pr-0">
-        <div className="flex justify-between ml-4">
-          {/* Mobile menu button - visible only on small screens */}
-          <button 
-            className="md:hidden flex items-center py-2"
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-          >
-            {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
-          </button>
-          
-          <div className="flex items-center bg-[#243757] rounded-bl-lg overflow-hidden shadow-sm ml-auto">
+        <div className="flex justify-end">
+          <div className="flex items-center bg-[#243757] rounded-bl-lg overflow-hidden shadow-sm">
             <button className="text-[#737373] font-geologica text-sm leading-5 tracking-[-0.14px] bg-white px-4 py-2 hover:bg-gray-50 transition-colors hidden sm:block">
               Dashboard
             </button>
@@ -99,18 +91,18 @@ export default function Navbar() {
       {/* Main Navigation */}
       <div className="w-full border-b">
         <div className="max-w-screen-2xl mx-auto px-4">
-          <div className="flex items-center py-2">
-            {/* Logo with minimum width to prevent squeezing */}
-            <div className="flex-shrink-0 min-w-[120px] md:min-w-[140px] mr-4">
+          <div className="flex items-center justify-between py-2">
+            {/* Logo section */}
+            <div className="flex-shrink-0">
               <Logo />
             </div>
 
-            {/* Desktop/Tablet Navigation - hidden on mobile, with overflow handling */}
-            <div className="hidden md:flex md:flex-wrap md:flex-grow items-center gap-1 lg:gap-2 overflow-x-auto">
+            {/* Desktop Navigation - only visible on large screens */}
+            <div className="hidden lg:flex items-center gap-2 xl:gap-4">
               {navItems.map((item) => (
-                <div key={item.label} className="relative flex-shrink-0">
+                <div key={item.label} className="relative">
                   <button
-                    className={`flex items-center gap-1 lg:gap-2 px-2 md:px-3 lg:px-4 py-2 md:py-2.5 rounded-lg transition-colors text-[#171717] font-geologica text-sm md:text-base leading-[26px] tracking-[-0.36px] whitespace-nowrap
+                    className={`flex items-center gap-1 px-3 xl:px-4 py-2.5 rounded-lg transition-colors whitespace-nowrap
                       ${
                         item.label === "Relationship Tests"
                           ? "bg-[rgba(36,55,87,0.10)]"
@@ -124,7 +116,7 @@ export default function Navbar() {
                       )
                     }
                   >
-                    <span>
+                    <span className="text-[#171717] font-geologica text-base leading-[26px] tracking-[-0.36px] whitespace-nowrap">
                       {item.label}
                     </span>
                     {item.hasDropdown && (
@@ -156,13 +148,21 @@ export default function Navbar() {
                 </div>
               ))}
             </div>
+            
+            {/* Mobile menu button - moved to the right side */}
+            <button 
+              className="lg:hidden flex items-center justify-center p-2 rounded-md hover:bg-gray-100 transition-colors"
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            >
+              {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+            </button>
           </div>
         </div>
       </div>
 
-      {/* Mobile Navigation Menu */}
+      {/* Mobile/Tablet Navigation Menu */}
       {mobileMenuOpen && (
-        <div className="md:hidden w-full bg-white border-b shadow-md">
+        <div className="lg:hidden w-full bg-white border-b shadow-md">
           <div className="max-w-screen-2xl mx-auto px-4 py-4">
             <div className="flex flex-col space-y-4">
               {navItems.map((item) => (
