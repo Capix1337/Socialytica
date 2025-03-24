@@ -1,6 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useAuth } from "@clerk/nextjs";
+import Link from "next/link";
 import Logo from "../ui/Logo";
 import NavDropdown from "./NavDropdown";
 import { Menu, X } from "lucide-react"; // Import icons for mobile menu
@@ -22,13 +24,14 @@ const relationshipTests = [
 ];
 
 export default function Navbar() {
+  const { isSignedIn, isLoaded } = useAuth();
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   
   // Close mobile menu when screen size changes beyond desktop breakpoint
   useEffect(() => {
     const handleResize = () => {
-      if (window.innerWidth >= 1024) { // Changed from 768px to 1024px (lg breakpoint)
+      if (window.innerWidth >= 1024) {
         setMobileMenuOpen(false);
       }
     };
@@ -43,15 +46,24 @@ export default function Navbar() {
       <div className="w-full pr-0">
         <div className="flex justify-end">
           <div className="flex items-center bg-[#243757] rounded-bl-lg overflow-hidden shadow-sm">
-            <button className="text-[#737373] font-geologica text-sm leading-5 tracking-[-0.14px] bg-white px-4 py-2 hover:bg-gray-50 transition-colors hidden sm:block">
-              Dashboard
-            </button>
-            <button className="text-white font-geologica text-sm leading-5 tracking-[-0.14px] bg-[#FC8E77] px-4 py-2 hover:bg-[#e57e68] transition-colors">
-              Sign in
-            </button>
-            <button className="text-white font-geologica text-sm leading-5 tracking-[-0.14px] bg-[#243757] px-4 py-2 hover:bg-[#2f4a75] transition-colors hidden sm:block">
-              Create Account
-            </button>
+            {isLoaded && isSignedIn && (
+              <Link href="/dashboard" className="text-[#737373] font-geologica text-sm leading-5 tracking-[-0.14px] bg-white px-4 py-2 hover:bg-gray-50 transition-colors sm:block">
+                Dashboard
+              </Link>
+            )}
+            
+            {isLoaded && !isSignedIn && (
+              <>
+                <Link href="/sign-in" className="text-white font-geologica text-sm leading-5 tracking-[-0.14px] bg-[#FC8E77] px-4 py-2 hover:bg-[#e57e68] transition-colors">
+                  Sign in
+                </Link>
+                <Link href="/sign-up" className="text-white font-geologica text-sm leading-5 tracking-[-0.14px] bg-[#243757] px-4 py-2 hover:bg-[#2f4a75] transition-colors hidden sm:block">
+                  Create Account
+                </Link>
+              </>
+            )}
+            
+            {/* Globe button - always visible regardless of auth state */}
             <button className="flex justify-center items-center bg-[#78D0DB] px-4 py-2 hover:bg-[#69c1cc] transition-colors">
               <svg
                 width="16"
@@ -92,7 +104,7 @@ export default function Navbar() {
       <div className="w-full border-b">
         <div className="max-w-screen-2xl mx-auto px-4">
           <div className="flex items-center justify-between py-2">
-            {/* Logo section */}
+            {/* Logo */}
             <div className="flex-shrink-0">
               <Logo />
             </div>
@@ -151,8 +163,9 @@ export default function Navbar() {
             
             {/* Mobile menu button - moved to the right side */}
             <button 
-              className="lg:hidden flex items-center justify-center p-2 rounded-md hover:bg-gray-100 transition-colors"
+              className="lg:hidden flex items-center justify-center p-2 ml-3 rounded-md hover:bg-gray-100"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              aria-label="Toggle menu"
             >
               {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
             </button>
@@ -225,14 +238,19 @@ export default function Navbar() {
                 </div>
               ))}
               
-              {/* Mobile-only menu items */}
+              {/* Mobile-only menu items - conditional based on auth state */}
               <div className="pt-4 border-t border-gray-200 mt-4">
-                <button className="w-full text-left px-4 py-3 rounded-lg hover:bg-gray-50 transition-colors text-primary font-medium">
-                  Dashboard
-                </button>
-                <button className="w-full text-left px-4 py-3 rounded-lg hover:bg-gray-50 transition-colors text-primary font-medium">
-                  Create Account
-                </button>
+                {isLoaded && isSignedIn && (
+                  <Link href="/dashboard" className="block w-full text-left px-4 py-3 rounded-lg hover:bg-gray-50 transition-colors text-primary font-medium">
+                    Dashboard
+                  </Link>
+                )}
+                
+                {isLoaded && !isSignedIn && (
+                  <Link href="/sign-up" className="block w-full text-left px-4 py-3 rounded-lg hover:bg-gray-50 transition-colors text-primary font-medium">
+                    Create Account
+                  </Link>
+                )}
               </div>
             </div>
           </div>
