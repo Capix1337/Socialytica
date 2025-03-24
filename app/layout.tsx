@@ -8,10 +8,16 @@ import Navbar from "@/components/Navbar/Navbar"
 import { Footer } from "@/components/footer"
 import { AuthGuestHandler } from '@/components/auth/AuthGuestHandler'
 import "./globals.css"
-import { Inter } from "next/font/google"
+import { Geologica } from "next/font/google"
 import { metadata } from './metadata'
 
-const inter = Inter({ subsets: ["latin"] })
+const geologica = Geologica({ 
+  subsets: ["latin"],
+  variable: '--font-geologica',
+  display: 'swap',
+  // Optional: Include specific weights if you don't want to load all weights
+  weight: ['300', '400', '500', '700']
+})
 
 export { metadata }
 
@@ -42,7 +48,7 @@ export default function RootLayout({
             }}
           />
         </head>
-        <body className={`${inter.className} min-h-screen flex flex-col`}>
+        <body className={`${geologica.className} min-h-screen flex flex-col`}>
           <ProfileCompletionProvider>
             <Navbar />
             <main>
