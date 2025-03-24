@@ -1,11 +1,10 @@
 //@/app/layout.tsx
 
 import { ClerkProvider } from '@clerk/nextjs'
-import { ThemeProvider } from "@/components/theme-provider"
 import { ProfileCompletionProvider } from '@/lib/contexts/ProfileCompletionContext'
 import { ProfileCompletionDialog } from '@/components/profile/ProfileCompletionDialog'
 import { Toaster } from "@/components/ui/sonner"
-import Navbar from "@/components/navbar"
+import Navbar from "@/components/Navbar/Navbar"
 import { Footer } from "@/components/footer"
 import { AuthGuestHandler } from '@/components/auth/AuthGuestHandler'
 import "./globals.css"
@@ -44,23 +43,16 @@ export default function RootLayout({
           />
         </head>
         <body className={`${inter.className} min-h-screen flex flex-col`}>
-          <ThemeProvider
-            attribute="class"
-            defaultTheme="system"
-            enableSystem
-            disableTransitionOnChange
-          >
-            <ProfileCompletionProvider>
-              <Navbar />
-              <main className="flex-grow container mx-auto px-4 py-8">
-                {children}
-              </main>
-              <Footer />
-              <ProfileCompletionDialog />
-              <AuthGuestHandler />
-              <Toaster position="top-center" />
-            </ProfileCompletionProvider>
-          </ThemeProvider>
+          <ProfileCompletionProvider>
+            <Navbar />
+            <main className="flex-grow container mx-auto px-4 py-8">
+              {children}
+            </main>
+            <Footer />
+            <ProfileCompletionDialog />
+            <AuthGuestHandler />
+            <Toaster position="top-center" />
+          </ProfileCompletionProvider>
         </body>
       </html>
     </ClerkProvider>
