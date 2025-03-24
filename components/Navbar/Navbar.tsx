@@ -41,7 +41,7 @@ export default function Navbar() {
   }, []);
 
   return (
-    <nav className="flex flex-col items-center w-full bg-white sticky top-0 z-50 shadow-sm">
+    <nav className="flex flex-col items-center w-full bg-amber-50 sticky top-0 z-50 shadow-sm">
       {/* Top Bar - right-aligned with no right padding */}
       <div className="w-full pr-0">
         <div className="flex justify-end">

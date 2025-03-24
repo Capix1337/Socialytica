@@ -1,4 +1,4 @@
-import Hero from "@/components/hero"
+import Shero from "@/components/Shero"
 import { Metadata } from "next"
 import { FeaturesGrid } from "@/components/features-grid"
 import { HowItWorks } from "@/components/how-it-works"
@@ -14,11 +14,10 @@ export const metadata: Metadata = {
 export default function HomePage() {
   return (
     <main>
-      <Hero />
+      <Shero />
       <FeaturesGrid />
       <HowItWorks />
       <CallToAction />
-?
       <Newsletter />
     </main>
   )
