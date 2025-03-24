@@ -16,17 +16,20 @@ const Shero = () => {
             Relationship & Personality Tests for Meaningful Growth
           </h2>
         </div>
+      </div>
 
-        {/* Decorative Image Container */}
-        <div className="w-full relative h-32 md:h-40 lg:h-48">
-          <Image 
-            src={heroImg}
-            alt="Decorative geometric shapes"
-            fill
-            priority
-            className="object-contain"
-            sizes="(max-width: 768px) 100vw, 100vw"
-          />
+        {/* Decorative Image Container - with overflow control */}
+        <div className="w-full overflow-hidden relative h-32 sm:h-40 md:h-48 lg:h-56">
+          <div className="absolute w-[120%] sm:w-[115%] md:w-[110%] lg:w-[105%] h-full left-[50%] -translate-x-1/2">
+            <Image 
+              src={heroImg}
+              alt="Decorative geometric shapes"
+              fill
+              priority
+              className="object-cover"
+              sizes="(max-width: 768px) 120vw, 110vw"
+            />
+          </div>
         </div>
 
         {/* Secondary Heading */}
@@ -35,7 +38,7 @@ const Shero = () => {
             Science-Based Personality & Relationship Tests for Real, Actionable Insights
           </h3>
         </div>
-      </div>
+      {/* </div> */}
     </div>
   );
 };

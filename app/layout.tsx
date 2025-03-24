@@ -45,7 +45,7 @@ export default function RootLayout({
         <body className={`${inter.className} min-h-screen flex flex-col`}>
           <ProfileCompletionProvider>
             <Navbar />
-            <main className="flex-grow container mx-auto py-8">
+            <main>
               {children}
             </main>
             <Footer />
