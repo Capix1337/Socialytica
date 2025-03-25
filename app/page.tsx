@@ -5,6 +5,7 @@ import { HowItWorks } from "@/components/how-it-works"
 import { CallToAction } from "@/components/call-to-action"
 import { Newsletter } from "@/components/newsletter"
 import TestsSection from "@/components/tests/TestsSection";
+import EvidenceSection from "@/components/features/EvidenceSection";
 
 
 export const metadata: Metadata = {
@@ -17,6 +18,7 @@ export default function HomePage() {
     <main>
       <Shero />
       <TestsSection />
+      <EvidenceSection />
       <FeaturesGrid />
       <HowItWorks />
       <CallToAction />
