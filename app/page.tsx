@@ -4,7 +4,8 @@ import { FeaturesGrid } from "@/components/features-grid"
 import { HowItWorks } from "@/components/how-it-works"
 import { CallToAction } from "@/components/call-to-action"
 import { Newsletter } from "@/components/newsletter"
-// import RecentBlogPosts from "./components/RecentBlogPosts";
+import TestsSection from "@/components/tests/TestsSection";
+
 
 export const metadata: Metadata = {
   title: "Socialytica | Relationship Psychology Tests & Analysis",
@@ -15,6 +16,7 @@ export default function HomePage() {
   return (
     <main>
       <Shero />
+      <TestsSection />
       <FeaturesGrid />
       <HowItWorks />
       <CallToAction />

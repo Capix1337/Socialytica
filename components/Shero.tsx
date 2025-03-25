@@ -33,11 +33,11 @@ const Shero = () => {
       </div>
 
       {/* Secondary Heading */}
-      <div className="text-center mt-12 mb-8">
+      {/* <div className="text-center mt-12 mb-8">
         <h3 className="text-[40px] font-normal leading-[48px] tracking-[-0.8px] text-[#243757] max-w-3xl mx-auto px-4">
           Science-Based Personality & Relationship Tests for Real, Actionable Insights
         </h3>
-      </div>
+      </div> */}
     </div>
   );
 };
