@@ -9,6 +9,7 @@ import EvidenceSection from "@/components/features/EvidenceSection";
 import InsightSection from "@/components/features/InsightSection";
 import AccessSection from "@/components/features/AccessSection";
 import FeaturesSection from "@/components/features/FeaturesSection";
+import InputDesign from "@/components/journey/InputDesign";
 
 export const metadata: Metadata = {
   title: "Socialytica | Relationship Psychology Tests & Analysis",
@@ -24,6 +25,7 @@ export default function HomePage() {
       <InsightSection />
       <AccessSection />
       <FeaturesSection />
+      <InputDesign />
       <FeaturesGrid />
       <HowItWorks />
       <CallToAction />
