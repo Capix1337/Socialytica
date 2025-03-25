@@ -8,7 +8,7 @@ import evidenceImage from "@/assets/evidence.png";
 export default function EvidenceSection() {
   return (
     <section className="w-full bg-white overflow-hidden">
-      <div className="grid grid-cols-1 lg:grid-cols-2 w-full">
+      <div className="grid grid-cols-1 md:grid-cols-2 w-full">
         {/* Left Content Section */}
         <motion.div 
           initial={{ opacity: 0, x: -20 }}

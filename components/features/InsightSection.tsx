@@ -8,7 +8,7 @@ import insightImage from "@/assets/Insight.png";
 export default function InsightSection() {
   return (
     <section className="w-full overflow-hidden">
-      <div className="grid grid-cols-1 lg:grid-cols-2 w-full">
+      <div className="grid grid-cols-1 md:grid-cols-2 w-full">
         {/* Left Image Section */}
         <motion.div 
           initial={{ opacity: 0, x: -20 }}
@@ -33,7 +33,7 @@ export default function InsightSection() {
           viewport={{ once: true }}
           transition={{ duration: 0.5 }}
           className="aspect-square flex flex-col justify-center items-center px-4 md:px-10 lg:px-20"
-          style={{ background: "#FFF2DE" }} // Peach cream background
+          style={{ background: "#FFF2DE" }}
         >
           <div className="flex justify-center items-center mb-8">
             <InsightIcon />
