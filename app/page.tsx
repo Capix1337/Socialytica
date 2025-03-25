@@ -6,6 +6,7 @@ import { CallToAction } from "@/components/call-to-action"
 import { Newsletter } from "@/components/newsletter"
 import TestsSection from "@/components/tests/TestsSection";
 import EvidenceSection from "@/components/features/EvidenceSection";
+import InsightSection from "@/components/features/InsightSection";
 
 
 export const metadata: Metadata = {
@@ -19,6 +20,7 @@ export default function HomePage() {
       <Shero />
       <TestsSection />
       <EvidenceSection />
+      <InsightSection />
       <FeaturesGrid />
       <HowItWorks />
       <CallToAction />
