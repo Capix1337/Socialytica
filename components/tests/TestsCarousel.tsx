@@ -4,6 +4,7 @@ import { useRef } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import TestCard from "./TestCard";
+import { StaticImageData } from "next/image";
 
 // Update imports to use SVG files
 import fourPillarIcon from "@/assets/icon-four-pillars.svg";
@@ -21,6 +22,11 @@ import marriageImg from "@/assets/image-marriage.png";
 import loveImg from "@/assets/image-partner-love.png";
 import personalityImg from "@/assets/image-personality.png";
 
+// Helper function to convert StaticImageData to string URL
+const getImageUrl = (image: StaticImageData): string => {
+  return typeof image === 'object' ? image.src : image;
+};
+
 const tests = [
   {
     slug: "four-pillar-relationship-test",
@@ -29,7 +35,7 @@ const tests = [
     title: "Four-Pillar Relationship Test",
     description:
       "Evaluate the strength, communication, and emotional well-being of your relationship",
-    imageSrc: fourPillarImg,
+    imageSrc: getImageUrl(fourPillarImg),
   },
   {
     slug: "compatibility-test",
@@ -38,7 +44,7 @@ const tests = [
     title: "Compatibility Test",
     description:
       "Discover how well you and your partner align in values, goals, and lifestyle.",
-    imageSrc: compatibilityImg,
+    imageSrc: getImageUrl(compatibilityImg),
   },
   {
     slug: "toxic-relationship-test",
@@ -47,7 +53,7 @@ const tests = [
     title: "Toxic Relationship Test",
     description:
       "Identify unhealthy patterns, red flags, and potential toxicity in your relationship.",
-    imageSrc: toxicImg,
+    imageSrc: getImageUrl(toxicImg),
   },
   {
     slug: "marriage-readiness-test",
@@ -56,7 +62,7 @@ const tests = [
     title: "Marriage Readiness Test",
     description:
       "Assess if you and your partner are ready for a long-term commitment or marriage.",
-    imageSrc: marriageImg,
+    imageSrc: getImageUrl(marriageImg),
   },
   {
     slug: "partner-love-test",
@@ -65,7 +71,7 @@ const tests = [
     title: "Does My Partner Love Me Test?",
     description:
       "Gain insights into your partner's feelings and emotional investment in the relationship.",
-    imageSrc: loveImg,
+    imageSrc: getImageUrl(loveImg),
   },
   {
     slug: "personality-test",
@@ -74,7 +80,7 @@ const tests = [
     title: "Personality Test",
     description:
       "Understand your personality traits, strengths, and how they impact your relationships.",
-    imageSrc: personalityImg,
+    imageSrc: getImageUrl(personalityImg),
   },
 ];
 
