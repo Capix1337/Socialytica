@@ -5,20 +5,21 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import TestCard from "./TestCard";
 
-// Import your assets
-import fourPillarIcon from "@/assets/icons/four-pillar-icon.png";
-import compatibilityIcon from "@/assets/icons/compatibility-icon.png";
-import toxicIcon from "@/assets/icons/toxic-icon.png";
-import marriageIcon from "@/assets/icons/marriage-icon.png";
-import loveIcon from "@/assets/icons/love-icon.png";
-import personalityIcon from "@/assets/icons/personality-icon.png";
+// Update imports to use SVG files
+import fourPillarIcon from "@/assets/icon-four-pillars.svg";
+import compatibilityIcon from "@/assets/icon-compatibility.svg";
+import toxicIcon from "@/assets/icon-toxic-relationship.svg";
+import marriageIcon from "@/assets/icon-marriage.svg";
+import loveIcon from "@/assets/icon-love-partner.svg";
+import personalityIcon from "@/assets/icon-personality.svg";
 
-import fourPillarImg from "@/assets/images/four-pillar-test.jpg";
-import compatibilityImg from "@/assets/images/compatibility-test.jpg";
-import toxicImg from "@/assets/images/toxic-test.jpg";
-import marriageImg from "@/assets/images/marriage-test.jpg";
-import loveImg from "@/assets/images/love-test.jpg";
-import personalityImg from "@/assets/images/personality-test.jpg";
+// Image imports remain the same
+import fourPillarImg from "@/assets/image-four-pillars.png";
+import compatibilityImg from "@/assets/image-compatibility.png";
+import toxicImg from "@/assets/image-toxic-relationship.png";
+import marriageImg from "@/assets/image-marriage.png";
+import loveImg from "@/assets/image-partner-love.png";
+import personalityImg from "@/assets/image-personality.png";
 
 const tests = [
   {
