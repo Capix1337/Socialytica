@@ -16,9 +16,9 @@ const FeatureCard: React.FC<FeatureCardProps> = ({
   iconColor,
 }) => {
   return (
-    <div className="flex flex-col items-start p-8 gap-6 min-w-[320px] max-w-[380px] flex-1 rounded-[30px] md:min-w-[300px]">
+    <div className="flex flex-col items-start p-8 gap-6 min-w-[320px] max-w-[420px] basis-[calc(33.33%-32px)] rounded-[30px] md:min-w-[300px] sm:basis-full">
       <div
-        className={`flex justify-center items-center w-[80px] h-[80px] rounded-full ${iconBgColor}`}
+        className={`flex justify-center items-center rounded-full ${iconBgColor}`}
       >
         <div
           className={`flex items-center justify-center w-[80px] h-[80px] ${iconColor}`}
