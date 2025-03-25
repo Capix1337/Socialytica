@@ -1,4 +1,11 @@
+import Image from "next/image";
+import Link from "next/link";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { ArrowRight } from "lucide-react";
+
 interface TestCardProps {
+  slug: string;
   iconSrc: string;
   iconBgColor: string;
   title: string;
@@ -7,6 +14,7 @@ interface TestCardProps {
 }
 
 export default function TestCard({
+  slug,
   iconSrc,
   iconBgColor,
   title,
@@ -14,36 +22,49 @@ export default function TestCard({
   imageSrc,
 }: TestCardProps) {
   return (
-    <div className="min-w-[320px] w-[320px] rounded-[30px] bg-white overflow-hidden">
-      <div className="w-full px-7 pr-12 py-8 md:px-5 md:pr-5">
-        <div
-          className="flex justify-center items-center rounded-full w-[72px] h-[72px]"
-          style={{ backgroundColor: iconBgColor }}
-        >
-          <img
-            src={iconSrc}
-            alt=""
-            className="w-9 h-9 object-contain object-center my-auto"
+    <Card className="min-w-[320px] w-[320px] overflow-hidden transition-all hover:shadow-md">
+      <CardHeader className="p-6">
+        <div className="flex items-start gap-4">
+          <div 
+            className="flex justify-center items-center rounded-full w-14 h-14 shrink-0"
+            style={{ backgroundColor: iconBgColor }}
+          >
+            <Image
+              src={iconSrc}
+              alt=""
+              width={36}
+              height={36}
+              className="object-contain"
+            />
+          </div>
+          <div className="space-y-2">
+            <h3 className="text-xl font-semibold">{title}</h3>
+            <p className="text-muted-foreground text-sm line-clamp-2">
+              {description}
+            </p>
+          </div>
+        </div>
+      </CardHeader>
+
+      <CardContent className="p-0">
+        <div className="relative h-48 w-full">
+          <Image
+            src={imageSrc}
+            alt={title}
+            fill
+            className="object-cover"
           />
         </div>
-
-        <div className="mt-5 w-full font-geologica">
-          <h3 className="w-full text-2xl text-[#171717] font-normal tracking-[-0.48px] leading-8">
-            {title}
-          </h3>
-          <p className="mt-1 w-full text-base text-[#525252] font-light tracking-[-0.16px] leading-[23px]">
-            {description}
-          </p>
+        
+        <div className="p-4 flex justify-end">
+          <Button asChild size="sm" className="gap-2">
+            <Link href={`/tests/${slug}`}>
+              Take Test
+              <ArrowRight className="h-4 w-4" />
+            </Link>
+          </Button>
         </div>
-      </div>
-
-      <div className="flex mt-[7px] h-[200px] w-full flex-col overflow-hidden items-stretch justify-center">
-        <img
-          src={imageSrc}
-          alt=""
-          className="aspect-[1.51] object-contain object-center w-full"
-        />
-      </div>
-    </div>
+      </CardContent>
+    </Card>
   );
 }
