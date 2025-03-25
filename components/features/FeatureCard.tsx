@@ -16,16 +16,16 @@ const FeatureCard: React.FC<FeatureCardProps> = ({
   iconColor,
 }) => {
   return (
-    <div className="flex flex-col items-start p-6 gap-5 min-w-[280px] max-w-[320px] flex-1 rounded-[30px]">
+    <div className="flex flex-col items-start p-8 gap-6 min-w-[320px] max-w-[380px] flex-1 rounded-[30px] md:min-w-[300px]">
       <div
-        className={`flex justify-center items-center w-16 h-16 rounded-full ${iconBgColor}`}
+        className={`flex justify-center items-center w-[80px] h-[80px] rounded-full ${iconBgColor}`}
       >
         <div
-          className={`w-8 h-8 ${iconColor}`}
+          className={`flex items-center justify-center w-[80px] h-[80px] ${iconColor}`}
           dangerouslySetInnerHTML={{ __html: icon }}
         />
       </div>
-      <div className="flex flex-col gap-1">
+      <div className="flex flex-col gap-2">
         <div className="text-2xl text-[#171717] font-geologica leading-8 tracking-[-0.48px]">
           {title}
         </div>
