@@ -1,6 +1,6 @@
 "use client";
 
-import Logo from "../ui/Logo";
+import Logo from "../ui/Wlogo";
 import SocialIcons from "./SocialIcons";
 
 const relationshipTests = [
@@ -141,8 +141,8 @@ export default function Footer() {
                 Privacy Policy
               </a>
             </div>
-            <span className="text-[#717D96] font-geologica text-sm font-light leading-[140%]">
-              © Socialytica 2025
+            <span className="text-[#717D96] font-geologica text-sm font-light leading-[140%] text-right sm:text-right sm:w-full">
+              © Socialytica {new Date().getFullYear()}
             </span>
           </div>
         </div>
