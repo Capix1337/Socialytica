@@ -1,98 +1,24 @@
 "use client";
 
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
 import heroImg from '@/assets/hero-img.png';
+import ParticleBackground from './ui/particle-background';
 
 const Shero = () => {
-  // Generate particle positions
-  const [particles, setParticles] = useState<Array<{
-    id: number;
-    left: string;
-    top: string;
-    size: string;
-    duration: string;
-    delay: string;
-    color: string;
-  }>>([]);
-
-  useEffect(() => {
-    // Responsive particle count based on screen size
-    const getParticleCount = () => {
-      if (typeof window !== 'undefined') {
-        if (window.innerWidth < 640) {
-          // Mobile devices
-          return 1500; // 1/6 of desktop count
-        } else if (window.innerWidth < 1024) {
-          // Tablets
-          return 3000; // 1/3 of desktop count
-        } else {
-          // Desktops
-          return 9000; // Keep full count for desktop
-        }
-      }
-      return 9000; // Default fallback
-    };
-
-    // Generate initial particles
-    const generateParticles = () => {
-      const count = getParticleCount();
-      const newParticles = Array.from({ length: count }, (_, i) => {
-        // Create color variations in whitish/grayish tones
-        const colorVariation = Math.floor(Math.random() * 30);
-        const baseColor = 225 - colorVariation;
-        
-        return {
-          id: i,
-          left: `${Math.random() * 100}%`,
-          top: `${Math.random() * 100}%`,
-          size: `${Math.random() * 2.5 + 0.8}px`, // Smaller for better performance with increased count
-          duration: `${Math.random() * 25 + 15}s`,
-          delay: `${Math.random() * 20}s`,
-          color: `rgba(${baseColor}, ${baseColor}, ${baseColor + 10}, ${0.3 + Math.random() * 0.3})`
-        };
-      });
-      setParticles(newParticles);
-    };
-
-    // Generate particles initially
-    generateParticles();
-
-    // Add event listener for window resize
-    const handleResize = () => {
-      generateParticles();
-    };
-
-    // Add resize listener
-    window.addEventListener('resize', handleResize);
-
-    // Clean up function
-    return () => {
-      window.removeEventListener('resize', handleResize);
-    };
-  }, []);
-
   return (
     <div className="relative w-full bg-gradient-to-b from-[#FFF2DE] to-[#FFF2DE00]">
-      {/* Stone Particles Background */}
+      {/* Canvas-based particle background */}
       <div className="absolute inset-0 overflow-hidden z-0">
-        {particles.map((particle) => (
-          <div
-            key={particle.id}
-            className="absolute rounded-full animate-float shadow-sm"
-            style={{
-              left: particle.left,
-              top: particle.top,
-              width: particle.size,
-              height: particle.size,
-              backgroundColor: particle.color,
-              animationDuration: particle.duration,
-              animationDelay: particle.delay,
-              filter: 'drop-shadow(0 0 1px rgba(255,255,255,0.5))'
-            }}
-          />
-        ))}
+        <ParticleBackground 
+          particleCount={{
+            sm: 1500,
+            md: 3000,
+            lg: 20000,
+          }}
+          height="150%"
+        />
         
         {/* Decorative blobs - keep these for depth */}
         <div className="absolute -left-20 -top-20 h-[400px] w-[400px] rounded-full bg-[#43A8BB]/10 blur-3xl"></div>
