@@ -18,24 +18,59 @@ const Shero = () => {
   }>>([]);
 
   useEffect(() => {
-    // Create larger stone-like particles
-    const newParticles = Array.from({ length: 120 }, (_, i) => {
-      // Create color variations in whitish/grayish tones
-      const colorVariation = Math.floor(Math.random() * 30);
-      const baseColor = 225 - colorVariation;
-      
-      return {
-        id: i,
-        left: `${Math.random() * 100}%`,
-        top: `${Math.random() * 100}%`,
-        size: `${Math.random() * 5 + 2}px`, // Larger size: 2-7px
-        duration: `${Math.random() * 20 + 15}s`, // Slower animation
-        delay: `${Math.random() * 10}s`,
-        color: `rgba(${baseColor}, ${baseColor}, ${baseColor + 10}, ${0.6 + Math.random() * 0.3})`
-      };
-    });
-    
-    setParticles(newParticles);
+    // Responsive particle count based on screen size
+    const getParticleCount = () => {
+      if (typeof window !== 'undefined') {
+        if (window.innerWidth < 640) {
+          // Mobile devices
+          return 1500; // 1/6 of desktop count
+        } else if (window.innerWidth < 1024) {
+          // Tablets
+          return 3000; // 1/3 of desktop count
+        } else {
+          // Desktops
+          return 9000; // Keep full count for desktop
+        }
+      }
+      return 9000; // Default fallback
+    };
+
+    // Generate initial particles
+    const generateParticles = () => {
+      const count = getParticleCount();
+      const newParticles = Array.from({ length: count }, (_, i) => {
+        // Create color variations in whitish/grayish tones
+        const colorVariation = Math.floor(Math.random() * 30);
+        const baseColor = 225 - colorVariation;
+        
+        return {
+          id: i,
+          left: `${Math.random() * 100}%`,
+          top: `${Math.random() * 100}%`,
+          size: `${Math.random() * 2.5 + 0.8}px`, // Smaller for better performance with increased count
+          duration: `${Math.random() * 25 + 15}s`,
+          delay: `${Math.random() * 20}s`,
+          color: `rgba(${baseColor}, ${baseColor}, ${baseColor + 10}, ${0.3 + Math.random() * 0.3})`
+        };
+      });
+      setParticles(newParticles);
+    };
+
+    // Generate particles initially
+    generateParticles();
+
+    // Add event listener for window resize
+    const handleResize = () => {
+      generateParticles();
+    };
+
+    // Add resize listener
+    window.addEventListener('resize', handleResize);
+
+    // Clean up function
+    return () => {
+      window.removeEventListener('resize', handleResize);
+    };
   }, []);
 
   return (
