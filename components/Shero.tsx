@@ -15,7 +15,7 @@ const Shero = () => {
           particleCount={{
             sm: 1500,
             md: 3000,
-            lg: 20000,
+            lg: 10000,
           }}
           height="150%"
         />
