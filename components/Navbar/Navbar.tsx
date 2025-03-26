@@ -6,6 +6,7 @@ import Link from "next/link";
 import Logo from "../ui/Logo";
 import NavDropdown from "./NavDropdown";
 import { Menu, X } from "lucide-react"; // Import icons for mobile menu
+import ParticleBackground from "../ui/particle-background";
 
 const navItems = [
   { label: "Relationship Tests", hasDropdown: true },
@@ -41,9 +42,24 @@ export default function Navbar() {
   }, []);
 
   return (
-    <nav className="flex flex-col items-center w-full bg-amber-50 sticky top-0 z-50 shadow-sm">
+    <nav className="flex flex-col items-center w-full bg-[#FFF2DE] sticky top-0 z-50 shadow-sm relative">
+      {/* Particle background */}
+      <div className="absolute inset-0 overflow-hidden z-0">
+        <ParticleBackground 
+          particleCount={{
+            sm: 500,  // Reduced for better navbar performance
+            md: 1000,
+            lg: 3000,
+          }}
+          height="100%"
+          particleColor="#444444"
+          particleSize={0.1}
+          opacityRange={[0.4, 0.7]}
+        />
+      </div>
+      
       {/* Top Bar - right-aligned with no right padding */}
-      <div className="w-full pr-0">
+      <div className="w-full pr-0 relative z-10">
         <div className="flex justify-end">
           <div className="flex items-center bg-[#243757] rounded-bl-lg overflow-hidden shadow-sm">
             {isLoaded && isSignedIn && (
@@ -101,7 +117,7 @@ export default function Navbar() {
       </div>
 
       {/* Main Navigation */}
-      <div className="w-full border-b">
+      <div className="w-full border-b border-[#24375710] relative z-10">
         <div className="max-w-screen-2xl mx-auto px-4">
           <div className="flex items-center justify-between py-2">
             {/* Logo */}
@@ -118,9 +134,9 @@ export default function Navbar() {
                       ${
                         item.label === "Relationship Tests"
                           ? "bg-[rgba(36,55,87,0.10)]"
-                          : "hover:bg-gray-50"
+                          : "hover:bg-[#24375715]"
                       }
-                      ${activeDropdown === item.label ? "bg-gray-50" : ""}
+                      ${activeDropdown === item.label ? "bg-[#24375715]" : ""}
                     `}
                     onClick={() =>
                       setActiveDropdown(
@@ -163,7 +179,7 @@ export default function Navbar() {
             
             {/* Mobile menu button - moved to the right side */}
             <button 
-              className="lg:hidden flex items-center justify-center p-2 ml-3 rounded-md hover:bg-gray-100"
+              className="lg:hidden flex items-center justify-center p-2 ml-3 rounded-md hover:bg-[#24375715]"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               aria-label="Toggle menu"
             >
@@ -175,7 +191,7 @@ export default function Navbar() {
 
       {/* Mobile/Tablet Navigation Menu */}
       {mobileMenuOpen && (
-        <div className="lg:hidden w-full bg-white border-b shadow-md">
+        <div className="lg:hidden w-full bg-white border-b shadow-md relative z-10">
           <div className="max-w-screen-2xl mx-auto px-4 py-4">
             <div className="flex flex-col space-y-4">
               {navItems.map((item) => (
