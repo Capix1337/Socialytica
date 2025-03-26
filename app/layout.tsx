@@ -5,7 +5,7 @@ import { ProfileCompletionProvider } from '@/lib/contexts/ProfileCompletionConte
 import { ProfileCompletionDialog } from '@/components/profile/ProfileCompletionDialog'
 import { Toaster } from "@/components/ui/sonner"
 import Navbar from "@/components/Navbar/Navbar"
-import { Footer } from "@/components/footer"
+import Footer from "@/components/Footer/Footer"
 import { AuthGuestHandler } from '@/components/auth/AuthGuestHandler'
 import "./globals.css"
 import { Geologica } from "next/font/google"
