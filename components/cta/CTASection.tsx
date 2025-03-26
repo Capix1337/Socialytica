@@ -6,14 +6,14 @@ import HandSvg from "@/assets/hand.svg";
 
 export default function CTASection() {
   return (
-    <section className="flex items-stretch self-stretch rounded-[30px] shadow-[0px_-10px_60px_0px_rgba(255,242,222,0.80)] bg-[#2B4879] px-5 py-20 lg:px-56 flex-col overflow-hidden font-geologica text-white justify-start">
+    <section className="flex items-stretch self-stretch rounded-[30px] shadow-[0px_-10px_60px_0px_rgba(255,242,222,0.80)] bg-[#2B4879] px-5 py-20 lg:px-56 flex-col overflow-hidden font-geologica text-white justify-start mx-4 md:mx-8 lg:mx-12">
       <div className="flex w-full flex-col items-stretch font-light text-center justify-start">
         <Image
           src={HandSvg}
           alt="CTA icon"
-          width={132}
-          height={132}
-          className="object-contain object-center self-center"
+          width={100}
+          height={100}
+          className="object-contain object-center self-center w-20 h-20 md:w-28 md:h-28 lg:w-32 lg:h-32"
         />
         <div className="mt-9 w-full">
           <h2 className="text-[40px] leading-[50px] tracking-[-1.8px] lg:text-[60px] lg:leading-[68px]">
