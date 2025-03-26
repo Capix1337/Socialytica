@@ -1,9 +1,7 @@
 import Shero from "@/components/Shero"
 import { Metadata } from "next"
-// import { FeaturesGrid } from "@/components/features-grid"
-// import { HowItWorks } from "@/components/how-it-works"
-// import { CallToAction } from "@/components/call-to-action"
-import { Newsletter } from "@/components/newsletter"
+import NewsletterSection from "@/components/newsletter/NewsletterSection";
+// import { Newsletter } from "@/components/newsletter"
 import TestsSection from "@/components/tests/TestsSection";
 import EvidenceSection from "@/components/features/EvidenceSection";
 import InsightSection from "@/components/features/InsightSection";
@@ -31,7 +29,7 @@ export default function HomePage() {
       {/* <FeaturesGrid />
       <HowItWorks />
       <CallToAction /> */}
-      <Newsletter />
+      <NewsletterSection />
     </main>
   )
 }
