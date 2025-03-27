@@ -21,9 +21,9 @@ const ParticleBackground = ({
     md: 3000,
     lg: 20000,
   },
-  particleColor = "#444444", // Changed from white to dark grey
+  particleColor = "#000000", // Changed from white to dark grey
   particleSize = 0.1, // Increased from 2.5 for better visibility
-  colorVariation = 20, // Reduced variation to keep particles dark
+  colorVariation = 5, // Reduced variation to keep particles dark
   opacityRange = [0.5, 0.8], // Increased opacity range
   height = "100%",
 }: ParticleBackgroundProps) => {
