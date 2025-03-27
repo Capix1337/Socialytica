@@ -26,9 +26,6 @@ export default function HomePage() {
       <FeaturesSection />
       <StepsComponent />
       <CTASection />
-      {/* <FeaturesGrid />
-      <HowItWorks />
-      <CallToAction /> */}
       <NewsletterSection />
     </main>
   )
