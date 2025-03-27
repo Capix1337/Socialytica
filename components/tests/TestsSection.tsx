@@ -2,11 +2,27 @@
 
 import { motion } from "framer-motion";
 import TestsCarousel from "./TestsCarousel";
+import ParticleBackground from "../ui/particle-background";
 
 export default function TestsSection() {
   return (
-    <section className="py-20 bg-background overflow-hidden">
-      <div className="pl-4 md:pl-6 pr-0">
+    <section className="py-20 bg-white relative overflow-hidden">
+      {/* Particle Background Layer */}
+      <div className="absolute inset-0 bg-[#f6f6f6] opacity-70 pointer-events-none">
+        <ParticleBackground 
+          particleCount={{
+            sm: 3000,
+            md: 6000,
+            lg: 15000,
+          }}
+          particleColor="#d1d1d1"
+          particleSize={1}
+          opacityRange={[0.4, 0.6]}
+          height="100%"
+        />
+      </div>
+
+      <div className="pl-4 md:pl-6 pr-0 relative z-10">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}

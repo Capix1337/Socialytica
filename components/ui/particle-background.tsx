@@ -21,10 +21,10 @@ const ParticleBackground = ({
     md: 3000,
     lg: 20000,
   },
-  particleColor = "#000000", // Changed from white to dark grey
-  particleSize = 0.1, // Increased from 2.5 for better visibility
-  colorVariation = 5, // Reduced variation to keep particles dark
-  opacityRange = [0.5, 0.8], // Increased opacity range
+  particleColor = "#d1d1d1", // Updated to match the dot pattern in TestsSection
+  particleSize = 1,
+  colorVariation = 10, // Slightly increased for subtle variation
+  opacityRange = [0.4, 0.6], // Adjusted to match opacity in TestsSection
   height = "100%",
 }: ParticleBackgroundProps) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);

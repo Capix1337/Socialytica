@@ -47,14 +47,14 @@ export default function Navbar() {
       <div className="absolute inset-0 overflow-hidden z-0">
         <ParticleBackground 
           particleCount={{
-            sm: 500,  // Reduced for better navbar performance
-            md: 1000,
+            sm: 1000,
+            md: 1500,
             lg: 3000,
           }}
+          particleColor="#d1d1d1"
+          particleSize={1}
+          opacityRange={[0.4, 0.6]}
           height="100%"
-          particleColor="#444444"
-          particleSize={0.1}
-          opacityRange={[0.4, 0.7]}
         />
       </div>
       
