@@ -6,7 +6,7 @@ import ParticleBackground from "../ui/particle-background";
 
 export default function TestsSection() {
   return (
-    <section className="py-20 bg-white relative overflow-hidden">
+    <section className="py-20 relative overflow-hidden">
       {/* Particle Background Layer */}
       <div className="absolute inset-0 bg-[#f6f6f6] opacity-70 pointer-events-none">
         <ParticleBackground 

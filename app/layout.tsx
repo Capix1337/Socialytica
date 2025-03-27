@@ -48,7 +48,7 @@ export default function RootLayout({
             }}
           />
         </head>
-        <body className={`${geologica.className} min-h-screen flex flex-col bg-[#F5F5F5]`}>
+        <body className={`${geologica.className} min-h-screen flex flex-col bg-[#f6f6f6]`}>
           <ProfileCompletionProvider>
             <Navbar />
             <main>
