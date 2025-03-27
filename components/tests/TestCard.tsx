@@ -43,8 +43,10 @@ export default function TestCard({
           
           {/* Text content below the icon */}
           <div className="space-y-2">
-            <h3 className="text-xl font-semibold">{title}</h3>
-            <p className="text-muted-foreground text-sm line-clamp-2">
+            <h3 className="font-geologica text-2xl font-normal leading-8 tracking-[-0.48px] text-neutral-900">
+              {title}
+            </h3>
+            <p className="font-geologica text-base font-light leading-[23px] tracking-[-0.16px] text-neutral-600 line-clamp-2">
               {description}
             </p>
           </div>
