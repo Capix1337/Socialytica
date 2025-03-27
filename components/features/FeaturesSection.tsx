@@ -50,11 +50,14 @@ const features = [
 
 const FeaturesSection = () => {
   return (
-    <section className="flex flex-col items-center px-12 py-36 bg-white md:py-24 sm:py-16 sm:px-6">
-      <h2 className="text-[40px] text-[#243757] text-center font-geologica leading-[48px] tracking-[-0.8px] mb-16 max-w-[800px] md:text-[36px] md:leading-[44px] sm:text-[32px] sm:leading-[40px]">
+    <section className="flex flex-col items-center px-12 py-36 bg-white md:py-24 sm:py-16 sm:px-6 relative">
+      {/* Grid pattern background - 3X larger */}
+      <div className="absolute inset-0 bg-[linear-gradient(to_right,#8080801a_1px,transparent_1px),linear-gradient(to_bottom,#8080801a_1px,transparent_1px)] bg-[size:40px_40px]"></div>
+      
+      <h2 className="text-[40px] text-[#243757] text-center font-geologica leading-[48px] tracking-[-0.8px] mb-16 max-w-[800px] md:text-[36px] md:leading-[44px] sm:text-[32px] sm:leading-[40px] relative z-10">
         The best platform to understand and improve your relationships
       </h2>
-      <div className="flex flex-wrap justify-center items-start gap-12 max-w-[1400px] md:gap-8 sm:gap-6">
+      <div className="flex flex-wrap justify-center items-start gap-12 max-w-[1400px] md:gap-8 sm:gap-6 relative z-10">
         {features.map((feature, index) => (
           <FeatureCard
             key={index}
